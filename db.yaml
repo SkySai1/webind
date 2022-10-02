@@ -1,6 +1,0 @@
-dbpass: bind22./
-dbuser: bind
-hostname: localhost
-name: bind
-port: 5432
-type: postgresql
