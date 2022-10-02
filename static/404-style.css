@@ -1,0 +1,33 @@
+@font-face {
+    font-family: DTC;
+    src: url(./DTC.otf);
+  }
+body{
+    background: linear-gradient(to bottom, #b6e7fc, #fcfeff);
+}
+.page{
+    max-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    align-content: center;
+}
+.container{
+    max-width: 100vw;
+    max-height: 100vh;
+    display: flex;
+    padding-top: 10vh;
+    flex-direction: column;
+    align-items: center;
+    font-size: x-large;
+}
+.container > h1{
+    margin: 0;
+    font-family: DTC;
+    color: #afac8a;
+}
+.container > h2{
+    margin: 1em;
+    color: #797d81;
+}

@@ -1,0 +1,241 @@
+<html>
+    <head>
+        <title>Настройка Базы Данных</title>
+        <link rel="stylesheet" href="../static/db-style.css">
+        <link rel="stylesheet" href="../static/preloader.css">
+        <link rel="stylesheet" href="../static/close-btn.css">
+        <script type="text/javascript" src="../static/js/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('.sqlform').submit(function (e){
+                    e.preventDefault();
+                    $.ajax({
+                    url:'{{url_for("index")}}',
+                    method: 'POST',
+                    dataType: 'html',
+                    data: $(this).serialize()
+                    })
+                    .done(function(data) {
+                    switch(data) {
+                        case ('create_scuess'):
+                            //const result = confirm('Покдлючено успешно! Создан db.yaml!\nТаблица и ролей и суперадминистратор успешно созданы!\nНеобходим перезапуск сервиса!\nПерезапустить сейчас?')
+                            document.querySelector('.confirm').classList.remove('hidden');
+                            document.querySelector('#message').textContent = 'Покдлючено успешно! Создан db.yaml'
+                            document.querySelector('#textinform').textContent = 'Таблица и ролей и суперадминистратор успешно созданы\nНеобходим перезапуск сервиса!'
+                            document.querySelector('#restart').setAttribute("onclick","rld()");
+                            document.querySelector('.mysql').classList.add('hidden');
+                            document.querySelector('.sqlite').classList.add('hidden');
+                            document.querySelector('.container').classList.add('hidden');
+                            break;
+                        case ('connection_sucess'):
+                            document.querySelector('.confirm').classList.remove('hidden');
+                            document.querySelector('#message').textContent = 'Покдлючено успешно! Создан db.yaml'
+                            document.querySelector('#textinform').textContent = 'Необходим перезапуск сервиса!'
+                            document.querySelector('#restart').setAttribute("onclick","rld()");
+                            document.querySelector('.mysql').classList.add('hidden');
+                            document.querySelector('.sqlite').classList.add('hidden');
+                            document.querySelector('.container').classList.add('hidden');
+                            break;
+                        case ('table_exist'): 
+                            alert('Ошибка, таблица пользователей в данной БД уже существует!');
+                            break;
+                        case ('create_bad'):
+                            alert('Ошибка создания таблицы ролей, проверьте вашу базу данных!');
+                            break;
+                        case ('bad_connect'):
+                            alert('Ошибка соединения с БД!');
+                            break;
+                        default:
+                                alert(data)
+                                //alert('Ошибка получения ответа!');
+                        }
+
+                    })
+                    .fail(function(){
+                        alert('Внутрення ошибка, перезагрузите страницу!');
+                    });
+                });
+            });
+        </script>
+        <script>
+            function show(id){
+                    document.querySelector(id).classList.toggle("hidden")
+            };
+            function rld(){
+                $.post("{{url_for('index')}}",
+                {
+                    status: 'restart',
+                },
+                function(){},
+                "json");
+                document.querySelector('.preloader-hide').classList.add("preloader-active");
+                setTimeout(() =>{
+                    location.reload();
+                },2000);
+            };
+            function ch(val){
+                switch(val){
+                    case 'PostgreSQL':
+                        port = '5432';
+                        break;
+                    case 'MySQL':
+                        port = '3306'
+                        break;
+                }
+                document.getElementById('port').setAttribute('value',port);
+            };
+        </script>
+    </head>
+    <body>
+        <div class="preloader-hide">
+            <div class="preloader-2">
+                <ul>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                </ul>
+            </div>
+        </div>
+        <div class="page">
+            <div class="container">
+                <h1>Выберете базу данных</h1>
+                <div class="selector">
+                    <button id="MySQL" class="button-1" onclick="show('.mysql')">Подключиться к БД</button>
+                    <button id="SQLA" class="button-2" onclick="show('.sqlite')">Создать БД SQL Lite</button>
+                </div>
+            </div>
+            <div class="mysql hidden">
+                <div class="sql_header">
+                    <button class="close-button" onclick="show('.mysql')">
+                        <div class="cl-btn-1">
+                            <div>
+                                <span class="left"></span>
+                                <span class="right"></span>
+                            </div>
+                        </div>
+                    </button>
+                    <h1>Настройка параметров БД SSQL</h1>
+                </div>
+                <form class="sqlform" autocomplete="on">
+                    <input type="hidden" name ="status" value="sqlsetup">
+                    <table class="tables">
+                        <tr>
+                            <td>Тип БД:</td>
+                            <td>
+                                <select id="selectdb" name="dbtype" onchange="ch(value)">
+                                  <option>MySQL</option>
+                                  <option>PostgreSQL</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Доменные имя:</td>
+                            <td><input class="dbinput" type="text" name="hostname" value="localhost"></td>
+                        </tr>
+                        <tr>
+                            <td>Порт:</td>
+                            <td><input id="port" class="dbinput" type="text" name="port" value="3306"></td>
+                        </tr>
+                        <tr>
+                            <td>Имя Базы Данных:</td>
+                            <td><input class="dbinput" type="text" name="dbname"></td>
+                        </tr>
+                        <tr>
+                            <td>Пользователь БД:</td>
+                            <td><input class="dbinput" type="text" name="dbuser"></td>
+                        </tr>
+                        <tr>
+                            <td>Пароль пользователя:</td>
+                            <td><input class="dbinput" type="password" name="dbpass"></td>
+                        </tr>
+                    </table>
+                    <div class="ask">
+                        <p>Создать таблицу ролей и администратора?</p>
+                        <input id="creater" type="checkbox" name="create" checked="on" onchange="show('#new-mysql')">
+                    </div>
+                    <div id='new-mysql'class="newuser">
+                        <h2>Создание учетной записи суперадминистртора</h2>
+                        <table class="tables">
+                            <tr>
+                                <td>Псевдоним:</td>
+                                <td><input class="dbinput" type="text" name="sauser"></td>
+                            </tr>
+                            <tr>
+                                <td>Пароль:</td>
+                                <td><input class="dbinput" type="password" name="sapass"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <button type="submit" id="mysql_submit" class="sql_button">Подключиться</button>
+                </form>
+            </div>
+            <div class="sqlite hidden">
+                <div class="sql_header">
+                    <button class="close-button" onclick="show('.sqlite')">
+                        <div class="cl-btn-1">
+                            <div>
+                                <span class="left"></span>
+                                <span class="right"></span>
+                            </div>
+                        </div>
+                    </button>
+                    <h1>Настройка параметров SQL Lite</h1>
+                </div>
+                <form class="sqlform">
+                    <input type="hidden" name ="status" value="sqlitesetup">
+                    <table class="tables">
+                    <tr>
+                        <td>Имя Базы Данных:</td>
+                        <td><input class="dbinput" type="text" name="dbname" value="{{dbname}}"></td>
+                    </tr>
+                </table>
+                <div class="ask">
+                    <p>Создать таблицу ролей и администратора?</p>
+                    <input id="creater2" type="checkbox" name="create" checked="on" onchange="show('#new-sqlite')">
+                </div>
+                <div id="new-sqlite"class="newuser">
+                    <h2>Создание учетной записи суперадминистртора</h2>
+                    <table class="tables">
+                        <tr>
+                            <td>Псевдоним:</td>
+                            <td><input class="dbinput" type="text" name="sauser"></td>
+                        </tr>
+                        <tr>
+                            <td>Пароль:</td>
+                            <td><input class="dbinput" type="password" name="sapass"></td>
+                        </tr>
+                    </table>
+                </div>
+                <button type="submit" id="sqlite_submit" class="sql_button">Создать</button>
+                </form>
+            </div>
+            <div class="confirm hidden">
+                <h1 style="color: #5fe75f;" id="message"></h1>
+                <p style="font-size:x-large"id="textinform"></p>
+                <button id="restart">Перезапустить</button>
+            </div>
+        </div>
+    </body>
+</html>
