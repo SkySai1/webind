@@ -9,7 +9,7 @@ from flask_mysqldb import MySQL
 from jinja2 import TemplateNotFound
 from flask_sqlalchemy import SQLAlchemy
 
-##Подключаем наш файл с функциями
+#Подключаем наш файл с функциями
 from backend.function import *
 from backend.dbcontrol import *
 
