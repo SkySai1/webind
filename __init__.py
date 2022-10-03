@@ -44,7 +44,7 @@ if os.path.exists('db.yaml'):
 		dbsql = None
 else: dbsql = None
 
-#!-- Сегмент адресации
+##!-- Сегмент адресации
 @app.route('/', methods=['GET','POST'])
 def index():
 	try:
