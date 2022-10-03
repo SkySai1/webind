@@ -5,6 +5,7 @@
 	<title>Центр управления</title>
 	<link rel="stylesheet" href="../static/index-style.css">
 	<link rel="stylesheet" href="../static/close-btn.css">
+	<link rel="stylesheet" href="../static/preloader.css">
 	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
 	<script>
 		function f(){
@@ -164,6 +165,7 @@
 	{% if session['role'] == 'superadmin' %}
 		<script>
 			function get_user_list(){
+				$('.preloader-hide').addClass('preloader-active');
 				dt = {'status' : 'userchange', 'action' : 'getuserlist'};
 				$.ajax({
 					url:'{{url_for("index")}}',
@@ -174,14 +176,15 @@
 					.done (function(data){
 						$('#userlist').empty();
 						var json = JSON.parse(data)
+						if (Object.keys(json.usernames).length > 10) {i = 10}
+						else { i = Object.keys(json.usernames).length};
+						$('#userlist').attr('size', i);
 						for (var key in json.usernames) {
 							$('#userlist').append(function () {
 								return $('<option>', {text: json.usernames[key]});
 							});
-						if (Object.keys(json.usernames).length > 10) {i = 10}
-						else { i = Object.keys(json.usernames).length};
-						$('#userlist').attr('size', i);
 						};
+						$('.preloader-hide').removeClass('preloader-active');
 					})
 					.fail (function(){
 
@@ -304,6 +307,37 @@
 					</div>
 				</div>
 				<div class="right_pannel hidden">
+					<div class="preloader-hide">
+						<div class="preloader-2">
+							<ul>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+								<li></li>
+							</ul>
+						</div>
+					</div>
 					<div class="right_pannel_header">
 						<p class="right_pannel_message_info hidden"></p>
 						<button onclick="rightclose()">

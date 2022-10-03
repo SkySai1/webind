@@ -156,7 +156,7 @@ body{
 .left_pannel{
   transition: 0.3s;
   width: 49vw;
-  height: 100vh;
+  height: 85vh;
   z-index: 2;
   background: linear-gradient(180deg, #6eb2eb, #baf5ff00);
   border-radius: 15px;
@@ -228,6 +228,7 @@ body{
   z-index: 2;
   border-radius: 15px;
   width: 49vw;
+  height: 85vh;
 }
 
 .right_pannel_header{

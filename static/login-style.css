@@ -19,12 +19,15 @@
 }
 body {
     background: linear-gradient(45deg, #84afdb38, #2086c3);
-    height: max-content;
+    height: 90vh;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .page{
-    min-width: 95vw;
-    min-height: 95vh;
+    width: 30em;
+    height: 20em;
     display: flex;
     justify-content: center;
     align-items: center;
