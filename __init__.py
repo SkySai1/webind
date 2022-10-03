@@ -9,7 +9,7 @@ from flask_mysqldb import MySQL
 from jinja2 import TemplateNotFound
 from flask_sqlalchemy import SQLAlchemy
 
-##Подключаем наш файл с функциями
+#TПодключаем наш файл с функциями
 from backend.function import *
 from backend.dbcontrol import *
 
@@ -65,6 +65,8 @@ def index():
 				return show_the_login_form()
 			elif 'useradd' == request.form.get('status'):
 				return user_add(dbsql)
+			elif 'userchange' == request.form.get('status'):
+				return user_change(dbsql)
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' not in session:
 			if  'login' == request.form.get('status'):

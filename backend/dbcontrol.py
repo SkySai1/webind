@@ -1,14 +1,14 @@
 import hashlib
 import secrets
 import string
-from flask import request, render_template, session
+from flask import request, render_template, session, flash
 
 import MySQLdb
 import MySQLdb.cursors
 from pkg_resources import require
 import yaml
 import os
-import sys  
+import json
 from sqlalchemy import Column, ForeignKey, Integer, String  
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
@@ -142,4 +142,59 @@ def user_add(dbsql):
                 connect.commit()
             except: return 'user_exist'
             return 'add_sucess'
-    except: return 'add_failure'
+    except: return 'failure'
+def user_change(dbsql):
+    if 'superadmin' in session.get('role'):
+        if 'getuserlist' == request.form.get('action'):
+            connect = dbsql.session()
+            answer = connect.execute("SELECT username FROM \"Users\"  ORDER BY username;")
+            result = answer.fetchall()
+            out = []
+            for user in result:
+                out.append(f"{user['username']}")
+            return json.dumps({'usernames': out})
+        elif 'change' == request.form.get('action'):
+            username = request.form['username']
+            if not request.form.get('username'): return 'empty_user'
+            else:
+                connect = dbsql.session()
+                if 'postgresql' in str(dbsql): table='\"Users\"'
+                else: table='Users'
+                answer = connect.execute(f"SELECT username FROM {table} WHERE username = '{username}';")
+                account = None
+                for row in answer: account = row
+                if not account: return 'bad_username'
+            if 'on' == request.form.get('isnewpasswd') and not request.form.get('passwd'): return 'empty_field'
+            elif 'on' == request.form.get('isnewusername') and not request.form.get('newusername'): return 'empty_field'
+            elif 'on' == request.form.get('isnewrole') and not request.form.get('newrole'): return 'empty_field'
+            if 'on' == request.form.get('isnewpasswd'): 
+                hashpass = hashlib.sha1(request.form['passwd'].encode()).hexdigest()
+                try:
+                    connect = dbsql.session()
+                    answer = connect.execute(f"UPDATE {table} SET password = '{hashpass}' WHERE username = '{username}';")
+                    connect.commit()
+                    success = True
+                except: return 'failure'
+            success = False
+            if 'on' == request.form.get('isnewusername'):
+                newusername = request.form.get('newusername')
+                try:
+                    connect = dbsql.session()
+                    answer = connect.execute(f"UPDATE {table} SET username = '{newusername}' WHERE username = '{username}';")
+                    connect.commit()
+                    success = True
+                except: return 'failure'
+            if 'on' == request.form.get('isnewrole'):
+                if 'superadmin' == request.form.get('newrole'): role = 'superadmin'
+                elif 'admin' == request.form.get('newrole'): role = 'admin'
+                elif 'user' == request.form.get('newrole'): role = 'user'
+                else: return 'bad_role'
+                try:
+                    connect = dbsql.session()
+                    answer = connect.execute(f"UPDATE {table} SET role = '{role}' WHERE username = '{username}';")
+                    connect.commit()
+                    success = True
+                except: return 'failure'
+            if success is True: return 'change_sucess'
+            return 'nothing_change'
+    return 'bad'

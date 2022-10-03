@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	
+
 	<title>Центр управления</title>
 	<link rel="stylesheet" href="../static/index-style.css">
 	<link rel="stylesheet" href="../static/close-btn.css">
@@ -43,7 +43,8 @@
 	</script>
 	<script>
 		function rightshow(id){
-			$('.right_pannel').removeClass('hidden')
+			$('.right_pannel_message_info').addClass('hidden');
+			$('.right_pannel').removeClass('hidden');
 			$('.el_right_pannel').addClass('hidden');
 			$('.square2').addClass('move-right');
 			//alert(id)
@@ -54,15 +55,31 @@
 			$('.el_right_pannel').addClass('hidden');
 			$('.square2').removeClass('move-right');
 		};
-		function randpass(){
+		function randpass(el){
 			var length = 8,
 			charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
 			retVal = "";
 			for (var i = 0, n = charset.length; i < length; ++i) {
 			retVal += charset.charAt(Math.floor(Math.random() * n));
 			};
-			$('#usrpasscreate').attr('value', retVal);
+			$(el).val(retVal);
 		};
+		function changeuname(value){
+			$('#change-username').val(value);
+		};
+		function user_list_filter() {
+			$('#change-username').on('keyup', function() {
+			  var filter = $(this).val();
+			  $('option').each(function() {
+				if ($(this).text().includes(filter)) {
+				  $(this).show();
+				} else {
+				  $(this).hide();
+				}
+				$('#userlist').val(filter);
+			  })
+			})
+		  };
 	</script>
 		{#  Скрипт отправки формы: #}
 	<script>
@@ -86,30 +103,54 @@
 	</script>
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script>
+		function rmi(color, text) {
+			$('.right_pannel_message_info').removeClass('hidden')
+			$('.right_pannel_message_info').css({'color' : color});
+			$('.right_pannel_message_info').text(text);
+			//$('.right_pannel_message_info').addClass('hidden');
+		};
+
 		function responce_handler(data){
-			$('.rh_block').removeClass('hidden');
+			/* Блок реакций на управления пользвотаелей*/
 			switch(data) {
 				case ('empty_login'):
-					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Введите псевдоним и пароль!');
-					break;
-				case ('bad_role'):
-					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Неверно указана роль!');
+					rmi('red', 'Введите псевдоним и пароль!');
 					break;
 				case ('add_sucess'):
-					$('#rh_message').css({'color' : 'green'});
-					$('#rh_message').text('Пользователь успешно создан!');
+					rmi('green', 'Пользователь успешно создан!');
 					break;
 				case ('user_exist'):
-					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Ошибка, пользователь существует!');
+					rmi('red', 'Ошибка, пользователь существует!');
 					break;
-				case ('add_failure'):
+				case ('empty_user'):
+					rmi('red', 'Выберете пользователя для изменения!');
+					break;
+				case ('bad_username'):
+					rmi('red', 'Пользователь не найден!')
+					break;
+				case ('empty_field'):
+					rmi('red', 'Заполните все отмеченные поля!');
+					break;
+				case ('change_sucess'):
+					rmi('green', 'Данные пользователя успешно изменены!');
+					get_user_list();
+					break;
+				case ('nothing_change'):
+					rmi('red', 'Необходимо отметить поля для изменения!');
+					break;
+				/* Общие события */
+				case ('failure'):
+					$('.rh_block').removeClass('hidden');
 					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Ошибка при создании пользователя!');
+					$('#rh_message').text('Ошибка выполнения функции!');
+					break;
+				case ('bad_role'):
+					$('.rh_block').removeClass('hidden');
+					$('#rh_message').css({'color' : 'red'});
+					$('#rh_message').text('Ошибка при прямом обращении к роли!');
 					break;
 				default:
+					alert(data);
 					break;
 			};
 		};
@@ -119,6 +160,35 @@
 			$(el).addClass("hidden");
 		};
 	</script>
+	{#		Скрипты суперадмина		#}
+	{% if session['role'] == 'superadmin' %}
+		<script>
+			function get_user_list(){
+				dt = {'status' : 'userchange', 'action' : 'getuserlist'};
+				$.ajax({
+					url:'{{url_for("index")}}',
+					method: 'POST',
+					dataType: 'html',
+					data: dt
+					})
+					.done (function(data){
+						$('#userlist').empty();
+						var json = JSON.parse(data)
+						for (var key in json.usernames) {
+							$('#userlist').append(function () {
+								return $('<option>', {text: json.usernames[key]});
+							});
+						if (Object.keys(json.usernames).length > 10) {i = 10}
+						else { i = Object.keys(json.usernames).length};
+						$('#userlist').attr('size', i);
+						};
+					})
+					.fail (function(){
+
+					});
+			};
+		</script>
+	{% endif %}
 </head>
 <body>
 	<div class="content">
@@ -226,7 +296,7 @@
 								<h2>Управление пользователями</h2>
 								<div>
 									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
-									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userchande')">Изменить</button>
+									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userchange'); get_user_list()">Изменить</button>
 									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userdel')">Удалить</button>
 								</div>
 							</div>
@@ -235,6 +305,7 @@
 				</div>
 				<div class="right_pannel hidden">
 					<div class="right_pannel_header">
+						<p class="right_pannel_message_info hidden"></p>
 						<button onclick="rightclose()">
 							<div class="cl-btn-1">
 								<div>
@@ -245,15 +316,14 @@
 						</button>
 
 					</div>
-					{#		Окно добавления пользователя для роли суперадмина:		#}
+					{#		Окно управления пользователями для роли суперадмина:		#}
 					{% if session['role'] == 'superadmin' %}
 						<div id="f-useradd" class="el_right_pannel hidden">
-							<h2>Добавить пользователя</h2>
-							<form class="form">
+							<h2>Добавить пользователя</h2>							<form class="form">
 								<input type="hidden" name="status" value="useradd">
 								<div>
 									<input type="text" name="username" placeholder="Псевдоним">
-									<select name="role">
+									<select name="newrole">
 										<option value="user">Пользователь</option>
 										<option value="admin">Администратор</option>
 										<option value="superadmin">Суперадминистратор</option>
@@ -261,10 +331,44 @@
 								</div>
 								<div>
 									<input id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-									<button type="button" onclick="randpass()">Сгенерировать</button>
+									<button type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
 								</div>
 								<button class="sa_button" type="submit" id="b-usercreate">Создать</button>
 							</form>
+						</div>
+						<div id="f-userchange" class="el_right_pannel hidden">
+							<h2>Изменить данные пользователя</h2>
+							<div>
+								<form class="form">
+									<input type="hidden" name="status" value="userchange">
+									<input type="hidden" name="action" value="change">
+									<div>
+										<select id="userlist" size="20" onchange="changeuname(value)">
+										</select>
+									</div>
+									<div>
+										<input id="change-username" onkeydown="user_list_filter()" type="text" name="username" placeholder="Псевдоним">
+										<div>
+											<input type="checkbox" name="isnewpasswd">
+											<input id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
+											<button type="button" onclick="randpass('#usrpasschange')">Сгенерировать</button>
+										</div>
+										<div>
+											<input type="checkbox" name="isnewusername">
+											<input name="newusername" placeholder="Новый псевдоним"type="text">
+										</div>
+										<div>
+											<input type="checkbox" name="isnewrole">
+											<select name="newrole">
+												<option value="user">Пользователь</option>
+												<option value="admin">Администратор</option>
+												<option value="superadmin">Суперадминистратор</option>
+											</select>
+										</div>
+										<button class="sa_button" type="submit" id="b-userchange">Изменить</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					{% endif %}
 					<div class="el_right_pannel hidden">

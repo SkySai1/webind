@@ -32,5 +32,20 @@
               </select>
             <button type="submit">OK</button>
         </form>
+        <div>
+            <button onclick="add()">Добавить</button>
+            <select>
+            </select>
+              
+              <script>
+                function add(){
+                for (i=0; i<10;i++){
+                    $('select').append(function () {
+                        return $('<option>', {text: ' ( '+i+' )'});
+                    });
+                };
+                }
+              </script>
+        </div>
     </body>
 </html>
