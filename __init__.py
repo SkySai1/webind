@@ -67,6 +67,8 @@ def index():
 				return user_add(dbsql)
 			elif 'userchange' == request.form.get('status'):
 				return user_change(dbsql)
+			elif 'userdel' == request.form.get('status'):
+				return user_delete(dbsql)
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' not in session:
 			if  'login' == request.form.get('status'):

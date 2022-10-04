@@ -35,7 +35,7 @@ Base = declarative_base()
 
 
 class NewUser(Base):  
-    __tablename__ = "Users" 
+    __tablename__ = "users" 
     
     id = Column(Integer, primary_key=True)  
     username = Column(String(255), nullable=False, unique=True)  
@@ -56,7 +56,7 @@ def create_sqlite_db():
         if 'create' in request.form:
             Base.metadata.create_all(engine)
             cursor = engine.connect()
-            answer = cursor.execute("select * from Users limit 1")
+            answer = cursor.execute("select * from users limit 1")
             result = answer.fetchone()
             if not result:
                 with Session(engine) as session:
@@ -92,7 +92,7 @@ def create_sql_db():
         engine.connect()
         if 'create' in request.form:
             cursor = engine.connect()
-            answer = cursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='Users';")
+            answer = cursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='users';")
             result = answer.fetchone()
             if not result:
                 try:
@@ -147,7 +147,7 @@ def user_change(dbsql):
     if 'superadmin' in session.get('role'):
         if 'getuserlist' == request.form.get('action'):
             connect = dbsql.session()
-            answer = connect.execute("SELECT username FROM \"Users\"  ORDER BY username;")
+            answer = connect.execute("SELECT username FROM users ORDER BY username;")
             result = answer.fetchall()
             out = []
             for user in result:
@@ -158,29 +158,22 @@ def user_change(dbsql):
             if not request.form.get('username'): return 'empty_user'
             else:
                 connect = dbsql.session()
-                if 'postgresql' in str(dbsql): table='\"Users\"'
-                else: table='Users'
-                answer = connect.execute(f"SELECT username FROM {table} WHERE username = '{username}';")
-                account = None
-                for row in answer: account = row
-                if not account: return 'bad_username'
+                answer = connect.execute(f"SELECT username, id FROM users WHERE username = '{username}';")
+                account = {}
+                for row in answer: 
+                    account['id'] = row['id']
+                    account['username'] = row['username']
+                if not account['username']: return 'bad_username'
+                if account['id'] == 1: return 'sa_block'
             if 'on' == request.form.get('isnewpasswd') and not request.form.get('passwd'): return 'empty_field'
             elif 'on' == request.form.get('isnewusername') and not request.form.get('newusername'): return 'empty_field'
             elif 'on' == request.form.get('isnewrole') and not request.form.get('newrole'): return 'empty_field'
+            success = False
             if 'on' == request.form.get('isnewpasswd'): 
                 hashpass = hashlib.sha1(request.form['passwd'].encode()).hexdigest()
                 try:
                     connect = dbsql.session()
-                    answer = connect.execute(f"UPDATE {table} SET password = '{hashpass}' WHERE username = '{username}';")
-                    connect.commit()
-                    success = True
-                except: return 'failure'
-            success = False
-            if 'on' == request.form.get('isnewusername'):
-                newusername = request.form.get('newusername')
-                try:
-                    connect = dbsql.session()
-                    answer = connect.execute(f"UPDATE {table} SET username = '{newusername}' WHERE username = '{username}';")
+                    connect.execute(f"UPDATE {table} SET password = '{hashpass}' WHERE username = '{username}';")
                     connect.commit()
                     success = True
                 except: return 'failure'
@@ -191,10 +184,37 @@ def user_change(dbsql):
                 else: return 'bad_role'
                 try:
                     connect = dbsql.session()
-                    answer = connect.execute(f"UPDATE {table} SET role = '{role}' WHERE username = '{username}';")
+                    connect.execute(f"UPDATE {table} SET role = '{role}' WHERE username = '{username}';")
                     connect.commit()
                     success = True
                 except: return 'failure'
-            if success is True: return 'change_sucess'
-            return 'nothing_change'
-    return 'bad'
+            if 'on' == request.form.get('isnewusername'):
+                newusername = request.form.get('newusername')
+                try:
+                    connect = dbsql.session()
+                    connect.execute(f"UPDATE {table} SET username = '{newusername}' WHERE username = '{username}';")
+                    connect.commit()
+                    success = True
+                except: return 'failure'
+            if success is True: return 'change_success'
+            else: return 'nothing_change'
+    return 'failure'
+
+def user_delete(dbsql):
+    if 'superadmin' in session.get('role') and 'userdel' == request.form.get('action'):
+        try:
+            if not request.form.get('username'): return 'empty_users'
+            connect = dbsql.session()
+            username = request.form['username']
+            answer = connect.execute(f"SELECT username, id FROM users WHERE username = '{username}';")
+            account = {}
+            for row in answer: 
+                account['id'] = row['id']
+                account['username'] = row['username']
+            if not account['username']: return 'bad_username'
+            if account['id'] == 1: return 'sa_block'
+            connect.execute(f"DELETE FROM users WHERE username = '{username}';")
+            connect.commit()
+            return 'userdel_success'
+        except: return 'failure'
+    return 'failure'

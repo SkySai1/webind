@@ -8,6 +8,9 @@
 	<link rel="stylesheet" href="../static/preloader.css">
 	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
 	<script>
+		$(document).ready(function(){
+			window.vanish = '';
+		});
 		function f(){
 			$('.square').toggleClass('move-left');
 		
@@ -84,31 +87,37 @@
 	</script>
 		{#  Скрипт отправки формы: #}
 	<script>
-		$(document).ready(function(){
-			$('.form').submit(function (e){
-				e.preventDefault();
-				$.ajax({
-				url:'{{url_for("index")}}',
-				method: 'POST',
-				dataType: 'html',
-				data: $(this).serialize()
-				})
-				.done(function(data) {
-					responce_handler(data);
-				})
-				.fail(function(){
-					alert('Внутрення ошибка, перезагрузите страницу!');
-				});
-			});
-		});
+		function form_submit(form){
+			//$(document).ready(function(){
+				//$(form).submit(function (e){
+					//e.preventDefault();
+					$.ajax({
+					url:'{{url_for("index")}}',
+					method: 'POST',
+					dataType: 'html',
+					data: $(form).serialize()
+					})
+					.done(function(data) {
+						responce_handler(data);
+					})
+					.fail(function(){
+						alert('Внутрення ошибка, перезагрузите страницу!');
+					});
+				//});
+			//});
+		};
 	</script>
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script>
 		function rmi(color, text) {
 			$('.right_pannel_message_info').removeClass('hidden')
+			clearTimeout(window.vanish);
 			$('.right_pannel_message_info').css({'color' : color});
 			$('.right_pannel_message_info').text(text);
-			//$('.right_pannel_message_info').addClass('hidden');
+			window.vanish = setTimeout( function(){
+				$('.right_pannel_message_info').addClass('hidden');
+			},2000);
+			
 		};
 
 		function responce_handler(data){
@@ -126,18 +135,27 @@
 				case ('empty_user'):
 					rmi('red', 'Выберете пользователя для изменения!');
 					break;
+				case ('sa_block'):
+					rmi('red', 'Запрещено изменять данные первого суперадмина!');
+					break;
 				case ('bad_username'):
 					rmi('red', 'Пользователь не найден!')
 					break;
 				case ('empty_field'):
 					rmi('red', 'Заполните все отмеченные поля!');
 					break;
-				case ('change_sucess'):
+				case ('change_success'):
 					rmi('green', 'Данные пользователя успешно изменены!');
 					get_user_list();
+					$('#change-username').val('');
 					break;
 				case ('nothing_change'):
 					rmi('red', 'Необходимо отметить поля для изменения!');
+					break;
+				case ('userdel_success'):
+					rmi('green', 'Пользователь успешно удалён!');
+					get_user_list();
+					$('#change-username').val('');
 					break;
 				/* Общие события */
 				case ('failure'):
@@ -190,6 +208,16 @@
 
 					});
 			};
+			function userdel(form){
+				newval = $('#change-username').val();
+				if (!newval) {responce_handler('empty_user')}
+				else{
+					$('#username-fordel').val(newval);
+					if (confirm('Потвердите удаление пользователя - '+newval)) { 
+						form_submit(form);
+					};
+				};
+			}
 		</script>
 	{% endif %}
 </head>
@@ -353,11 +381,12 @@
 					{#		Окно управления пользователями для роли суперадмина:		#}
 					{% if session['role'] == 'superadmin' %}
 						<div id="f-useradd" class="el_right_pannel hidden">
-							<h2>Добавить пользователя</h2>							<form class="form">
+							<h2>Добавить пользователя</h2>							
+							<form class="form" id="usercreate-form">
 								<input type="hidden" name="status" value="useradd">
 								<div>
 									<input type="text" name="username" placeholder="Псевдоним">
-									<select name="newrole">
+									<select name="role">
 										<option value="user">Пользователь</option>
 										<option value="admin">Администратор</option>
 										<option value="superadmin">Суперадминистратор</option>
@@ -367,7 +396,7 @@
 									<input id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
 									<button type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
 								</div>
-								<button class="sa_button" type="submit" id="b-usercreate">Создать</button>
+								<button class="sa_button" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 							</form>
 						</div>
 						<div id="f-userchange" class="el_right_pannel hidden">
@@ -399,9 +428,17 @@
 												<option value="superadmin">Суперадминистратор</option>
 											</select>
 										</div>
-										<button class="sa_button" type="submit" id="b-userchange">Изменить</button>
-									</div>
+										<div class="column">
+											<button class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
 								</form>
+											<form class="form" id="userdel-form">
+												<input type="hidden" name="status" value="userdel">
+												<input type="hidden" name="action" value="userdel">
+												<input id="username-fordel" type="hidden" name="username" value="test">
+												<button class="sa_button" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+											</form>
+										</div>
+									</div>
 							</div>
 						</div>
 					{% endif %}
