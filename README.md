@@ -7,4 +7,4 @@ Required Packages:
   libpq-dev
   
   
-after download run: python3 -m venv flask --upgrade
+after download run into webind directory: python3 -m venv flask --upgrade
