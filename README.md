@@ -6,5 +6,11 @@ Required Packages:
   build-essential 
   libpq-dev
   
+Required pip modules:
+	flask
+	flask-mysqldb
+	flask-sqlalchemy
+	pyyaml
+	paramiko
   
 after download run into webind directory: python3 -m venv flask --upgrade
