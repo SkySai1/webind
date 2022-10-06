@@ -25,10 +25,7 @@ def do_the_login(username,password,dbsql):
 		query = dbsql.session()
 		#Выполняем саму команду
 		pass_hash = hashlib.sha1(password.encode()).hexdigest()
-		if 'postgresql' in str(dbsql):
-			answer = query.execute(f"SELECT * FROM \"users\" WHERE username = '{username}' AND password = '{pass_hash}'")
-		else:
-			answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
+		answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
 		account = None
 		for row in answer: account = row
 		if account:

@@ -37,6 +37,7 @@ if os.path.exists('db.yaml'):
 			app.config['SQLALCHEMY_DATABASE_URI'] = f'{driver}://{dbuser}:{dbpass}@{host}:{port}/{dbname}'
 		elif 'sqlite' in file['type']:
 			dbname = file['dbname']
+			dbpath = os.path.abspath(f"./bases/{dbname}.db")
 			app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///bases/{dbname}.db'
 		app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 		dbsql = SQLAlchemy(app)
