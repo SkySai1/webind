@@ -28,12 +28,10 @@
 							welcome.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 							welcome.textContent = 'Ошибка соединения с БД!';
 							break;
-						case ('ok'):
+                        default:
+							//alert(data)
 							document.querySelector('.preloader-hide').classList.add("preloader-active");
 							window.location.replace("{{url_for('index')}}");
-							break;
-                        default:
-							console.log(data);
 							break;
 					};
 				})
