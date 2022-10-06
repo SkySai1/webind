@@ -1,11 +1,5 @@
 .preloader-hide {
     display: none;
-    position: fixed;
-    width: inherit;
-    height: inherit;
-    opacity: 0;
-    z-index: -10;
-    transition: all 0.5s;
 }
 .preloader-active {
     position: absolute;
@@ -20,6 +14,7 @@
     opacity: 1;
     border-radius: 15px;
     box-shadow: 0 0 1em 2em white;
+    transition: all 0s;
 }
 
 .preloader-2 {

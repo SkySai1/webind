@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 	<title>Центр управления</title>
 	<link rel="stylesheet" href="../static/index-style.css">
 	<link rel="stylesheet" href="../static/close-btn.css">
 	<link rel="stylesheet" href="../static/preloader.css">
 	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+	{#	Общие функциональные скрипты #}
 	<script>
-		$(document).ready(function(){
+        $(document).ready(function(){
 			window.vanish = '';
 		});
 		function f(){
@@ -41,56 +41,23 @@
 			  })
 			  .fail(function(){
 				alert('Внутрення ошибка, перезагрузите страницу!');
-			  })
-			
+			  })		
 		};
-	</script>
-	<script>
-		function rightshow(id){
-			$('.right_pannel_message_info').addClass('hidden');
-			$('.right_pannel').removeClass('hidden');
-			$('.el_right_pannel').addClass('hidden');
-			$('.square2').addClass('move-right');
-			//alert(id)
-			$(id).removeClass('hidden');
+
+		function cls(el){
+			$(el).addClass("hidden");
 		};
-		function rightclose(){
-			$('.right_pannel').addClass('hidden');
-			$('.el_right_pannel').addClass('hidden');
-			$('.square2').removeClass('move-right');
-		};
-		function randpass(el){
-			var length = 8,
-			charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-			retVal = "";
-			for (var i = 0, n = charset.length; i < length; ++i) {
-			retVal += charset.charAt(Math.floor(Math.random() * n));
-			};
-			$(el).val(retVal);
-		};
-		function changeuname(value){
-			$('#change-username').val(value);
-		};
-		function user_list_filter() {
-			$('#change-username').on('keyup', function() {
-			  var filter = $(this).val();
-			  $('option').each(function() {
-				if ($(this).text().includes(filter)) {
-				  $(this).show();
-				} else {
-				  $(this).hide();
-				}
-				$('#userlist').val(filter);
-			  })
-			})
-		  };
-	</script>
-		{#  Скрипт отправки формы: #}
+
+		function changer(el){
+			$(el).toggleClass("hidden")
+		}
+    </script>
+	
+	{#  Скрипт отправки формы: #}
 	<script>
 		function form_submit(form){
 			//$(document).ready(function(){
 				//$(form).submit(function (e){
-					//e.preventDefault();
 					$.ajax({
 					url:'{{url_for("index")}}',
 					method: 'POST',
@@ -107,6 +74,99 @@
 			//});
 		};
 	</script>
+
+
+	{#	Скрипты отображения всплывающего меню	 #}
+	<script>
+		function rightshow(id){
+			$('.right_pannel_message_info').addClass('hidden');
+			$('.right_pannel').removeClass('hidden');
+			$('.el_right_pannel').addClass('hidden');
+			$('.square2').addClass('move-right');
+			//alert(id)
+			$(id).removeClass('hidden');
+		};
+		function rightclose(){
+			$('.right_pannel').addClass('hidden');
+			$('.el_right_pannel').addClass('hidden');
+			$('.square2').removeClass('move-right');
+		};
+	</script>
+
+	{#	Скрипты управления пользователями (суперадмин) #}
+	{% if session['role'] == 'superadmin' %}
+	<script>
+		function randpass(el){
+			var length = 8,
+			charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+			retVal = "";
+			for (var i = 0, n = charset.length; i < length; ++i) {
+			retVal += charset.charAt(Math.floor(Math.random() * n));
+			};
+			$(el).val(retVal);
+		};
+		function changeuname(input, value){
+			$(input).val(value);
+		};
+		function user_list_filter(input, userlist) {
+			$(input).on('keyup', function() {
+			  var filter = $(this).val().toLowerCase();
+			  $('option').each(function() {
+				var text = $(this).text().toLowerCase();
+				//if ($(this).text().includes(filter)) {
+				if (text.includes(filter)){
+					$(this).show();
+				} else {
+				  $(this).hide();
+				}
+				$(userlist).val(filter);
+			  })
+			})
+		  };
+		  function get_user_list(to_listbox){
+			$('.preloader-hide').addClass('preloader-active');
+			clearTimeout(window.vanish);
+			dt = {'status' : 'userfind', 'action' : 'getuserlist'};
+			$.ajax({
+				url:'{{url_for("index")}}',
+				method: 'POST',
+				dataType: 'html',
+				data: dt
+				})
+				.done (function(data){
+					$(to_listbox).empty();
+					var json = JSON.parse(data)
+					if (Object.keys(json.usernames).length > 10) {i = 10}
+					else { i = Object.keys(json.usernames).length};
+					$(to_listbox).attr('size', i);
+					for (var key in json.usernames) {
+						$(to_listbox).append(function () {
+							return $('<option>', {text: json.usernames[key]});
+						});
+					};
+					$('.preloader-hide').addClass('opacity');
+					window.vanish = setTimeout(function(){
+						$('.preloader-hide').removeClass('preloader-active');
+						$('.preloader-hide').removeClass('opacity');
+					},500);
+				})
+				.fail (function(){
+
+				});
+		};
+		function userdel(form){
+			newval = $('#change-username').val();
+			if (!newval) {responce_handler('empty_user')}
+			else{
+				$('#username-fordel').val(newval);
+				if (confirm('Потвердите удаление пользователя - '+newval)) { 
+					form_submit(form);
+				};
+			};
+		}
+	</script>
+	{% endif %}
+
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script>
 		function rmi(color, text) {
@@ -121,7 +181,7 @@
 		};
 
 		function responce_handler(data){
-			/* Блок реакций на управления пользвотаелей*/
+			/* Блок реакций функций управления пользвотаелей*/
 			switch(data) {
 				case ('empty_login'):
 					rmi('red', 'Введите псевдоним и пароль!');
@@ -133,7 +193,7 @@
 					rmi('red', 'Ошибка, пользователь существует!');
 					break;
 				case ('empty_user'):
-					rmi('red', 'Выберете пользователя для изменения!');
+					rmi('red', 'Выберете пользователя!');
 					break;
 				case ('sa_block'):
 					rmi('red', 'Запрещено изменять данные первого суперадмина!');
@@ -146,7 +206,7 @@
 					break;
 				case ('change_success'):
 					rmi('green', 'Данные пользователя успешно изменены!');
-					get_user_list();
+					get_user_list('#userlist-on-ch');
 					$('#change-username').val('');
 					break;
 				case ('nothing_change'):
@@ -154,7 +214,7 @@
 					break;
 				case ('userdel_success'):
 					rmi('green', 'Пользователь успешно удалён!');
-					get_user_list();
+					get_user_list('#userlist-on-ch');
 					$('#change-username').val('');
 					break;
 				/* Общие события */
@@ -173,53 +233,8 @@
 					break;
 			};
 		};
-	</script>
-	<script>
-		function cls(el){
-			$(el).addClass("hidden");
-		};
-	</script>
-	{#		Скрипты суперадмина		#}
-	{% if session['role'] == 'superadmin' %}
-		<script>
-			function get_user_list(){
-				$('.preloader-hide').addClass('preloader-active');
-				dt = {'status' : 'userchange', 'action' : 'getuserlist'};
-				$.ajax({
-					url:'{{url_for("index")}}',
-					method: 'POST',
-					dataType: 'html',
-					data: dt
-					})
-					.done (function(data){
-						$('#userlist').empty();
-						var json = JSON.parse(data)
-						if (Object.keys(json.usernames).length > 10) {i = 10}
-						else { i = Object.keys(json.usernames).length};
-						$('#userlist').attr('size', i);
-						for (var key in json.usernames) {
-							$('#userlist').append(function () {
-								return $('<option>', {text: json.usernames[key]});
-							});
-						};
-						$('.preloader-hide').removeClass('preloader-active');
-					})
-					.fail (function(){
 
-					});
-			};
-			function userdel(form){
-				newval = $('#change-username').val();
-				if (!newval) {responce_handler('empty_user')}
-				else{
-					$('#username-fordel').val(newval);
-					if (confirm('Потвердите удаление пользователя - '+newval)) { 
-						form_submit(form);
-					};
-				};
-			}
-		</script>
-	{% endif %}
+	</script>
 </head>
 <body>
 	<div class="content">
@@ -324,11 +339,11 @@
 					<div class="menu_front">
 						{% if session['role'] == 'superadmin' %}
 							<div class="users_control">
-								<h2>Управление пользователями</h2>
+								<h2 class="sah2">Управление пользователями</h2>
 								<div>
 									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
-									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userchange'); get_user_list()">Изменить</button>
-									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userdel')">Удалить</button>
+									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userchange'); get_user_list('#userlist-on-ch')">Изменить</button>
+									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userfind'); get_user_list('#userlist-on-fn')">Найти</button>
 								</div>
 							</div>
 						{% endif %}
@@ -380,37 +395,44 @@
 					</div>
 					{#		Окно управления пользователями для роли суперадмина:		#}
 					{% if session['role'] == 'superadmin' %}
-						<div id="f-useradd" class="el_right_pannel hidden">
-							<h2>Добавить пользователя</h2>							
-							<form class="form" id="usercreate-form">
-								<input type="hidden" name="status" value="useradd">
+
+						{# ДОБАВЛЕНИЕ ЮЗЕРА #}
+
+					<div id="f-useradd" class="el_right_pannel column hidden">
+						<h2 class="sah2">Добавить пользователя</h2>							
+						<form class="form" id="usercreate-form">
+							<input type="hidden" name="status" value="useradd">
+							<div>
+								<input type="text" name="username" placeholder="Псевдоним">
+								<select name="role">
+									<option value="user">Пользователь</option>
+									<option value="admin">Администратор</option>
+									<option value="superadmin">Суперадминистратор</option>
+								</select>
+							</div>
+							<div>
+								<input id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
+								<button type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
+							</div>
+							<button class="sa_button" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
+						</form>
+					</div>
+
+						{# ИЗМЕНЕНИЕ ЮЗЕРА #}
+
+					<div id="f-userchange" class="el_right_pannel column hidden">
+						<h2 class="sah2">Изменить данные пользователя</h2>
+						<div class="column">
+							<form class="form row" id="userchange-form">
+								<input type="hidden" name="status" value="userchange">
+								<input type="hidden" name="action" value="change">
 								<div>
-									<input type="text" name="username" placeholder="Псевдоним">
-									<select name="role">
-										<option value="user">Пользователь</option>
-										<option value="admin">Администратор</option>
-										<option value="superadmin">Суперадминистратор</option>
+									<select id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
 									</select>
 								</div>
-								<div>
-									<input id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-									<button type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
-								</div>
-								<button class="sa_button" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
-							</form>
-						</div>
-						<div id="f-userchange" class="el_right_pannel hidden">
-							<h2>Изменить данные пользователя</h2>
-							<div>
-								<form class="form">
-									<input type="hidden" name="status" value="userchange">
-									<input type="hidden" name="action" value="change">
+								<div class="column">
 									<div>
-										<select id="userlist" size="20" onchange="changeuname(value)">
-										</select>
-									</div>
-									<div>
-										<input id="change-username" onkeydown="user_list_filter()" type="text" name="username" placeholder="Псевдоним">
+										<input id="change-username" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
 										<div>
 											<input type="checkbox" name="isnewpasswd">
 											<input id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
@@ -428,29 +450,55 @@
 												<option value="superadmin">Суперадминистратор</option>
 											</select>
 										</div>
-										<div class="column">
-											<button class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
-								</form>
-											<form class="form" id="userdel-form">
-												<input type="hidden" name="status" value="userdel">
-												<input type="hidden" name="action" value="userdel">
-												<input id="username-fordel" type="hidden" name="username" value="test">
-												<button class="sa_button" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
-											</form>
-										</div>
 									</div>
+								</form>
+								<form class="form" id="userdel-form">
+									<input type="hidden" name="status" value="userdel">
+									<input type="hidden" name="action" value="userdel">
+									<input id="username-fordel" type="hidden" name="username" value="test">
+								</form>
+								<div class="row">
+									<button style="margin-right: 1em;" form="userchange-form" class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
+									<button style="margin-left: 1em;" form="userdel-form"class="sa_button" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+								</div>
 							</div>
-						</div>
-					{% endif %}
-					<div class="el_right_pannel hidden">
+						</div>	
+					</div>				
 
+					{# НАЙТИ ЮЗЕРА #}
+
+					<div id="f-userfind" class="el_right_pannel column hidden">
+						<h2 class="sah2">Подробная информация</h2>
+						<form class="form">
+						<input type="hidden" name="status" value="userfind">
+							<div class="row">
+								<select id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
+								</select>
+								<div>
+									<input id="find-username" onkeydown="user_list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
+									<button class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
+								</div>
+							</div>
+						</form>
 					</div>
+					{% endif %}
 				</div>
 			</div>
 			<div class="server_panel">
 				{% if session['role'] == 'superadmin' %}
-					<div class="add_server">
-						<!--<button>Подключиться к серверу</button>!-->
+					<div>
+						<button onclick="changer('#server-add')">Подключиться к серверу</button>
+					</div>
+					<div class="hidden" id="server-add">
+						<form class="form">
+							<input type="hidden" name="status" value="serveradd">
+							<input type="text" name="host" placeholder="Адрес">
+							<input type="text" name="port" placeholder="Порт" value="22">
+							<input type="text" name="user" placeholder="Имя пользователя">
+							<input type="text" name="pass" placeholder="Пароль">
+							<button type="button" onclick="form_submit(this.form)">Подключиться</button>
+						</form>
+
 					</div>
 				{% endif %}
 			</div>

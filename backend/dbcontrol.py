@@ -145,15 +145,7 @@ def user_add(dbsql):
     except: return 'failure'
 def user_change(dbsql):
     if 'superadmin' in session.get('role'):
-        if 'getuserlist' == request.form.get('action'):
-            connect = dbsql.session()
-            answer = connect.execute("SELECT username FROM users ORDER BY username;")
-            result = answer.fetchall()
-            out = []
-            for user in result:
-                out.append(f"{user['username']}")
-            return json.dumps({'usernames': out})
-        elif 'change' == request.form.get('action'):
+        if 'change' == request.form.get('action'):
             username = request.form['username']
             if not request.form.get('username'): return 'empty_user'
             else:
@@ -173,7 +165,7 @@ def user_change(dbsql):
                 hashpass = hashlib.sha1(request.form['passwd'].encode()).hexdigest()
                 try:
                     connect = dbsql.session()
-                    connect.execute(f"UPDATE {table} SET password = '{hashpass}' WHERE username = '{username}';")
+                    connect.execute(f"UPDATE users SET password = '{hashpass}' WHERE username = '{username}';")
                     connect.commit()
                     success = True
                 except: return 'failure'
@@ -184,7 +176,7 @@ def user_change(dbsql):
                 else: return 'bad_role'
                 try:
                     connect = dbsql.session()
-                    connect.execute(f"UPDATE {table} SET role = '{role}' WHERE username = '{username}';")
+                    connect.execute(f"UPDATE users SET role = '{role}' WHERE username = '{username}';")
                     connect.commit()
                     success = True
                 except: return 'failure'
@@ -192,7 +184,7 @@ def user_change(dbsql):
                 newusername = request.form.get('newusername')
                 try:
                     connect = dbsql.session()
-                    connect.execute(f"UPDATE {table} SET username = '{newusername}' WHERE username = '{username}';")
+                    connect.execute(f"UPDATE users SET username = '{newusername}' WHERE username = '{username}';")
                     connect.commit()
                     success = True
                 except: return 'failure'
@@ -203,7 +195,7 @@ def user_change(dbsql):
 def user_delete(dbsql):
     if 'superadmin' in session.get('role') and 'userdel' == request.form.get('action'):
         try:
-            if not request.form.get('username'): return 'empty_users'
+            if not request.form.get('username'): return 'empty_user'
             connect = dbsql.session()
             username = request.form['username']
             answer = connect.execute(f"SELECT username, id FROM users WHERE username = '{username}';")
@@ -216,5 +208,21 @@ def user_delete(dbsql):
             connect.execute(f"DELETE FROM users WHERE username = '{username}';")
             connect.commit()
             return 'userdel_success'
+        except: return 'failure'
+    return 'failure'
+
+def user_find(dbsql):
+    if 'superadmin' in session.get('role'):
+        try:
+            if 'getuserlist' == request.form.get('action'):
+                connect = dbsql.session()
+                answer = connect.execute("SELECT username FROM users ORDER BY username;")
+                result = answer.fetchall()
+                out = []
+                for user in result:
+                    out.append(f"{user['username']}")
+                return json.dumps({'usernames': out})
+            elif not request.form.get('username'): return 'empty_user'
+            return request.form.get('username')
         except: return 'failure'
     return 'failure'
