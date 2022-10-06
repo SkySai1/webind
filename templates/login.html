@@ -44,56 +44,56 @@
 	</script>
 </head>
 <body>
-<div class="preloader-hide">
-    <div class="preloader-2">
-		<ul>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-		</ul>
-	</div>
-</div>
 		<div class="page">
-		<div class="container">
-			<form id="loginform" autocomplete="off" class="formlogin"action="" method="POST" >
-					<h1 id="welcome">Форма входа</h1>
-					{%for flash in get_flashed_messages() %}
-							{% if flash == 'badpass'%}
-								<h1 style="color: red; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Неверная комбинация!</h1>
-								<style> #welcome{ display:none}</style>
-							{% elif flash == 'baddb' %}	
-								<h1 style="color: red; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Ошибка соединения с базой данных!</h1>
-								<style> #welcome{ display:none}</style>
-							{% endif %}
-					{% endfor %}
-					<input type="hidden" name="status" value="login">
-					<p><input class="field" type="text" name="username" placeholder="Псевдоним" autocomplete="off"/>
-					<p><input class="field" type="password" name="password" placeholder="Пароль" autocomplete="off"/>
-					<p><button id="submit" type=submit value=Вход>Вход</button>
-			</form>
-		</div>	
+			<div class="preloader-hide">
+				<div class="preloader-2">
+					<ul>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+					</ul>
+				</div>
+			</div>
+			<div class="container">
+				<form id="loginform" autocomplete="off" class="formlogin"action="" method="POST" >
+						<h1 id="welcome">Форма входа</h1>
+						{%for flash in get_flashed_messages() %}
+								{% if flash == 'badpass'%}
+									<h1 style="color: red; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Неверная комбинация!</h1>
+									<style> #welcome{ display:none}</style>
+								{% elif flash == 'baddb' %}	
+									<h1 style="color: red; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Ошибка соединения с базой данных!</h1>
+									<style> #welcome{ display:none}</style>
+								{% endif %}
+						{% endfor %}
+						<input type="hidden" name="status" value="login">
+						<p><input class="field" type="text" name="username" placeholder="Псевдоним" autocomplete="off"/>
+						<p><input class="field" type="password" name="password" placeholder="Пароль" autocomplete="off"/>
+						<p><button id="submit" type=submit value=Вход>Вход</button>
+				</form>
+			</div>	
 	</div>
 </body>
 </html>
