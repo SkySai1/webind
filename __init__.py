@@ -9,7 +9,7 @@ from flask_mysqldb import MySQL
 from jinja2 import TemplateNotFound
 from flask_sqlalchemy import SQLAlchemy
 
-#TПодключаем наш файл с функциями
+# Подключаем наш файл с функциями
 from backend.function import *
 from backend.dbcontrol import *
 from backend.sshjob import *
@@ -38,7 +38,7 @@ if os.path.exists('db.yaml'):
 		elif 'sqlite' in file['type']:
 			dbname = file['dbname']
 			dbpath = os.path.abspath(f"./bases/{dbname}.db")
-			app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///bases/{dbname}.db'
+			app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{dbpath}'
 		app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 		dbsql = SQLAlchemy(app)
 		dbsql.session.execute

@@ -38,8 +38,8 @@ def do_the_login(username,password,dbsql):
 		else:
 			return 'badpass'
 	except Exception as e:
+		return (str(e))
 		return ('baddb')
-		#return str(dbsql)
 
 #Функция вывода формы вход
 def show_the_login_form():
