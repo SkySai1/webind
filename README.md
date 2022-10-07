@@ -13,5 +13,7 @@ Required pip modules:
 	flask-sqlalchemy,
 	pyyaml,
 	paramiko,
+	psycopg2 (driver for PostgreSQL),
+	pymysql (driver for MySQL).
 	
 after download run into webind directory: python3 -m venv flask --upgrade
