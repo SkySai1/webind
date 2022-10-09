@@ -17,5 +17,4 @@ Required pip modules (normally its preloaded in this project):
 	pymysql (driver for MySQL).
 	
 After download you need to execute "reconfig.py" 
-to change path of pip3's python3 execute file, 
-also you may need to run "python3 -m venv flask --upgrade".
+to change path of pip3's python3 execute file.
