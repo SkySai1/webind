@@ -6,7 +6,7 @@ Required Packages:
   build-essential, 
   libpq-dev.
   
-Required pip modules:
+Required pip modules (normally its preloaded in this project):
 	wheel,
 	flask,
 	flask-mysqldb,
@@ -16,4 +16,6 @@ Required pip modules:
 	psycopg2 (driver for PostgreSQL),
 	pymysql (driver for MySQL).
 	
-after download run into webind directory: python3 -m venv flask --upgrade
+After download you need to execute "reconfig.py" 
+to change path of pip3's python3 execute file, 
+also you may need to run "python3 -m venv flask --upgrade".
