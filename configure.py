@@ -73,10 +73,11 @@ try:
     rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{pip[0]}", shell=True))
     rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{wheel[0]}", shell=True))
     rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install {thispath}/archive/*", shell=True))
-except:
+except Exception as e:
     print(f'''
 Unable to install modules, check the directory ./flask/
           ''')
+    print(e)
     exit()
     
 print('Configure was successfull! Now you can run webind.py')
