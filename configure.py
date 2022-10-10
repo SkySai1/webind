@@ -6,6 +6,17 @@ import shutil
 import subprocess
 from subprocess import PIPE
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    
 ### Поиск аткуальной версии python ###
 
 def finder(fname, pattern, path):
@@ -66,18 +77,46 @@ if rc != 0:
 print('Virtual environment was created success!')
 
 print('Installing python3\'s modules from ./archive')
-pip = finder('pip','',f'{thispath}/archive/')
-wheel = finder('wheel','',f'{thispath}/archive/')
-rc = []
-try:
-    rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{pip[0]}", shell=True))
-    rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{wheel[0]}", shell=True))
-    rc.append(subprocess.call(f"{thispath}/flask/bin/pip3 install {thispath}/archive/*", shell=True))
-except Exception as e:
-    print(f'''
-Unable to install modules, check the directory ./flask/
-          ''')
-    print(e)
-    exit()
+list = ['pip', 
+        'wheel', 
+        'bcrypt-4.0.1', 
+        'cffi-1.15.1', 
+        'SQLAlchemy-1.4.41',
+        'click-8.1.3',
+        'cryptography-38.0.1',
+        'MarkupSafe-2.1.1',
+        'PyYAML-6.0',
+        'Flask-2.2.2',
+        'Flask-MySQLdb-1.0.1',
+        'Flask_SQLAlchemy-3.0.0',
+        'greenlet-1.1.3',
+        'importlib_metadata-5.0.0',
+        'itsdangerous-2.1.2',
+        'Jinja2-3.1.2',
+        'mysqlclient-2.1.1',
+        'paramiko-2.11.0',
+        'psycopg2-2.9.4',
+        'pycparser-2.21',
+        'PyMySQL-1.0.2',
+        'PyNaCl-1.5.0',
+        'six-1.16.0',
+        'typing_extensions-4.4.0',
+        'Werkzeug-2.2.2',
+        'zipp-3.9.0']
+for string in list:
+    file = finder(string, '', f'{thispath}/archive/')
+    i=0
+    while True:
+        try:
+            mp = subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{file[i]}", shell=True)
+            if mp != 0: 
+                print(f'{bcolors.WARNING}Trying next:{bcolors.ENDC}')
+            else:
+                print(f'{bcolors.OKGREEN}Success!{bcolors.ENDC}')
+                break
+            i+=1
+        except Exception as e:
+            print(f'{bcolors.WARNING}Error with {string} try to install it from pypi.org{bcolors.ENDC}')
+            exit()
     
 print('Configure was successfull! Now you can run webind.py')
