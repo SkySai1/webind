@@ -106,6 +106,7 @@ list = ['pip',
 for string in list:
     file = finder(string, '', f'{thispath}/archive/')
     i=0
+    print(f'{bcolors.HEADER}Installing {string}{bcolors.ENDC}')
     while True:
         try:
             mp = subprocess.call(f"{thispath}/flask/bin/pip3 install --upgrade {thispath}/archive/{file[i]}", shell=True)
