@@ -35,8 +35,12 @@ def runcommand(cmd, args):
 	return result.stdout.decode('utf-8')
 
 thispath = os.path.abspath('./')
+if not os.path.exists(f'{thispath}/configure.py'):
+    print(f'{bcolors.WARNING} You need to change your current directory to webind\'s directory')
+    exit()
+
 if os.path.exists(f'{thispath}/flask/'):
-    print('It\'s seems you have some directory ./flask/,\n\
+    print(f'It\'s seems you have some directory {thispath}/flask/,\n\
 continue to execute the script will destroy all content in it,\n\
 are you ok with that?\n(y/n)')
     while True:
@@ -79,30 +83,30 @@ print('Virtual environment was created success!')
 print('Installing python3\'s modules from ./archive')
 list = ['pip', 
         'wheel', 
-        'bcrypt-4.0.1', 
-        'cffi-1.15.1', 
-        'SQLAlchemy-1.4.41',
-        'click-8.1.3',
-        'cryptography-38.0.1',
-        'MarkupSafe-2.1.1',
-        'PyYAML-6.0',
-        'Flask-2.2.2',
-        'Flask-MySQLdb-1.0.1',
-        'Flask_SQLAlchemy-3.0.0',
-        'greenlet-1.1.3',
-        'importlib_metadata-5.0.0',
-        'itsdangerous-2.1.2',
-        'Jinja2-3.1.2',
-        'mysqlclient-2.1.1',
-        'paramiko-2.11.0',
-        'psycopg2-2.9.4',
-        'pycparser-2.21',
-        'PyMySQL-1.0.2',
-        'PyNaCl-1.5.0',
-        'six-1.16.0',
-        'typing_extensions-4.4.0',
-        'Werkzeug-2.2.2',
-        'zipp-3.9.0']
+        'bcrypt', 
+        'cffi', 
+        'SQLAlchemy',
+        'click',
+        'cryptography',
+        'MarkupSafe',
+        'PyYAML',
+        'Werkzeug',
+        'Flask-2',
+        'Flask-MySQLdb',
+        'Flask_SQLAlchemy',
+        'greenlet',
+        'importlib_metadata',
+        'itsdangerous',
+        'Jinja2',
+        'mysqlclient',
+        'paramiko',
+        'psycopg2',
+        'pycparser',
+        'PyMySQL',
+        'PyNaCl',
+        'six',
+        'typing_extensions',
+        'zipp']
 for string in list:
     file = finder(string, '', f'{thispath}/archive/')
     i=0
@@ -113,11 +117,11 @@ for string in list:
             if mp != 0: 
                 print(f'{bcolors.WARNING}Trying next:{bcolors.ENDC}')
             else:
-                print(f'{bcolors.OKGREEN}Success!{bcolors.ENDC}')
+                print(f'{bcolors.OKGREEN}{string} is Success!{bcolors.ENDC}\n')
                 break
             i+=1
         except Exception as e:
             print(f'{bcolors.WARNING}Error with {string} try to install it from pypi.org{bcolors.ENDC}')
             exit()
     
-print('Configure was successfull! Now you can run webind.py')
+print(f'{bcolors.OKBLUE} Configure was successfull! Now you can run webind.py {bcolors.ENDC}')
