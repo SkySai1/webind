@@ -35,8 +35,12 @@ def runcommand(cmd, args):
 	return result.stdout.decode('utf-8')
 
 thispath = os.path.abspath('./')
+if not os.path.exists(f'{thispath}/configure.py'):
+    print(f'{bcolors.WARNING} You need to change your current directory to webind\'s directory')
+    exit()
+
 if os.path.exists(f'{thispath}/flask/'):
-    print('It\'s seems you have some directory ./flask/,\n\
+    print(f'It\'s seems you have some directory {thispath}/flask/,\n\
 continue to execute the script will destroy all content in it,\n\
 are you ok with that?\n(y/n)')
     while True:
