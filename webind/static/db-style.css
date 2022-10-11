@@ -1,0 +1,206 @@
+@font-face {
+    font-family: DTC;
+    src: url(./DTC.otf);
+  }
+body{
+    background: linear-gradient(45deg, #84afdb38, #2086c3);
+    height: max-content;
+    display: flex;
+    justify-content: center;
+}
+.page{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 95vw;
+    height: 95vh;
+}
+.container{
+    text-align: center;
+    display: inline-block;
+    position: relative;
+    width: auto;
+    height: auto;
+    background: linear-gradient(180deg, #2c69c587, #8cbfdf40);
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    box-shadow: 0px -0.5em 1em rgb(122 122 122 / 50%);
+}
+.container > h1{
+    display: flex;
+    justify-content: center;
+    color: #ffffff;
+    font-family: math;
+    font-size: x-large;
+}
+.selector{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 10em;
+}
+.button-1{
+    background: #6578bf6b;
+}
+.button-2{
+    background: #5defe86b;
+}
+.selector > button{
+    font-size: xx-large;
+    border-radius: 20px;
+    width: 7em;
+    border-style: none;
+    box-shadow: 2px 3px 0.2em rgb(32 33 34);
+    display: flex;
+    justify-content: center;
+    font-family: math;
+    margin: 0 1em 0 1em;
+}
+.button-1:hover{
+    background: #d1e4f16b;
+}
+.button-2:hover{
+    background: #cefffd6b;
+}
+
+.selector > button:active{
+    box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
+}
+.mysql{
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    margin-left: 0.5em;
+    background: linear-gradient(180deg, #5cb9cfd4, #d0e3f2);
+    border-radius: 15px;
+    max-height: 80vh;
+    min-width: 45vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: x-large;
+    box-shadow: 5px 7px 2em 0em #11202a8f;
+    overflow: auto;
+}
+.mysql > form{
+    margin-left: 1em;
+}
+.sql_header{
+    width: 100%;
+    text-align: center;
+}
+.sql_header > h1{
+    font-size: x-large;
+}
+.sqlite{
+    position: fixed;
+    z-index: 3;
+    right: 0;
+    margin-right: 0.5em;
+    background: linear-gradient(0deg, #5cb9cfd4, #d0e3f2);
+    border-radius: 15px;
+    max-height: 80vh;
+    min-width: 45vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: x-large;
+    box-shadow: 5px 7px 2em 0em #11202a8f;
+    overflow: auto;
+}
+.sqlite > form{
+    margin-left: 1em;
+}
+.tables{
+    font-size: x-large;
+}
+.dbinput, select{
+    font-size: x-large;
+    border-radius: 9px;
+    border: none;
+    background: linear-gradient(89deg, #ffffff, #7dc3d900);
+    margin-left: 1em;
+    width: 15em;
+}
+.dbinput:-webkit-autofill {
+    -webkit-box-shadow:0 0 0 50px rgba(81, 110, 163, 0.904) inset; /* можно изменить на любой вариант цвета */
+    -webkit-text-fill-color: rgba(148, 193, 230, 0.658);
+    font-size:x-large;
+}
+.newuser > h2{
+    font-size: x-large;
+}
+.sql_button{
+    font-size: xx-large;
+    border-radius: 20px;
+    width: 8em;
+    height: 1.5em;
+    border-style: none;
+    box-shadow: 2px 3px 0.2em rgb(32 33 34);
+    display: flex;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
+    background: #6578bf6b;
+    margin-top: 1em;
+    align-items: center;
+    font-family: math;
+    color: #0a1b3a;
+}
+.sql_button:hover{
+    background: #b5bfe2;
+    cursor: pointer;
+}
+.sql_button:active{
+    box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
+}
+.ask{
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: flex-start;
+}
+.ask > input {
+    margin-left: 1em;
+}
+
+.confirm{
+    position: absolute;
+    display: flex;
+    z-index: 2;
+    white-space: pre;
+    background: linear-gradient(180deg, #3476d9f2, #b48cdf);
+    border-radius: 25px;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 1em;
+    text-align: center;
+}
+#restart{
+    font-size: xx-large;
+    border-radius: 20px;
+    width: 8em;
+    height: 1.5em;
+    border-style: none;
+    box-shadow: 2px 3px 0.2em rgb(32 33 34);
+    display: flex;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
+    background: #6578bf6b;
+    margin-top: 1em;
+    align-items: center;
+    font-family: math;
+    color: #0a1b3a;
+}
+#restart:hover{
+    background: #b5bfe2;
+}
+#restart:active{
+    box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
+}
+.hidden {
+    display:none;
+}
