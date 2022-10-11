@@ -5,7 +5,6 @@ import re
 import shutil
 import subprocess
 from subprocess import PIPE
-from turtle import bgcolor
 
 class bcolors:
     HEADER = '\033[95m'
