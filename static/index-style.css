@@ -235,6 +235,7 @@ body{
   box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
 }
 
+
 .right_pannel{
   transition: 0.3s;
   background: linear-gradient(180deg, #a7d2df, #baf5ff00);
@@ -326,6 +327,9 @@ body{
   background: #ebc3c3;
 }
 #b-userdel:active{
+  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
+}
+#b-useradd:active{
   box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
 }
 #f-userfind{
