@@ -284,6 +284,7 @@ body{
   box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
 }
 
+
 .right_pannel{
   transition: 0.3s;
   background: linear-gradient(180deg, #a7d2df, #baf5ff00);
@@ -349,7 +350,6 @@ body{
 #b-userdel:hover{
   background: #ebc3c3;
 }
-
 /*Стилизация главной кнопки*/
 .buttonstyle{
   margin-top: -1.6em;
