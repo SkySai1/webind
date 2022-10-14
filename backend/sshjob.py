@@ -3,6 +3,7 @@ import socket
 import time
 import paramiko
 from flask import session, request
+from backend.dbcontrol import *
 
 def send_command(hostname, port, username, password, commandlist):
     #comment
@@ -32,26 +33,5 @@ def send_command(hostname, port, username, password, commandlist):
     return result
 
 
-def server_add(dbsql):
-    if 'superadmin' in session.get('role'):
-        try:
-            host = request.form['host']
-            port = request.form['port']
-            user = request.form['user']
-            passwd = request.form['pass']
-        except Exception as e:
-            return str(e)
-            #return 'serv_field_bad'
-        try:
-            #cmlist = ["python3","import os","print(str(os.access('/etc/bind/', os.W_OK)))"]
-            cmlist = ["named -V"]
-            result = send_command(host, port, user, passwd ,cmlist)
-            str = result[cmlist[0]].split(sep='\n')
-            for row in str:
-                if re.search(r'''named configuration''', row):
-                    nc = re.sub(r'\s*',"", row).split(sep=':')
-                    return nc[1]
-            return 'nothing'
-        except Exception as e:
-            return str(e)
-        
+
+

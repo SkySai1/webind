@@ -13,6 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from backend.function import *
 from backend.dbcontrol import *
 from backend.sshjob import *
+from backend.servcontrol import *
 
 #Создаём объект Flask
 app = Flask(__name__)
@@ -73,8 +74,8 @@ def index():
 				return user_delete(dbsql)
 			elif 'userfind' == request.form.get('status'):
 				return user_find(dbsql)
-			elif 'serveradd' == request.form.get('status'):
-				return server_add(dbsql)
+			elif 'server' == request.form.get('status'):
+				return server(dbsql)
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' not in session:
 			if  'login' == request.form.get('status'):

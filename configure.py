@@ -80,7 +80,7 @@ if rc != 0:
     exit()
 print('Virtual environment was created success!')
 
-print('Installing python3\'s modules from ./archive')
+print(f'Installing python3\'s modules from {thispath}/archive')
 list = ['pip', 
         'wheel', 
         'bcrypt', 
@@ -124,4 +124,4 @@ for string in list:
             print(f'{bcolors.WARNING}Error with {string} try to install it from pypi.org{bcolors.ENDC}')
             exit()
     
-print(f'{bcolors.OKBLUE} Configure was successfull! Now you can run webind.py {bcolors.ENDC}')
+print(f'{bcolors.OKBLUE}Configure was successfull! Now you can run webind.py {bcolors.ENDC}')
