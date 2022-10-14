@@ -1,3 +1,4 @@
+from email.policy import default
 import hashlib
 import secrets
 import string
@@ -9,11 +10,45 @@ from pkg_resources import require
 import yaml
 import os
 import json
-from sqlalchemy import Column, ForeignKey, Integer, String  
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+
+### Раздел описания сущностей БД 
+Base = declarative_base()
+ServersBase = declarative_base()
+ServBase = declarative_base()
+
+class NewUser(Base):  
+    __tablename__ = "users" 
+    
+    id = Column(Integer, primary_key=True)  
+    username = Column(String(255), nullable=False, unique=True)  
+    password = Column(String(255), nullable=False)  
+    role = Column(String(255))
+    email = Column(String(255))
+    def __repr__(self):
+        return f"Webind(id={self.id!r}, username={self.username!r}, password={self.password!r}, role={self.role!r})"
+
+class ServList(ServersBase):
+    __tablename__ = "server_list"
+    
+    id = Column(Integer, primary_key=True)
+    hostname = Column(String(255), nullable=False)
+    username = Column(String(255), nullable=False)
+    confpath = Column(String(255), nullable=False)
+    workdirectory = Column(String(255), nullable=False)
+    configured = Column(Boolean, default=False)
+    
+def dyntable(ServBase, tbname):
+	class Dynamic(ServBase):
+		__tablename__ = tbname
+		id = Column(Integer, primary_key=True)
+		config = Column(String(255), unique=True)
+		value = Column(String(255))
+	return Dynamic
 
 #Функция подключения к БД
 def connect_db(app):
@@ -31,25 +66,9 @@ def connect_db(app):
 			return False
 	return False
 
-Base = declarative_base()
-
-
-class NewUser(Base):  
-    __tablename__ = "users" 
-    
-    id = Column(Integer, primary_key=True)  
-    username = Column(String(255), nullable=False, unique=True)  
-    password = Column(String(255), nullable=False)  
-    role = Column(String(255))
-    #email = Column(String(255))
-    def __repr__(self):
-        return f"Webind(id={self.id!r}, username={self.username!r}, password={self.password!r}, role={self.role!r})"
-
-
 #Фукнкция создания БД sql lite
 def create_sqlite_db():
     try:
-        hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
         dbname = request.form['dbname']
         engine = create_engine(f'sqlite:///bases/{dbname}.db')
         engine.connect()
@@ -59,6 +78,9 @@ def create_sqlite_db():
             answer = cursor.execute("select * from users limit 1")
             result = answer.fetchone()
             if not result:
+                if not request.form.get('sauser') or not request.form.get('sapass'):
+                    return 'empty_login'
+                hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
                 with Session(engine) as session:
                     superadmin = NewUser(username=request.form['sauser'], password=hashpass, role="superadmin") 
                     session.add(superadmin) 
@@ -95,6 +117,8 @@ def create_sql_db():
             answer = cursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='users';")
             result = answer.fetchone()
             if not result:
+                if not request.form.get('sauser') or not request.form.get('sapass'):
+                    return 'empty_login'
                 try:
                     Base.metadata.create_all(engine)
                     username = request.form['sauser']
@@ -225,4 +249,19 @@ def user_find(dbsql):
             elif not request.form.get('username'): return 'empty_user'
             return request.form.get('username')
         except: return 'failure'
+    return 'failure'
+
+def server_insertdb(dbsql, hostname, user, confpath, wd):
+    if 'superadmin' in session.get('role'):
+        try:
+            engine = dbsql.get_engine()
+            ServersBase.metadata.create_all(engine)
+            with Session(engine) as ses:
+                serv = ServList(hostname=hostname, username=user, confpath=confpath, workdirectory=wd) 
+                ses.add(serv)
+                ses.commit()
+            return 'serv_add_success'
+        except Exception as e:
+            print(e)
+            return 'failure'
     return 'failure'

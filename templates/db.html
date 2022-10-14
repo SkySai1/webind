@@ -45,6 +45,9 @@
                             document.querySelector('.sqlite').classList.add('hidden');
                             document.querySelector('.container').classList.add('hidden');
                             break;
+                        case ('empty_login'): 
+                            alert('Ошибка, заполните поля создания администратора!');
+                            break;
                         case ('table_exist'): 
                             alert('Ошибка, таблица пользователей в данной БД уже существует!');
                             break;
@@ -188,6 +191,10 @@
                         <h2>Создание учетной записи суперадминистртора</h2>
                         <table class="tables">
                             <tr>
+                                <td>Адрес эл. почты:</td>
+                                <td><input class="dbinput" type="text" name="saemail"></td>
+                            </tr>
+                            <tr>
                                 <td>Псевдоним:</td>
                                 <td><input class="dbinput" type="text" name="sauser"></td>
                             </tr>
@@ -227,6 +234,10 @@
                 <div id="new-sqlite"class="newuser">
                     <h2>Создание учетной записи суперадминистртора</h2>
                     <table class="tables">
+                        <tr>
+                            <td>Адрес эл. почты:</td>
+                            <td><input class="dbinput" type="text" name="saemail"></td>
+                        </tr>
                         <tr>
                             <td>Псевдоним:</td>
                             <td><input class="dbinput" type="text" name="sauser"></td>

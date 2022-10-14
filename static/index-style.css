@@ -17,6 +17,7 @@ body{
 .row{
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
 }
 .content{
   position: fixed;
@@ -136,6 +137,10 @@ body{
   font-family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
   margin: 0;
 }
+.rh_block > div > p{
+  white-space: pre-wrap;
+  font-size: large;
+}
 .common_btn{
   font-size: large;
   border-radius: 5px;
@@ -186,6 +191,7 @@ body{
   align-items: center;
   flex-direction: column;;
   border: outset;
+  margin-bottom: 2em;
 }
 .menu_front > div > h2 {
   margin: -0.6em 0 0 0;
@@ -193,14 +199,14 @@ body{
   z-index: 4;
   border-radius: 5px;
 }
-.users_control{
+.sa_controls{
   border-color: #7d16ef;
 }
-.users_control > h2{
+.sa_controls > h2{
   color: #8021e9;
   box-shadow: 0em 0em 0.3em #7e00ff;
 }
-.users_control > div{
+.sa_controls > div{
   height: 2.4em;
   width: 23em;
   padding: 0.5em 1em;
@@ -213,7 +219,7 @@ body{
 .sa_button{
   font-size: large;
   border-radius: 5px;
-  width: 6em;
+  min-width: 6em;
   height: 1.5em;
   border-style: none;
   box-shadow: 2px 3px 0.2em rgb(32 33 34);
@@ -233,6 +239,49 @@ body{
 }
 .sa_button:active{
   box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
+}
+.sa_minibutton{
+  min-width: 6em;
+  height: 1.5em;
+  border-style: none;
+  display: flex;
+  justify-content: center;
+  background: #9c65bf6b;
+  align-items: center;
+  font-family: math;
+  color: #0a1b3a;
+  margin: 0.4em auto 0 auto;
+  font-size: x-large;
+  border-radius: 0;
+  box-shadow: 0px 0px 0.1em rgb(32 33 34);
+}
+
+.sa_minibutton:hover{
+  background: #b5bfe2;
+  cursor: pointer;
+}
+
+.sa_minibutton:active{
+  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
+}
+
+.minibutton{
+  height: 1.5em;
+  border-style: none;
+  justify-content: center;
+  background: #f8f8f894;
+  font-family: math;
+  color: #0a1b3a;
+  margin: 0.4em auto 0 auto;
+  font-size: x-large;
+  border-radius: 0;
+  box-shadow: 0px 0px 0.1em rgb(32 33 34);
+}
+.minibutton:hover{
+  background: #f8f8f8;
+}
+.minibutton:active{
+  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
 }
 
 
@@ -275,67 +324,32 @@ body{
   font-size: large;
   font-family: system-ui;
 }
+.right_input{
+  font-size: x-large;
+  border-radius: 5px;
+  background: linear-gradient(89deg, #ffffff, #7dc3d9bd);
+  width: 15em;
+  margin-bottom: 0.2em;
+  border-width: 0.01em;
+}
+.right_select{
+  font-size: x-large;
+  border-radius: 5px;
+  background: linear-gradient(89deg, #ffffff, #7dc3d9bd);
+  max-width: 15vw;
+  margin-bottom: 0.2em;
+  border-width: 0.01em;
+}
 .sah2{
   margin-top: 0;
   color: #47187a;
 }
-#f-useradd > form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-#f-useradd > form > div{
-  width: 21em;
-  display: flex;
-  flex-direction: row;
-}
-
-#f-useradd > form > div > input {
-  display: inherit;
-}
-#f-useradd > form > div > select {
-  width: 100%;
-}
-#f-useradd > form > div > button {
-  width: 100%;
-}
-#f-useradd > form > button {
-  margin: 0.4em auto 0 auto;
-  font-size: large;
-  border-radius: 0;
-  box-shadow: 0px 0px 0.1em rgb(32 33 34);
-}
-
-#b-userchange {
-  margin: 0.4em auto 0 auto;
-  font-size: large;
-  border-radius: 0;
-  box-shadow: 0px 0px 0.1em rgb(32 33 34);
-}
-#b-userchange:active{
-  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
-}
 #b-userdel{
-  margin: 0.4em auto 0 auto;
   background: #f59c9c;
-  font-size: large;
-  border-radius: 0;
-  box-shadow: 0px 0px 0.1em rgb(32 33 34);
 }
 #b-userdel:hover{
   background: #ebc3c3;
 }
-#b-userdel:active{
-  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
-}
-#b-useradd:active{
-  box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
-}
-#f-userfind{
-  
-}
-
 /*Стилизация главной кнопки*/
 .buttonstyle{
   margin-top: -1.6em;

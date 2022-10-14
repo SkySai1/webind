@@ -50,6 +50,7 @@
 			  })
 			  .fail(function(){
 				alert('Внутрення ошибка, перезагрузите страницу!');
+				console.log(data);
 			  })		
 		};
 
@@ -65,22 +66,18 @@
 	{#  Скрипт отправки формы: #}
 	<script>
 		function form_submit(form){
-			//$(document).ready(function(){
-				//$(form).submit(function (e){
-					$.ajax({
-					url:'{{url_for("index")}}',
-					method: 'POST',
-					dataType: 'html',
-					data: $(form).serialize()
-					})
-					.done(function(data) {
-						responce_handler(data);
-					})
-					.fail(function(){
-						alert('Внутрення ошибка, перезагрузите страницу!');
-					});
-				//});
-			//});
+			$.ajax({
+			url:'{{url_for("index")}}',
+			method: 'POST',
+			dataType: 'html',
+			data: $(form).serialize()
+			})
+			.done(function(data) {
+				responce_handler(data);
+			})
+			.fail(function(){
+				alert('Внутрення ошибка, перезагрузите страницу!');
+			});
 		};
 	</script>
 
@@ -176,6 +173,33 @@
 	</script>
 	{% endif %}
 
+	{#	Скрипты управления серверами (суперадмин) #}
+	{% if session['role'] == 'superadmin' %}
+	<script>
+		function form_serv_submit(form){
+			$('.preloader-hide').addClass('preloader-active');
+			clearTimeout(window.vanish);
+			$.ajax({
+			url:'{{url_for("index")}}',
+			method: 'POST',
+			dataType: 'html',
+			data: $(form).serialize()
+			})
+			.done(function(data) {
+				responce_handler(data);
+				$('.preloader-hide').addClass('opacity');
+				window.vanish = setTimeout(function(){
+					$('.preloader-hide').removeClass('preloader-active');
+					$('.preloader-hide').removeClass('opacity');
+				},500);
+			})
+			.fail(function(){
+				alert('Внутрення ошибка, перезагрузите страницу!');
+			});
+		};
+	</script>
+	{% endif %}
+
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script>
 		function rmi(color, text) {
@@ -188,7 +212,14 @@
 			},2000);
 			
 		};
-
+		function big_message(color, text, advise) {
+			$('.rh_block').removeClass('hidden');
+			$('#rh_message').text('');
+			$('#rh_info').text('');
+			$('#rh_message').css({'color' : color});
+			$('#rh_message').text(text);
+			$('#rh_info').text(advise);
+		};
 		function responce_handler(data){
 			/* Блок реакций функций управления пользвотаелей*/
 			switch(data) {
@@ -226,16 +257,19 @@
 					get_user_list('#userlist-on-ch');
 					$('#change-username').val('');
 					break;
+				/* Реакция на управление пользователей */
+				case ('serv_add_success'):
+					big_message('green', 'Сервер успешно подключен!', 'Настройте его на стартовом экране');
+					break;
+				case ('serv_add_permission_bad'):
+					big_message('#b99223', 'Ошибка добавления сервера, но подключение доступно!','Нет необходимых прав для учетной записи, от имени которой происходит подключение.\nПроверьте, рекурсивно, права на чтение, запись для файла конфиуграции "named.conf" и его директории.\nУзнать месторасположение можно через "named -V".\nИзменить права через "chmod"');
+					break;
 				/* Общие события */
 				case ('failure'):
-					$('.rh_block').removeClass('hidden');
-					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Ошибка выполнения функции!');
+					big_message('red', 'Ошибка выполнения функции!')
 					break;
 				case ('bad_role'):
-					$('.rh_block').removeClass('hidden');
-					$('#rh_message').css({'color' : 'red'});
-					$('#rh_message').text('Ошибка при прямом обращении к роли!');
+					big_message('red', 'Ошибка при прямом обращении к роли!')
 					break;
 				default:
 					alert(data);
@@ -342,12 +376,43 @@
 				</div>
 			</div>
 			<div class="mainmenu hidden">
+				<div class="preloader-hide">
+					<div class="preloader-2">
+						<ul>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+							<li></li>
+						</ul>
+					</div>
+				</div>
 				<div class="left_pannel">
 					<div class="menu_header">
 					</div>
 					<div class="menu_front">
 						{% if session['role'] == 'superadmin' %}
-							<div class="users_control">
+							<div class="sa_controls">
 								<h2 class="sah2">Управление пользователями</h2>
 								<div>
 									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
@@ -356,40 +421,17 @@
 								</div>
 							</div>
 						{% endif %}
+						{% if session['role'] == 'superadmin' %}
+							<div class="sa_controls">
+								<h2 class="sah2">Управление серверами</h2>
+								<div>
+									<button class="sa_button" onclick="rightshow('#server-add')">Подключиться к серверу</button>
+								</div>
+							</div>
+						{% endif %}
 					</div>
 				</div>
 				<div class="right_pannel hidden">
-					<div class="preloader-hide">
-						<div class="preloader-2">
-							<ul>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-								<li></li>
-							</ul>
-						</div>
-					</div>
 					<div class="right_pannel_header">
 						<p class="right_pannel_message_info hidden"></p>
 						<button onclick="rightclose()">
@@ -404,31 +446,28 @@
 					</div>
 					{#		Окно управления пользователями для роли суперадмина:		#}
 					{% if session['role'] == 'superadmin' %}
-
-						{# ДОБАВЛЕНИЕ ЮЗЕРА #}
-
+					{# ДОБАВЛЕНИЕ ЮЗЕРА #}
 					<div id="f-useradd" class="el_right_pannel column hidden">
 						<h2 class="sah2">Добавить пользователя</h2>							
-						<form class="form" id="usercreate-form">
+						<form class="form column" id="usercreate-form" style="align-items: flex-start;">
 							<input type="hidden" name="status" value="useradd">
-							<div>
-								<input type="text" name="username" placeholder="Псевдоним">
-								<select name="role">
+							<div class="column" >
+								<input class="right_input" type="text" name="username" placeholder="Псевдоним">
+								<select style="width: 15.3em;" class="right_input" name="role">
 									<option value="user">Пользователь</option>
 									<option value="admin">Администратор</option>
 									<option value="superadmin">Суперадминистратор</option>
 								</select>
 							</div>
 							<div>
-								<input id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-								<button type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
+								<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
+								<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
 							</div>
-							<button id='b-useradd'class="sa_button" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
+							<button id='b-useradd'class="sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 						</form>
 					</div>
 
-						{# ИЗМЕНЕНИЕ ЮЗЕРА #}
-
+					{# ИЗМЕНЕНИЕ ЮЗЕРА #}
 					<div id="f-userchange" class="el_right_pannel column hidden">
 						<h2 class="sah2">Изменить данные пользователя</h2>
 						<div class="column">
@@ -436,24 +475,24 @@
 								<input type="hidden" name="status" value="userchange">
 								<input type="hidden" name="action" value="change">
 								<div>
-									<select id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
+									<select class="right_select" style="width: auto;" id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
 									</select>
 								</div>
 								<div class="column">
 									<div>
-										<input id="change-username" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
+										<input style="width: 16em" class="right_input" id="change-username" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
 										<div>
 											<input type="checkbox" name="isnewpasswd">
-											<input id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
-											<button type="button" onclick="randpass('#usrpasschange')">Сгенерировать</button>
+											<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
+											<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasschange')">Сгенерировать</button>
 										</div>
 										<div>
 											<input type="checkbox" name="isnewusername">
-											<input name="newusername" placeholder="Новый псевдоним"type="text">
+											<input class="right_input" name="newusername" placeholder="Новый псевдоним"type="text">
 										</div>
 										<div>
 											<input type="checkbox" name="isnewrole">
-											<select name="newrole">
+											<select style="width: 15.3em" class="right_input" name="newrole">
 												<option value="user">Пользователь</option>
 												<option value="admin">Администратор</option>
 												<option value="superadmin">Суперадминистратор</option>
@@ -467,49 +506,46 @@
 									<input id="username-fordel" type="hidden" name="username" value="test">
 								</form>
 								<div class="row">
-									<button style="margin-right: 1em;" form="userchange-form" class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
-									<button style="margin-left: 1em;" form="userdel-form"class="sa_button" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+									<button style="margin-right: 1em;" form="userchange-form" class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
+									<button style="margin-left: 1em;" form="userdel-form"class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
 								</div>
 							</div>
 						</div>	
 					</div>				
-
 					{# НАЙТИ ЮЗЕРА #}
-
 					<div id="f-userfind" class="el_right_pannel column hidden">
 						<h2 class="sah2">Подробная информация</h2>
 						<form class="form">
 						<input type="hidden" name="status" value="userfind">
 							<div class="row">
-								<select id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
+								<select class="right_select" id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
 								</select>
 								<div>
-									<input id="find-username" onkeydown="user_list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
-									<button class="sa_button" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
+									<input class="right_input" id="find-username" onkeydown="user_list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
+									<button class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
 								</div>
 							</div>
 						</form>
 					</div>
 					{% endif %}
-				</div>
-			</div>
-			<div class="server_panel">
-				{% if session['role'] == 'superadmin' %}
-					<div>
-						<button onclick="changer('#server-add')">Подключиться к серверу</button>
-					</div>
-					<div class="hidden" id="server-add">
-						<form class="form">
-							<input type="hidden" name="status" value="serveradd">
-							<input type="text" name="host" placeholder="Адрес">
-							<input type="text" name="port" placeholder="Порт" value="22">
-							<input type="text" name="user" placeholder="Имя пользователя">
-							<input type="text" name="pass" placeholder="Пароль">
-							<button type="button" onclick="form_submit(this.form)">Подключиться</button>
-						</form>
 
+					{#		Окно управления серверами для роли суперадмина:		#}
+					{% if session['role'] == 'superadmin' %}
+					{# ДОБАВЛЕНИЕ СЕРВЕРА #}
+					<div class="el_right_pannel column hidden" id="server-add">
+						<h2 class="sah2">Добавить сервер</h2>	
+						<form class="form column">
+							<input type="hidden" name="status" value="server">
+							<input type="hidden" name="action" value="serveradd">
+							<input class="right_input" type="text" name="host" placeholder="Адрес">
+							<input class="right_input" type="text" name="port" placeholder="Порт" value="22">
+							<input class="right_input" type="text" name="user" placeholder="Имя пользователя">
+							<input class="right_input" type="text" name="pass" placeholder="Пароль">
+							<button class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)">Подключиться</button>
+						</form>
 					</div>
-				{% endif %}
+					{% endif %}
+				</div>
 			</div>
 		</div>
 	</div>
