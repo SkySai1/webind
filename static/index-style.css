@@ -105,7 +105,6 @@ body{
 }
 .logout-svg:hover{
   background: radial-gradient(#f7f01a99, #b9e8fc);
-  cursor: pointer;
 }
 
 .front{
