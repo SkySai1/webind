@@ -43,7 +43,15 @@ def serveradd(dbsql):
                 status = row
                 break
         if 'True' in status:
-            return server_insertdb(dbsql,host,user,ncf[1], wd)
+            cmlist = ["hostnamectl"]
+            result = send_command(host, port, user, passwd ,cmlist)
+            string = result[cmlist[0]].split(sep='\n')
+            for row in string:
+                if re.search(r'''Machine ID''', row):
+                    mid = re.sub(r'\s*',"", row).split(sep=':')
+                    break
+            mid_hash = hashlib.sha1(mid[1].encode()).hexdigest()
+            return server_insertdb(dbsql,host,mid_hash,user,ncf[1], wd)
         elif 'False' in status:
             return 'serv_add_permission_bad'
         return 'nothing'

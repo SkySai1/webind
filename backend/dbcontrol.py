@@ -1,5 +1,6 @@
 from email.policy import default
 import hashlib
+import re
 import secrets
 import string
 from flask import request, render_template, session, flash
@@ -37,6 +38,7 @@ class ServList(ServersBase):
     
     id = Column(Integer, primary_key=True)
     hostname = Column(String(255), nullable=False)
+    machine_id = Column(String(255), nullable=False, unique=True)
     username = Column(String(255), nullable=False)
     confpath = Column(String(255), nullable=False)
     workdirectory = Column(String(255), nullable=False)
@@ -251,17 +253,18 @@ def user_find(dbsql):
         except: return 'failure'
     return 'failure'
 
-def server_insertdb(dbsql, hostname, user, confpath, wd):
+def server_insertdb(dbsql, hostname, mid, user, confpath, wd):
     if 'superadmin' in session.get('role'):
         try:
             engine = dbsql.get_engine()
             ServersBase.metadata.create_all(engine)
             with Session(engine) as ses:
-                serv = ServList(hostname=hostname, username=user, confpath=confpath, workdirectory=wd) 
+                serv = ServList(hostname=hostname, machine_id=mid, username=user, confpath=confpath, workdirectory=wd) 
                 ses.add(serv)
                 ses.commit()
             return 'serv_add_success'
         except Exception as e:
             print(e)
+            if re.search('already exists', str(e)): return 'serv_exist'
             return 'failure'
     return 'failure'

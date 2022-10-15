@@ -16,268 +16,21 @@
 
 	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
 	{#	Общие функциональные скрипты #}
-	<script>
-        $(document).ready(function(){
-			window.vanish = '';
-		});
-		function f(){
-			$('.square').toggleClass('move-left');
-		
-			var elrp = $('.el_right_pannel');
-			for (var i = 0; i < elrp.length; i++) {
-				if (!$(elrp[i]).hasClass('hidden')) {
-					var flag = true;
-					break;
-				};
-			};
-			if (flag == true) {
-				$('.square2').toggleClass('move-right');
-			} else {
-				$('.square2').removeClass('move-right');
-			};
-			document.querySelector('.mainmenu').classList.toggle("hidden");
-		};
-		function logout(){
-			var dt = {status: 'logout'};
-			$.ajax({
-				type: 'POST',
-				url: "{{url_for('index')}}",
-				data: dt,
-				dataType: 'html'
-			  })
-			  .done(function(data){
-				location.reload();
-			  })
-			  .fail(function(){
-				alert('Внутрення ошибка, перезагрузите страницу!');
-				console.log(data);
-			  })		
-		};
-
-		function cls(el){
-			$(el).addClass("hidden");
-		};
-
-		function changer(el){
-			$(el).toggleClass("hidden")
-		}
-    </script>
-	
+	<script defer src="../static/js/default.js"></script>
 	{#  Скрипт отправки формы: #}
-	<script>
-		function form_submit(form){
-			$.ajax({
-			url:'{{url_for("index")}}',
-			method: 'POST',
-			dataType: 'html',
-			data: $(form).serialize()
-			})
-			.done(function(data) {
-				responce_handler(data);
-			})
-			.fail(function(){
-				alert('Внутрення ошибка, перезагрузите страницу!');
-			});
-		};
-	</script>
-
-
+	<script defer src="../static/js/sendform.js"></script>
 	{#	Скрипты отображения всплывающего меню	 #}
-	<script>
-		function rightshow(id){
-			$('.right_pannel_message_info').addClass('hidden');
-			$('.right_pannel').removeClass('hidden');
-			$('.el_right_pannel').addClass('hidden');
-			$('.square2').addClass('move-right');
-			//alert(id)
-			$(id).removeClass('hidden');
-		};
-		function rightclose(){
-			$('.right_pannel').addClass('hidden');
-			$('.el_right_pannel').addClass('hidden');
-			$('.square2').removeClass('move-right');
-		};
-	</script>
-
+	<script defer src="../static/js/info.js"></script>
 	{#	Скрипты управления пользователями (суперадмин) #}
 	{% if session['role'] == 'superadmin' %}
-	<script>
-		function randpass(el){
-			var length = 8,
-			charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-			retVal = "";
-			for (var i = 0, n = charset.length; i < length; ++i) {
-			retVal += charset.charAt(Math.floor(Math.random() * n));
-			};
-			$(el).val(retVal);
-		};
-		function changeuname(input, value){
-			$(input).val(value);
-		};
-		function user_list_filter(input, userlist) {
-			$(input).on('keyup', function() {
-			  var filter = $(this).val().toLowerCase();
-			  $('option').each(function() {
-				var text = $(this).text().toLowerCase();
-				//if ($(this).text().includes(filter)) {
-				if (text.includes(filter)){
-					$(this).show();
-				} else {
-				  $(this).hide();
-				}
-				$(userlist).val(filter);
-			  })
-			})
-		  };
-		  function get_user_list(to_listbox){
-			$('.preloader-hide').addClass('preloader-active');
-			clearTimeout(window.vanish);
-			dt = {'status' : 'userfind', 'action' : 'getuserlist'};
-			$.ajax({
-				url:'{{url_for("index")}}',
-				method: 'POST',
-				dataType: 'html',
-				data: dt
-				})
-				.done (function(data){
-					$(to_listbox).empty();
-					var json = JSON.parse(data)
-					if (Object.keys(json.usernames).length > 10) {i = 10}
-					else { i = Object.keys(json.usernames).length};
-					$(to_listbox).attr('size', i);
-					for (var key in json.usernames) {
-						$(to_listbox).append(function () {
-							return $('<option>', {text: json.usernames[key]});
-						});
-					};
-					$('.preloader-hide').addClass('opacity');
-					window.vanish = setTimeout(function(){
-						$('.preloader-hide').removeClass('preloader-active');
-						$('.preloader-hide').removeClass('opacity');
-					},500);
-				})
-				.fail (function(){
-
-				});
-		};
-		function userdel(form){
-			newval = $('#change-username').val();
-			if (!newval) {responce_handler('empty_user')}
-			else{
-				$('#username-fordel').val(newval);
-				if (confirm('Потвердите удаление пользователя - '+newval)) { 
-					form_submit(form);
-				};
-			};
-		}
-	</script>
+		<script defer src="../static/js/usercontrol.js"></script>
 	{% endif %}
-
 	{#	Скрипты управления серверами (суперадмин) #}
 	{% if session['role'] == 'superadmin' %}
-	<script>
-		function form_serv_submit(form){
-			$('.preloader-hide').addClass('preloader-active');
-			clearTimeout(window.vanish);
-			$.ajax({
-			url:'{{url_for("index")}}',
-			method: 'POST',
-			dataType: 'html',
-			data: $(form).serialize()
-			})
-			.done(function(data) {
-				responce_handler(data);
-				$('.preloader-hide').addClass('opacity');
-				window.vanish = setTimeout(function(){
-					$('.preloader-hide').removeClass('preloader-active');
-					$('.preloader-hide').removeClass('opacity');
-				},500);
-			})
-			.fail(function(){
-				alert('Внутрення ошибка, перезагрузите страницу!');
-			});
-		};
-	</script>
+		<script defer src="../static/js/servcontrol.js"></script>
 	{% endif %}
-
 	{#  Скрипт - Обрабочтик овтетов:  #}
-	<script>
-		function rmi(color, text) {
-			$('.right_pannel_message_info').removeClass('hidden')
-			clearTimeout(window.vanish);
-			$('.right_pannel_message_info').css({'color' : color});
-			$('.right_pannel_message_info').text(text);
-			window.vanish = setTimeout( function(){
-				$('.right_pannel_message_info').addClass('hidden');
-			},2000);
-			
-		};
-		function big_message(color, text, advise) {
-			$('.rh_block').removeClass('hidden');
-			$('#rh_message').text('');
-			$('#rh_info').text('');
-			$('#rh_message').css({'color' : color});
-			$('#rh_message').text(text);
-			$('#rh_info').text(advise);
-		};
-		function responce_handler(data){
-			/* Блок реакций функций управления пользвотаелей*/
-			switch(data) {
-				case ('empty_login'):
-					rmi('red', 'Введите псевдоним и пароль!');
-					break;
-				case ('add_sucess'):
-					rmi('green', 'Пользователь успешно создан!');
-					break;
-				case ('user_exist'):
-					rmi('red', 'Ошибка, пользователь существует!');
-					break;
-				case ('empty_user'):
-					rmi('red', 'Выберете пользователя!');
-					break;
-				case ('sa_block'):
-					rmi('red', 'Запрещено изменять данные первого суперадмина!');
-					break;
-				case ('bad_username'):
-					rmi('red', 'Пользователь не найден!')
-					break;
-				case ('empty_field'):
-					rmi('red', 'Заполните все отмеченные поля!');
-					break;
-				case ('change_success'):
-					rmi('green', 'Данные пользователя успешно изменены!');
-					get_user_list('#userlist-on-ch');
-					$('#change-username').val('');
-					break;
-				case ('nothing_change'):
-					rmi('red', 'Необходимо отметить поля для изменения!');
-					break;
-				case ('userdel_success'):
-					rmi('green', 'Пользователь успешно удалён!');
-					get_user_list('#userlist-on-ch');
-					$('#change-username').val('');
-					break;
-				/* Реакция на управление пользователей */
-				case ('serv_add_success'):
-					big_message('green', 'Сервер успешно подключен!', 'Настройте его на стартовом экране');
-					break;
-				case ('serv_add_permission_bad'):
-					big_message('#b99223', 'Ошибка добавления сервера, но подключение доступно!','Нет необходимых прав для учетной записи, от имени которой происходит подключение.\nПроверьте, рекурсивно, права на чтение, запись для файла конфиуграции "named.conf" и его директории.\nУзнать месторасположение можно через "named -V".\nИзменить права через "chmod"');
-					break;
-				/* Общие события */
-				case ('failure'):
-					big_message('red', 'Ошибка выполнения функции!')
-					break;
-				case ('bad_role'):
-					big_message('red', 'Ошибка при прямом обращении к роли!')
-					break;
-				default:
-					alert(data);
-					break;
-			};
-		};
-
-	</script>
+	<script defer src="../static/js/handler.js"></script>
 </head>
 <body>
 	<div class="content">
@@ -289,9 +42,9 @@
 				{% elif session['role'] == 'admin' %}
 					<h2 class="first-mode">Администратор</h2>
 				{% else %}
-					<h2 class="second-mode">Пользователь - {{ session['username'] }}</h2>
+					<h2 class="second-mode">Пользователь</h2>
 				{% endif %}
-				<p>{{config.get('version')}} - {{config.get('hostname')}}</p>
+				<p>{{ session['username'] }}</p>
 			</div>
 			<div class="center_block">
 				<button id="menu_button" onclick="f()">
