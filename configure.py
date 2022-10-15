@@ -75,7 +75,7 @@ if rc != 0:
     print('''
           Failure with creating virtual environemnt,
           you need to ensure you have installed package - python3-venv (with your choosen version of python).
-          Or you can create virtual environment manually through "python3 -m venv flask" and re-execute this script.
+          Also you can create virtual environment manually through "python3 -m venv flask" and re-execute this script.
           ''')
     exit()
 print('Virtual environment was created success!')
