@@ -1,7 +1,7 @@
 # webind
 Supported version:
-    -x86_64 python3.7+
-    -aarch64 python3.6.9+
+- x86_64, python3.7+
+- aarch64, python3.6.9+
 
 Required Packages: python3-venv, python3-pip, python3-dev, default-libmysqlclient-dev, build-essential, libpq-dev.
 
