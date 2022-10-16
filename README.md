@@ -6,7 +6,6 @@ Supported version:
 Required Packages: 
 - python3-venv, 
 - python3-pip, 
-- python3-dev, 
 - default-libmysqlclient-dev, 
 - build-essential, 
 - libpq-dev.
