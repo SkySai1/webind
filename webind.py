@@ -79,10 +79,9 @@ def index():
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' not in session:
 			if  'login' == request.form.get('status'):
-				if 'username' in request.form and 'password' in request.form:
-					return do_the_login(request.form['username'],request.form['password'],dbsql)
+				return do_the_login(dbsql)
 		#Блок: Гет-запрос, ДБ настроена, Вход НЕ произведён
-		elif dbsql and 'loggedin' not in session:
+		elif 'GET' in request.method and dbsql and 'loggedin' not in session:
 			return show_the_login_form()
 		#Блок: Гет-запрос, ДБ НЕ настроена, Вход НЕ произведён
 		elif 'GET' in request.method and not dbsql and 'loggedin' not in session:

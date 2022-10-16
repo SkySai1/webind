@@ -16,30 +16,28 @@ from subprocess import PIPE
 def restart():
 	os.execv(sys.argv[0], sys.argv)
 
-#Login
-#Функция осуществления входа, получаем на приём - логин, пароль и объект инициализированной базы данных
-def do_the_login(username,password,dbsql):
-	#Испольуем объект cursor который позволяет выполнять команды MySQL
-	#MySQLdb.cursors.DictCursor - обязательная опция для правильного формата ответа
-	try:
-		query = dbsql.session()
-		#Выполняем саму команду
-		pass_hash = hashlib.sha1(password.encode()).hexdigest()
-		answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
-		account = None
-		for row in answer: account = row
-		if account:
-			#Создаим сессионные пременные на основе данных из вывода MySQL
-			session['loggedin'] = True
-			session['id'] = account['id']
-			session['username'] = account['username']
-			session['role'] = account['role']
-			return 'ok'
-		else:
-			return 'badpass'
-	except Exception as e:
-		return (str(e))
-		return ('baddb')
+def do_the_login(dbsql):
+	if request.form.get('username') and request.form.get('password'):
+		try:
+			password=request.form['password']
+			username=request.form['username']
+			query = dbsql.session()
+			pass_hash = hashlib.sha1(password.encode()).hexdigest()
+			answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
+			account = None
+			for row in answer: account = row
+			if account:
+				session['loggedin'] = True
+				session['id'] = account['id']
+				session['username'] = account['username']
+				session['role'] = account['role']
+				return 'ok'
+			else:
+				return 'badpass'
+		except Exception as e:
+			print (str(e))
+			return 'baddb'
+	return 'empty_login'
 
 #Функция вывода формы вход
 def show_the_login_form():

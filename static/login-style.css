@@ -19,7 +19,6 @@
 }
 body {
     background: linear-gradient(45deg, #84afdb38, #2086c3);
-    height: 90vh;
     position: relative;
     display: flex;
     align-items: center;
