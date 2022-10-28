@@ -14,7 +14,7 @@ import json
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 ### Раздел описания сущностей БД 
@@ -268,3 +268,17 @@ def server_insertdb(dbsql, hostname, mid, user, confpath, wd):
             if re.search('already exists', str(e)): return 'serv_exist'
             return 'failure'
     return 'failure'
+
+def servlistquery(dbsql):
+    try:
+        engine = dbsql.get_engine()
+        stmt = select(ServList)
+        #print(stmt)
+        servs = []
+        with engine.connect() as ses:
+            for row in ses.execute(stmt):
+                myjson = {"id":row[0], "hostname":row[1], "configured":row[6]}
+                servs.append(myjson)
+        return json.dumps(servs)
+    except Exception as e:
+        return e

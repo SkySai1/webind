@@ -162,6 +162,30 @@ body{
 .common_btn:active{
   box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
 }
+
+#servlist{
+  overflow: auto;
+  max-height: 80vh;
+  width: 10vw;
+}
+#servlist > div
+{
+  margin-bottom: 1em;
+  border: outset;
+}
+#servlist > div > h3
+{
+  margin: 0;
+}
+
+#servlist > div > a
+{
+
+}
+
+
+
+
 /*Открывающиеся меню*/
 .mainmenu{
   display: flex;

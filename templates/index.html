@@ -70,6 +70,7 @@
 			</div>
 		</div>
 		<div class="front">
+
 			<div class="rh_block hidden">
 				<div>
 					<h1 id="rh_message"></h1>
@@ -77,6 +78,7 @@
 					<button class="common_btn" onclick="cls('.rh_block')">Закрыть</button>
 				</div>
 			</div>
+
 			<div class="mainmenu hidden">
 				<div class="preloader-hide">
 					<div class="preloader-2">
@@ -249,6 +251,12 @@
 					{% endif %}
 				</div>
 			</div>
+
+			{% if session['role'] == 'superadmin' or session['role'] == 'sadmin'%}
+				<div>
+					<div id="servlist" class="Column"></div>
+				</div>
+			{% endif %}
 		</div>
 	</div>
 </body>
