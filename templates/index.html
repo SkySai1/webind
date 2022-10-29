@@ -15,22 +15,40 @@
 	<meta name="theme-color" content="#ffffff">
 
 	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+	{# Скрипты уровня document, по ролям #}
+	{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+		<script defer src="../static/js/doc-admins.js"></script>
+	{% elif session['role'] == 'user' %}
+		<script defer src="../static/js/doc-users.js"></script>
+	{% endif %}
+
 	{#	Общие функциональные скрипты #}
 	<script defer src="../static/js/default.js"></script>
+
 	{#  Скрипт отправки формы: #}
 	<script defer src="../static/js/sendform.js"></script>
+
 	{#	Скрипты отображения всплывающего меню	 #}
 	<script defer src="../static/js/info.js"></script>
+
 	{#	Скрипты управления пользователями (суперадмин) #}
 	{% if session['role'] == 'superadmin' %}
 		<script defer src="../static/js/usercontrol.js"></script>
 	{% endif %}
+
 	{#	Скрипты управления серверами (суперадмин) #}
 	{% if session['role'] == 'superadmin' %}
 		<script defer src="../static/js/servcontrol.js"></script>
 	{% endif %}
+
+	{#	Скрипты отображения серверов (админ) #}
+	{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+		<script defer src="../static/js/servlist.js"></script>
+	{% endif %}
+
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script defer src="../static/js/handler.js"></script>
+
 </head>
 <body>
 	<div class="content">
@@ -252,7 +270,7 @@
 				</div>
 			</div>
 
-			{% if session['role'] == 'superadmin' or session['role'] == 'sadmin'%}
+			{% if session['role'] == 'superadmin' or session['role'] == 'admin'%}
 				<div>
 					<div id="servlist" class="Column"></div>
 				</div>

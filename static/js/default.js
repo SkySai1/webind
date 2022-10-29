@@ -1,13 +1,3 @@
-//import './jquery.min.js';
-$(document).ready(function(){
-    window.vanish = '';
-    var data = {
-        status: "server",
-        action: "getservlist"
-    };
-    getservlist(data)
-});
-
 function f(){
     $('.square').toggleClass('move-left');
 

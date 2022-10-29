@@ -174,6 +174,7 @@ def runcommand(cmd, args):
 	return result.stdout.decode('utf-8')
 
 def testpage():
-	if 'dbtype' in request.form:
-		return request.form.get('dbtype').lower()
-	return 'Nothing'
+	out = ''
+	for value in request.form:
+		out += f"{value}\n"
+	return out

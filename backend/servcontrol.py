@@ -8,8 +8,11 @@ def server(dbsql):
     if 'superadmin' in session.get('role'):
         if 'serveradd' in request.form.get('action'):
             return serveradd(dbsql)
-        elif 'getservlist' in request.form.get('action'):
+    if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
+        if 'getservlist' in request.form.get('action'):
             return getservlist(dbsql)
+        elif 'getserver' in request.form.get('action'):
+            return getserv(dbsql)
     return 'nothing'
         
 def serveradd(dbsql):
@@ -59,8 +62,3 @@ def serveradd(dbsql):
         return 'nothing'
     except Exception as e:
         return str(e)
-
-def getservlist(dbsql):
-    if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
-        return servlistquery(dbsql)
-    return 'bad_role'

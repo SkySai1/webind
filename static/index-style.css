@@ -167,20 +167,32 @@ body{
   overflow: auto;
   max-height: 80vh;
   width: 10vw;
+  padding: 0.2em;
 }
-#servlist > div
+#servlist > form > button
 {
   margin-bottom: 1em;
   border: outset;
+  background: none;
+  text-align: left;
+  width: 100%;
 }
-#servlist > div > h3
+#servlist > form > button:hover{
+  box-shadow: 0em 0em 0.5em 0.1em rgb(250 250 100 / 80%);
+  
+}
+#servlist > form > button:active{
+  border:inset;
+}
+#servlist > form > button > h3
 {
   margin: 0;
+  margin-bottom: 0.2em;
 }
 
-#servlist > div > a
+#servlist > form > button > a
 {
-
+  
 }
 
 

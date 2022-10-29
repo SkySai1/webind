@@ -20,7 +20,6 @@ from sqlalchemy.orm import Session
 ### Раздел описания сущностей БД 
 Base = declarative_base()
 ServersBase = declarative_base()
-ServBase = declarative_base()
 
 class NewUser(Base):  
     __tablename__ = "users" 
@@ -44,13 +43,14 @@ class ServList(ServersBase):
     workdirectory = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
     
-def dyntable(ServBase, tbname):
-	class Dynamic(ServBase):
-		__tablename__ = tbname
-		id = Column(Integer, primary_key=True)
-		config = Column(String(255), unique=True)
-		value = Column(String(255))
-	return Dynamic
+def dyntable(tbname):
+    ServBase = declarative_base()
+    class Dynamic(ServBase):
+        __tablename__ = tbname
+        id = Column(Integer, primary_key=True)
+        config = Column(String(255), unique=True)
+        value = Column(String(255))
+    return Dynamic
 
 #Функция подключения к БД
 def connect_db(app):
@@ -269,16 +269,36 @@ def server_insertdb(dbsql, hostname, mid, user, confpath, wd):
             return 'failure'
     return 'failure'
 
-def servlistquery(dbsql):
-    try:
-        engine = dbsql.get_engine()
-        stmt = select(ServList)
-        #print(stmt)
-        servs = []
-        with engine.connect() as ses:
-            for row in ses.execute(stmt):
-                myjson = {"id":row[0], "hostname":row[1], "configured":row[6]}
-                servs.append(myjson)
-        return json.dumps(servs)
-    except Exception as e:
-        return e
+def getservlist(dbsql):
+    if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
+        try:
+            engine = dbsql.get_engine()
+            stmt = select(ServList)
+            #print(stmt)
+            servs = []
+            with engine.connect() as ses:
+                for row in ses.execute(stmt):
+                    myjson = {"id":row[0], "hostname":row[1], "configured":row[6]}
+                    servs.append(myjson)
+            return json.dumps(servs)
+        except Exception as e:
+            return e
+    return 'bad_role'
+
+def getserv(dbsql):
+    if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
+        tbname = request.form.get('servname')
+        try:
+            engine = dbsql.get_engine()
+            custom = dyntable(tbname)
+            stmt = select(custom)
+            servs = []
+            with engine.connect() as ses:
+                for row in ses.execute(stmt):
+                    myjson = {"id":row[0], "config":row[1], "value":row[2]}
+                    servs.append(myjson)
+            return json.dumps(servs)
+        except Exception as e:
+            print(e)
+            return 'newserv'
+    return 'bad_role'
