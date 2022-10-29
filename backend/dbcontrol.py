@@ -43,13 +43,14 @@ class ServList(ServersBase):
     workdirectory = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
     
-def dyntable(tbname):
+def dyntable(tbname, *engine):
     ServBase = declarative_base()
     class Dynamic(ServBase):
         __tablename__ = tbname
         id = Column(Integer, primary_key=True)
         config = Column(String(255), unique=True)
         value = Column(String(255))
+    if engine: ServBase.metadata.create_all(engine[-1])
     return Dynamic
 
 #Функция подключения к БД
