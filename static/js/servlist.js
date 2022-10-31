@@ -17,14 +17,12 @@ function getservlist(data){
             const $hidden3 = document.createElement('input');
             const $host = document.createElement('h3');
             const $status = document.createElement('a');
+            const $rightdiv = document.createElement('div');
+            const $img = document.createElement('img');
+
 
             const $servlist = document.querySelector('#servlist');
-            $servlist.appendChild($form);
-
-            $button.type='button';
-            $button.onclick=function(){getserv(this.form);};
-
-            $form.appendChild($button);
+            $servlist.appendChild($form);         
 
             $hidden1.type='hidden';
             $hidden1.name='status';
@@ -37,20 +35,35 @@ function getservlist(data){
             $hidden3.type='hidden';
             $hidden3.name='servname';
             $hidden3.value=json[object].hostname;
-
+            
             $form.appendChild($hidden1);
             $form.appendChild($hidden2);
             $form.appendChild($hidden3);
 
+            $form.classList.add('row');
+            $form.style='align-items: center;';
+            
+            $img.src='../static/img/settings.svg';
+            $img.classList.add('settings-svg');
+            $button.appendChild($img);
+            $button.type='button';
+            $button.style='margin-right: 0.5em; background: none; border: none;';
+            $button.onclick=function(){getserv(this.form);};
+            $form.appendChild($button);
+
+            $form.appendChild($rightdiv);
+
             $host.textContent = json[object].hostname;
-            $button.appendChild($host);
+            $host.style='word-break: break-all;';
+            $rightdiv.appendChild($host);
             
             if (json[object].configured == 'true') {
                 $status.textContent = 'Настроен'
             } else {
                 $status.textContent = 'Не настроен'
             };
-            $button.appendChild($status);
+            $rightdiv.appendChild($status);
+
         };
     })
     .fail(function(){

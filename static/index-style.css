@@ -108,6 +108,11 @@ body{
   cursor: pointer;
 }
 
+.settings-svg:hover{
+  background: radial-gradient(#f7f7f7, #b9e8fc);
+  cursor: pointer;
+}
+
 .front{
   display: flex;
   justify-content: space-between;
@@ -166,31 +171,24 @@ body{
 #servlist{
   overflow: auto;
   max-height: 80vh;
-  width: 10vw;
+  width: 15vw;
   padding: 0.2em;
 }
-#servlist > form > button
+#servlist > form
 {
   margin-bottom: 1em;
   border: outset;
   background: none;
   text-align: left;
-  width: 100%;
+  width: auto;
 }
-#servlist > form > button:hover{
-  box-shadow: 0em 0em 0.5em 0.1em rgb(250 250 100 / 80%);
-  
-}
-#servlist > form > button:active{
-  border:inset;
-}
-#servlist > form > button > h3
+#servlist > form > div > h3
 {
   margin: 0;
   margin-bottom: 0.2em;
 }
 
-#servlist > form > button > a
+#servlist > form > div > a
 {
   
 }
