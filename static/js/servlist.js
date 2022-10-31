@@ -48,7 +48,7 @@ function getservlist(data){
             $button.appendChild($img);
             $button.type='button';
             $button.style='margin-right: 0.5em; background: none; border: none;';
-            $button.onclick=function(){getserv(this.form);};
+            $button.onclick=function(){getserv(this.form, this);};
             $form.appendChild($button);
 
             $form.appendChild($rightdiv);
@@ -71,7 +71,8 @@ function getservlist(data){
     });
 };
 
-function getserv(form){
+function getserv(form, dom){
+    $(dom).children('.settings-svg').addClass('rotate');
     $.ajax({
     url:'/',
     method: 'POST',
@@ -79,6 +80,7 @@ function getserv(form){
     data: $(form).serialize()
     })
     .done(function(data) {
+        $(dom).children('.settings-svg').removeClass('rotate');
         if (data == 'newserv'){
             console.log('new');
         } else {

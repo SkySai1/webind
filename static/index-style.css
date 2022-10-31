@@ -108,6 +108,10 @@ body{
   cursor: pointer;
 }
 
+.settings-svg{
+  padding: 0;
+  margin: 0;
+}
 .settings-svg:hover{
   background: radial-gradient(#f7f7f7, #b9e8fc);
   cursor: pointer;
@@ -426,6 +430,10 @@ body{
   animation: scale 1.5s linear infinite;
   animation-fill-mode:forwards;
 }
+
+.rotate{
+  animation: rotate 1.5s linear infinite;
+}
 .buttonstyle:hover > .graphic {
   color: #3edcfff5;
   transform-origin: 55% 65%;
@@ -435,6 +443,8 @@ body{
   animation-fill-mode:both;*/
   cursor: pointer;
 }
+
+
 
 @keyframes scale {
   100% {
@@ -446,6 +456,15 @@ body{
 @keyframes move{
   100%{
   transform:translateX(-0.2em);
+  }
+}
+
+@keyframes rotate{
+  0%{
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
