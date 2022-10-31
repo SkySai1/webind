@@ -1,13 +1,12 @@
 #!flask/bin/python3
-from nis import match
 import os
-import pwd
+import time
+import datetime
 import secrets
 from flask import Flask, template_rendered, url_for, request, render_template, redirect, session, abort
-from werkzeug.utils import secure_filename
-from flask_mysqldb import MySQL
 from jinja2 import TemplateNotFound
 from flask_sqlalchemy import SQLAlchemy
+from multiprocessing import Process
 
 ## Подключаем наш файл с функциями
 from backend.function import *
@@ -107,9 +106,25 @@ def test():
 #--!
 
 #Рзмещается в конце
-if __name__ == '__main__':
-	
+def Parallel(*fns):
+  proc = []
+  for fn in fns:
+    p = Process(target=fn)
+    p.start()
+    proc.append(p)
+  for p in proc:
+    p.join()
+    
+def timer():
+    #while True:
+        print(datetime.datetime.now())
+        time.sleep(1 -time.time() % 1)
+        
+def start_app():
 	app.debug = True
 	app.use_debugger = True
 	app.run('0.0.0.0',5000)
+ 
+if __name__ == '__main__':
+	Parallel(start_app, timer)
 
