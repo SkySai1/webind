@@ -21,13 +21,14 @@ def send_command(hostname, port, username, key_id, commandlist):
 
     with client.invoke_shell() as ssh:
             ssh.send('echo\n')
-            time.sleep(0.5)
+            ssh.settimeout(0.5)
+            #time.sleep(0.1)
             ssh.recv(3000)
             result = {}
             for command in commandlist:
                     ssh.send(f'{command}\n')
-                    time.sleep(0.5)
-                    ssh.settimeout(1)
+                    #time.sleep(0.1)
+                    ssh.settimeout(0.5)
                     output = ""
                     while True:
                         try:
@@ -76,9 +77,9 @@ def keygen(hostname, port, passwd, username):
     client.connect(hostname=hostname, username=username, password=passwd, port=port, look_for_keys=False, allow_agent=False)
     with client.invoke_shell() as ssh:
         ssh.send(f'mkdir -m 700 ~/.ssh/\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
         ssh.send(f'echo {public_key.decode()} >> ~/.ssh/authorized_keys\n')
-        time.sleep(0.5)
+        time.sleep(0.1)
             
     return id
  

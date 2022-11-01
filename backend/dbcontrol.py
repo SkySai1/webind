@@ -42,6 +42,7 @@ class ServList(ServersBase):
     keyid = Column(String(255), nullable=False)
     confpath = Column(String(255), nullable=False)
     workdirectory = Column(String(255), nullable=False)
+    bind_version = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
     
 def dyntable(tbname, *engine):
@@ -255,13 +256,13 @@ def user_find(dbsql):
         except: return 'failure'
     return 'failure'
 
-def server_insertdb(dbsql, hostname, mid, user, key_id, confpath, wd):
+def server_insertdb(dbsql, hostname, mid, user, key_id, confpath, workdir, bind_vers):
     if 'superadmin' in session.get('role'):
         try:
             engine = dbsql.get_engine()
             ServersBase.metadata.create_all(engine)
             with Session(engine) as ses:
-                serv = ServList(hostname=hostname, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=wd) 
+                serv = ServList(hostname=hostname, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=workdir,bind_version=bind_vers) 
                 ses.add(serv)
                 ses.commit()
             return 'serv_add_success'
@@ -290,17 +291,22 @@ def getservlist(dbsql):
 def getserv(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         tbname = request.form.get('servname')
+        engine = dbsql.get_engine()
+        custom = dyntable(tbname)
+        stmt = select(custom)
+        stmt2 = select(ServList).where(ServList.hostname == tbname)
+        myjson = {}
         try:
-            engine = dbsql.get_engine()
-            custom = dyntable(tbname)
-            stmt = select(custom)
-            servs = []
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
-                    myjson = {"id":row[0], "config":row[1], "value":row[2]}
-                    servs.append(myjson)
-            return json.dumps(servs)
-        except Exception as e:
-            print(e)
-            return 'newserv'
+                    myjson.update(id=row[0], config=row[1], value=row[2])
+        except:
+            pass
+        try:
+            with engine.connect() as ses:
+                for row in ses.execute(stmt2):
+                    myjson.update(hostname=row[1], bind_version=row[7], configured=row[8])
+            return json.dumps(myjson, indent=4)
+        except:
+            return 'failure'
     return 'bad_role'

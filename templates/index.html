@@ -271,8 +271,12 @@
 			</div>
 
 			{% if session['role'] == 'superadmin' or session['role'] == 'admin'%}
-				<div>
-					<div id="servlist" class="Column"></div>
+				<div id="servlist" class="Column"></div>
+			{% endif %}
+			{% if session['role'] == 'superadmin' or session['role'] == 'admin'%}
+				<div id="servcontrol" class="Column">
+					<h1></h1>
+					
 				</div>
 			{% endif %}
 		</div>

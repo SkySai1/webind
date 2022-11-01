@@ -35,13 +35,14 @@ def serveradd(dbsql):
         string = result[cmlist[0]].split(sep='\n')
         for row in string:
             if re.search(r'''named configuration''', row):
-                ncf = re.sub(r'\s*',"", row).split(sep=':')
-                break
-        wd = re.sub(r'[\w._-]*$', '', ncf[1])
+                named_conf = re.sub(r'\s*',"", row).split(sep=':')[-1]
+            if re.search(r'BIND 9', row):
+                bind_vers = re.sub(r'[\s]<.*',"", row)
+        workdir = re.sub(r'[\w._-]*$', '', named_conf)
         cmlist = ["python3",
                 "import os",
-                f"ncf = os.access('{ncf[1]}', os.W_OK)",
-                f"ncp = os.access('{wd}', os.W_OK)",
+                f"ncf = os.access('{named_conf}', os.W_OK)",
+                f"ncp = os.access('{workdir}', os.W_OK)",
                 "if ncf is True and ncp is True: print('True')",
                 "else: print('False')",
                 "\n"
@@ -61,7 +62,7 @@ def serveradd(dbsql):
                     mid = re.sub(r'\s*',"", row).split(sep=':')
                     break
             mid_hash = hashlib.sha1(mid[1].encode()).hexdigest()
-            return server_insertdb(dbsql,host,mid_hash,user,key_id,ncf[1], wd)
+            return server_insertdb(dbsql,host,mid_hash,user,key_id,named_conf, workdir, bind_vers)
         elif 'False' in status:
             return 'serv_add_permission_bad'
         return 'nothing'
