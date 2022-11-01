@@ -4,6 +4,7 @@ import paramiko
 from backend.dbcontrol import *
 from backend.sshjob import *
 
+
 def server(dbsql):
     if 'superadmin' in session.get('role'):
         if 'serveradd' in request.form.get('action'):
@@ -22,11 +23,15 @@ def serveradd(dbsql):
         user = request.form['user']
         passwd = request.form['pass']
     except Exception as e:
-        return str(e)
-        #return 'serv_field_bad'
+        #return str(e)
+        return 'serv_field_bad'
     try:
+        key_id = keygen(host, port, passwd, user)
+    except:
+        return 'sshkey_failure'
+    try:     
         cmlist = ["named -V"]
-        result = send_command(host, port, user, passwd ,cmlist)
+        result = send_command(host, port, user, key_id, cmlist)
         string = result[cmlist[0]].split(sep='\n')
         for row in string:
             if re.search(r'''named configuration''', row):
@@ -41,7 +46,7 @@ def serveradd(dbsql):
                 "else: print('False')",
                 "\n"
                 ]        
-        result = send_command(host, port, user, passwd ,cmlist)
+        result = send_command(host, port, user, key_id, cmlist)
         string = result[cmlist[6]].split(sep='\n')
         for row in string:
             if re.search(r'^False|^True', row):
@@ -49,16 +54,17 @@ def serveradd(dbsql):
                 break
         if 'True' in status:
             cmlist = ["hostnamectl"]
-            result = send_command(host, port, user, passwd ,cmlist)
+            result = send_command(host, port, user, key_id, cmlist)
             string = result[cmlist[0]].split(sep='\n')
             for row in string:
                 if re.search(r'''Machine ID''', row):
                     mid = re.sub(r'\s*',"", row).split(sep=':')
                     break
             mid_hash = hashlib.sha1(mid[1].encode()).hexdigest()
-            return server_insertdb(dbsql,host,mid_hash,user,ncf[1], wd)
+            return server_insertdb(dbsql,host,mid_hash,user,key_id,ncf[1], wd)
         elif 'False' in status:
             return 'serv_add_permission_bad'
         return 'nothing'
     except Exception as e:
-        return str(e)
+        print(e)
+        return 'failure'   

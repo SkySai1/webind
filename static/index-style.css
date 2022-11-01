@@ -133,6 +133,7 @@ body{
   justify-content: center;
   z-index: 99;
   background: #dbeff36b;
+  position: absolute;
 }
 .rh_block > div{
   display: flex;

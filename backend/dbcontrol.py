@@ -39,6 +39,7 @@ class ServList(ServersBase):
     hostname = Column(String(255), nullable=False)
     machine_id = Column(String(255), nullable=False, unique=True)
     username = Column(String(255), nullable=False)
+    keyid = Column(String(255), nullable=False)
     confpath = Column(String(255), nullable=False)
     workdirectory = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
@@ -254,13 +255,13 @@ def user_find(dbsql):
         except: return 'failure'
     return 'failure'
 
-def server_insertdb(dbsql, hostname, mid, user, confpath, wd):
+def server_insertdb(dbsql, hostname, mid, user, key_id, confpath, wd):
     if 'superadmin' in session.get('role'):
         try:
             engine = dbsql.get_engine()
             ServersBase.metadata.create_all(engine)
             with Session(engine) as ses:
-                serv = ServList(hostname=hostname, machine_id=mid, username=user, confpath=confpath, workdirectory=wd) 
+                serv = ServList(hostname=hostname, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=wd) 
                 ses.add(serv)
                 ses.commit()
             return 'serv_add_success'
@@ -283,7 +284,7 @@ def getservlist(dbsql):
                     servs.append(myjson)
             return json.dumps(servs)
         except Exception as e:
-            return e
+            return 'db_failed'
     return 'bad_role'
 
 def getserv(dbsql):

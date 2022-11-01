@@ -6,67 +6,73 @@ function getservlist(data){
     data: data
     })
     .done(function(data) {
-        var json = JSON.parse(data)
-        var $servlist = document.getElementById('servlist');
-        $servlist.textContent='';
-        for (object in Object.keys(json)) {
-            const $button = document.createElement('button');
-            const $form = document.createElement('form');
-            const $hidden1 = document.createElement('input');
-            const $hidden2 = document.createElement('input');
-            const $hidden3 = document.createElement('input');
-            const $host = document.createElement('h3');
-            const $status = document.createElement('a');
-            const $rightdiv = document.createElement('div');
-            const $img = document.createElement('img');
-
-
+        if (data=='db_failed') {
             const $servlist = document.querySelector('#servlist');
-            $servlist.appendChild($form);         
+            const $message = document.createElement('h3');
+            $message.textContent ='Список серверов пуст';
+            $servlist.appendChild($message);  
+        } else {
+            var json = JSON.parse(data)
+            var $servlist = document.getElementById('servlist');
+            $servlist.textContent='';
+            for (object in Object.keys(json)) {
+                const $button = document.createElement('button');
+                const $form = document.createElement('form');
+                const $hidden1 = document.createElement('input');
+                const $hidden2 = document.createElement('input');
+                const $hidden3 = document.createElement('input');
+                const $host = document.createElement('h3');
+                const $status = document.createElement('a');
+                const $rightdiv = document.createElement('div');
+                const $img = document.createElement('img');
 
-            $hidden1.type='hidden';
-            $hidden1.name='status';
-            $hidden1.value='server';
 
-            $hidden2.type='hidden';
-            $hidden2.name='action';
-            $hidden2.value='getserver';
+                const $servlist = document.querySelector('#servlist');
+                $servlist.appendChild($form);         
 
-            $hidden3.type='hidden';
-            $hidden3.name='servname';
-            $hidden3.value=json[object].hostname;
-            
-            $form.appendChild($hidden1);
-            $form.appendChild($hidden2);
-            $form.appendChild($hidden3);
+                $hidden1.type='hidden';
+                $hidden1.name='status';
+                $hidden1.value='server';
 
-            $form.classList.add('row');
-            $form.style='align-items: center;';
-            
-            $img.src='../static/img/settings.svg';
-            $img.classList.add('settings-svg');
-            $button.appendChild($img);
-            $button.type='button';
-            $button.style='margin-right: 0.5em; background: none; border: none;';
-            $button.onclick=function(){getserv(this.form, this);};
-            $form.appendChild($button);
+                $hidden2.type='hidden';
+                $hidden2.name='action';
+                $hidden2.value='getserver';
 
-            $form.appendChild($rightdiv);
+                $hidden3.type='hidden';
+                $hidden3.name='servname';
+                $hidden3.value=json[object].hostname;
+                
+                $form.appendChild($hidden1);
+                $form.appendChild($hidden2);
+                $form.appendChild($hidden3);
 
-            $host.textContent = json[object].hostname;
-            $host.style='word-break: break-all;';
-            $rightdiv.appendChild($host);
-            
-            if (json[object].configured == 'true') {
-                $status.textContent = 'Настроен'
-            } else {
-                $status.textContent = 'Не настроен'
+                $form.classList.add('row');
+                $form.style='align-items: center;';
+                
+                $img.src='../static/img/settings.svg';
+                $img.classList.add('settings-svg');
+                $button.appendChild($img);
+                $button.type='button';
+                $button.style='margin-right: 0.5em; background: none; border: none;';
+                $button.onclick=function(){getserv(this.form, this);};
+                $form.appendChild($button);
+
+                $form.appendChild($rightdiv);
+
+                $host.textContent = json[object].hostname;
+                $host.style='word-break: break-all;';
+                $rightdiv.appendChild($host);
+                
+                if (json[object].configured == 'true') {
+                    $status.textContent = 'Настроен'
+                } else {
+                    $status.textContent = 'Новый сервер'
+                };
+                $rightdiv.appendChild($status);
             };
-            $rightdiv.appendChild($status);
-
         };
     })
-    .fail(function(){
+    .fail(function(data){
         alert('Внутрення ошибка, перезагрузите страницу!');
     });
 };
