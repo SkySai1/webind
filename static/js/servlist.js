@@ -88,7 +88,7 @@ function getserv(form, dom){
     .done(function(data) {
         $(dom).children('.settings-svg').removeClass('rotate');
         var json = JSON.parse(data)
-        if (json.configured == 'true'){
+        if (json.serv_config.clear_serv == 'true'){
             console.log('new');
         } else {
             console.log(json)

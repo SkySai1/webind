@@ -295,18 +295,21 @@ def getserv(dbsql):
         custom = dyntable(tbname)
         stmt = select(custom)
         stmt2 = select(ServList).where(ServList.hostname == tbname)
-        myjson = {}
+        servs = {}
         try:
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
-                    myjson.update(id=row[0], config=row[1], value=row[2])
+                    myjson = {"id":row[0], "config":row[1], "value":row[2], "clear_serv":"false"}
+                    servs.update(serv_config=myjson)
         except:
-            pass
+            myjson = {'clear_serv':"true"}
+            servs.update(serv_config=myjson)
         try:
             with engine.connect() as ses:
                 for row in ses.execute(stmt2):
-                    myjson.update(hostname=row[1], bind_version=row[7], configured=row[8])
-            return json.dumps(myjson, indent=4)
+                    myjson = {"hostname":row[1], "bind version":row[7]}
+                    servs.update(serv_controls=myjson)
+            return json.dumps(servs, indent=4)
         except:
             return 'failure'
     return 'bad_role'
