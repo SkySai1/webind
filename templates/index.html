@@ -147,7 +147,7 @@
 							<div class="sa_controls">
 								<h2 class="sah2">Управление серверами</h2>
 								<div>
-									<button class="sa_button" onclick="rightshow('#server-add')">Подключиться к серверу</button>
+									<button class="sa_button" onclick="rightshow('#server-add')">Подключить</button>
 								</div>
 							</div>
 						{% endif %}
@@ -156,8 +156,8 @@
 				<div class="right_pannel hidden">
 					<div class="right_pannel_header">
 						<p class="right_pannel_message_info hidden"></p>
-						<button onclick="rightclose()">
-							<div class="cl-btn-1">
+						<button onclick="rightclose()" class="cl-btn">
+							<div class="div-cl-btn">
 								<div>
 									<span class="left"></span>
 									<span class="right"></span>
@@ -183,7 +183,7 @@
 							</div>
 							<div>
 								<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-								<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasscreate')">Сгенерировать</button>
+								<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
 							</div>
 							<button id='b-useradd'class="sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 						</form>
@@ -206,7 +206,7 @@
 										<div>
 											<input type="checkbox" name="isnewpasswd">
 											<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
-											<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasschange')">Сгенерировать</button>
+											<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasschange')">Случайный</button>
 										</div>
 										<div>
 											<input type="checkbox" name="isnewusername">
@@ -272,11 +272,20 @@
 
 			{% if session['role'] == 'superadmin' or session['role'] == 'admin'%}
 				<div id="servlist" class="Column"></div>
-			{% endif %}
-			{% if session['role'] == 'superadmin' or session['role'] == 'admin'%}
-				<div id="servcontrol" class="Column">
-					<h1></h1>
-					
+				<div id="servcontrol" class="Column hidden">
+					<div id="servcontrol_header">
+						<button onclick="servcontrol_close()" class="cl-btn">
+							<div class="div-cl-btn">
+								<div>
+									<span class="left"></span>
+									<span class="right"></span>
+								</div>
+							</div>
+						</button>
+					</div>
+					<div id="servcontrol_front">
+
+					</div>
 				</div>
 			{% endif %}
 		</div>

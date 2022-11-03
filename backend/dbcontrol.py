@@ -37,6 +37,7 @@ class ServList(ServersBase):
     
     id = Column(Integer, primary_key=True)
     hostname = Column(String(255), nullable=False)
+    core = Column(String(255), nullable=False)
     machine_id = Column(String(255), nullable=False, unique=True)
     username = Column(String(255), nullable=False)
     keyid = Column(String(255), nullable=False)
@@ -256,13 +257,13 @@ def user_find(dbsql):
         except: return 'failure'
     return 'failure'
 
-def server_insertdb(dbsql, hostname, mid, user, key_id, confpath, workdir, bind_vers):
+def server_insertdb(dbsql, hostname, core, mid, user, key_id, confpath, workdir, bind_vers):
     if 'superadmin' in session.get('role'):
         try:
             engine = dbsql.get_engine()
             ServersBase.metadata.create_all(engine)
             with Session(engine) as ses:
-                serv = ServList(hostname=hostname, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=workdir,bind_version=bind_vers) 
+                serv = ServList(hostname=hostname, core=core, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=workdir,bind_version=bind_vers) 
                 ses.add(serv)
                 ses.commit()
             return 'serv_add_success'
@@ -276,7 +277,7 @@ def getservlist(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         try:
             engine = dbsql.get_engine()
-            stmt = select(ServList)
+            stmt = select(ServList).order_by(ServList.id)
             #print(stmt)
             servs = []
             with engine.connect() as ses:
@@ -299,16 +300,18 @@ def getserv(dbsql):
         try:
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
-                    myjson = {"id":row[0], "config":row[1], "value":row[2], "clear_serv":"false"}
-                    servs.update(serv_config=myjson)
+                    pass
+                myjson = {"id":row[0], "config":row[1], "value":row[2], "clear_serv":"false"}
+                servs.update(serv_config=myjson)
         except:
             myjson = {'clear_serv':"true"}
             servs.update(serv_config=myjson)
         try:
             with engine.connect() as ses:
                 for row in ses.execute(stmt2):
-                    myjson = {"hostname":row[1], "bind version":row[7]}
-                    servs.update(serv_controls=myjson)
+                    pass
+                myjson = {"hostname":row[1], "core":row[2], "bind_version":row[8]}
+                servs.update(serv_controls=myjson)
             return json.dumps(servs, indent=4)
         except:
             return 'failure'

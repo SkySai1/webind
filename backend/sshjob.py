@@ -82,6 +82,3 @@ def keygen(hostname, port, passwd, username):
         time.sleep(0.1)
             
     return id
- 
-
-

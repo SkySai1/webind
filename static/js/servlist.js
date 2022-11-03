@@ -87,14 +87,62 @@ function getserv(form, dom){
     })
     .done(function(data) {
         $(dom).children('.settings-svg').removeClass('rotate');
-        var json = JSON.parse(data)
-        if (json.serv_config.clear_serv == 'true'){
-            console.log('new');
-        } else {
-            console.log(json)
-        }
+        showservinfo(data);
     })
     .fail(function(){
         alert('Внутрення ошибка, перезагрузите страницу!');
     });
+};
+
+function showservinfo(data){
+    var json = JSON.parse(data)
+    if (json.serv_config.clear_serv == 'true'){
+        console.log(json);
+    } else {
+        console.log(json);
+    }
+    const $body = document.querySelector('#servcontrol_front');
+    $body.textContent='';
+
+    //Заголовок - хост
+    const $host = document.createElement('h2');
+    $host.textContent=json.serv_controls.hostname;
+    $body.appendChild($host);
+
+    //Блок параметров сервера
+    const $content = document.createElement('div');
+    $body.appendChild($content);
+
+        //Таблица свойств
+        const $table = document.createElement('table');
+        $table.classList.add('servtable');
+        $content.appendChild($table)
+
+            //Версия DNS
+            const $row1 = document.createElement('tr')
+            $table.appendChild($row1);
+            const $bindvers_txt = document.createElement('th');
+            const $bindvers_data = document.createElement('th');
+            $bindvers_txt.textContent='Версия DNS сервиса:'
+            $bindvers_data.textContent=json.serv_controls.bind_version;
+            $row1.appendChild($bindvers_txt);
+            $row1.appendChild($bindvers_data);
+
+            //Рабочая директория
+            const $row2 = document.createElement('tr')
+            $table.appendChild($row2);
+            const $workdir_txt = document.createElement('th');
+            const $workdir_data = document.createElement('th');
+            $workdir_txt.textContent='Ориентация:';
+            $workdir_data.textContent=json.serv_controls.core;
+            $row2.appendChild($workdir_txt);
+            $row2.appendChild($workdir_data);
+    
+    $('#servcontrol').removeClass('hidden');
+};
+
+function servcontrol_close(){
+    $('#servcontrol').addClass('hidden');
+    const $body = document.querySelector('#servcontrol_front');
+    $body.textContent='';
 };

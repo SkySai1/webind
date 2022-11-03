@@ -1,6 +1,10 @@
 @font-face {
   font-family: DTC;
-  src: url(./DTC.otf);
+  src: url(./fonts/DTC.otf);
+}
+@font-face {
+  font-family: current;
+  src: url(./fonts/current.otf);
 }
 body{
   background: linear-gradient(to bottom, #b6e7fc, #fcfeff);
@@ -25,7 +29,7 @@ body{
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, #b6e7fc, #fcfeff);
+  background: linear-gradient(320deg, #b6e7fc, #fcfeff);
 }
 .header{
   display: flex;
@@ -76,7 +80,6 @@ body{
   align-items: center;
   justify-content: center;
   border: none;
-  box-shadow: 0 0 0px 0.5em #bae8fccc inset;
   transition: 0.3s;
   background: #ffffff00;
   z-index: 5;
@@ -175,6 +178,8 @@ body{
   box-shadow: inset 2px 3px 0.2em rgb(32 33 34);
 }
 
+
+/*Блок параметров списка серверов */
 #servlist{
   overflow: auto;
   max-height: 80vh;
@@ -188,20 +193,75 @@ body{
   text-align: left;
   width: auto;
   border: 4px solid;
-  border-image: linear-gradient(45deg, #fcffe3, #1ca8ff) 1;
+  border-image: linear-gradient(150deg, #fcffe3, #1ca8ff) 1;
 }
 #servlist > form > div > h3
 {
   margin: 0;
   margin-bottom: 0.2em;
+  font-family: monospace;
+  font-size: large;
 }
 
 #servlist > form > div > a
 {
   
 }
-
-
+#servcontrol {
+  position: fixed;
+  margin-top: 1em;
+  width: 50vw;
+  height: 75vh;
+  left: calc(50% - 50vw/2);
+  display: flex;
+  justify-content: flex-start;
+  border: solid;
+  overflow: auto;
+  box-shadow: 5px 5px 10px 0px rgb(98 120 133 / 39%);
+  border-image: linear-gradient(130deg, #ffffff, #1ca8ff) 1;
+  flex-direction: column;
+  align-items: center;
+}
+#servcontrol_header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 100%;
+}
+#servcontrol_front{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+#servcontrol_front > div {
+  width: 100%;
+  display: flex;
+  justify-items: start;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+#servcontrol_front > h2{
+  margin-top: 0;
+  font-family: 'current';
+}
+.servtable{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 16px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.servtable > tr > th{
+  border-style: solid;
+  border-width: 0 1px 1px 0;
+  border-color: white;
+  background: #97bdde94;
+  color: #3f4b4c;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
 
 
 /*Открывающиеся меню*/
@@ -212,13 +272,14 @@ body{
   left: 0;
   width: 100vw;
   justify-content: space-between;
+  z-index: 3;
 }
 .left_pannel{
   transition: 0.3s;
-  width: 49vw;
+  width: 50vw;
   height: 85vh;
   z-index: 2;
-  background: linear-gradient(180deg, #6eb2eb, #baf5ff00);
+  background: linear-gradient(320deg, #6eb2eb, #f9fdff);
   border-radius: 15px;
   display: flex;
   flex-direction: column;
@@ -230,53 +291,55 @@ body{
 }
 .menu_front > div {
   display: flex;
-  align-items: center;
-  flex-direction: column;;
+  align-items: flex-start;
+  flex-direction: column;
   margin-bottom: 2em;
 }
 .menu_front > div > h2 {
   margin: -0.6em 0 0 0;
-  background: linear-gradient(180deg, #6eb2eb, #f9f4f4);
+  background: #b3d4eb;
   z-index: 4;
   border-radius: 5px;
+  font-family: monospace;
+  padding-right: 1em;
+  margin-left: 0.5em;
+  padding-left: 0.4em;
 }
 .sa_controls{
-  box-shadow: 0px 0px 10px 2px #8c2fff;
+  box-shadow: 7px 6px 5px 0px #7725dd38;
+  border: solid 2px;
+  border-image: linear-gradient(150deg, #fbfdff, #7725dd7d) 1;
   border-radius: 7px;
-  width: 98%;
+  width: 95%;
   margin-left: auto;
   margin-right: auto;
 }
 .sa_controls > h2{
   color: #8021e9;
-  box-shadow: 0em 0em 0.3em #7e00ff;
+  box-shadow: 0em 0em 0.3em #7e00ff99;
 }
 .sa_controls > div{
   height: 2.4em;
-  width: 23em;
   padding: 0.5em 1em;
   z-index: 3;
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
   margin-top: -.8em;
 }
 .sa_button{
   font-size: large;
-  border-radius: 5px;
   min-width: 6em;
   height: 1.5em;
   border-style: none;
-  box-shadow: 2px 3px 0.2em rgb(32 33 34);
+  box-shadow: 4px 4px 3px 0px rgb(32 33 34 / 43%);
   display: flex;
   justify-content: center;
-  margin-right: auto;
-  margin-left: auto;
   background: #9c65bf6b;
   margin-top: 1em;
   align-items: center;
-  font-family: math;
+  font-family: system-ui;
   color: #0a1b3a;
+  margin-right: 1em;
 }
 .sa_button:hover{
   background: #b5bfe2;
@@ -332,23 +395,21 @@ body{
 
 .right_pannel{
   transition: 0.3s;
-  background: linear-gradient(180deg, #a7d2df, #baf5ff00);
+  background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
   z-index: 2;
   border-radius: 15px;
-  width: 49vw;
+  width: 50vw;
   height: 85vh;
 }
 
 .right_pannel_header{
   height: 2em;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
-.right_pannel_header > button {
+.cl-btn{
   background: #ffffff00;
   border: none;
-  position: fixed;
-  right: 0;
   padding-right: 1.2em;
 }
 

@@ -37,8 +37,21 @@ def serveradd(dbsql):
             if re.search(r'''named configuration''', row):
                 named_conf = re.sub(r'\s*',"", row).split(sep=':')[-1]
             if re.search(r'BIND 9', row):
-                bind_vers = re.sub(r'[\s]<.*',"", row)
-        workdir = re.sub(r'[\w._-]*$', '', named_conf)
+                bind_vers = re.search(r'BIND 9[\s\.\w\(\)\-\_]*',row).group(0)
+        cmlist = ["python3",
+                  "import os",
+                  "if os.path.isfile('/etc/debian_version'): print('Debian')",
+                  "elif os.path.isfile('/etc/redhat-release'): print('RedHat')",
+                  "\n"
+                ]
+        result = send_command(host, port, user, key_id, cmlist)
+        if 'debian' in result[cmlist[-1]]: 
+            workdir='/etc/bind/'
+            core='debian'
+        elif 'rhel' in result[cmlist[-1]]: 
+            workdir='/var/named/'
+            core='rhel'
+        else: return 'identity_bad'
         cmlist = ["python3",
                 "import os",
                 f"ncf = os.access('{named_conf}', os.W_OK)",
@@ -59,10 +72,10 @@ def serveradd(dbsql):
             string = result[cmlist[0]].split(sep='\n')
             for row in string:
                 if re.search(r'''Machine ID''', row):
-                    mid = re.sub(r'\s*',"", row).split(sep=':')
+                    machine_id = re.sub(r'\s*',"", row).split(sep=':')[1]
                     break
-            mid_hash = hashlib.sha1(mid[1].encode()).hexdigest()
-            return server_insertdb(dbsql,host,mid_hash,user,key_id,named_conf, workdir, bind_vers)
+            machine_id_hash = hashlib.sha1(machine_id.encode()).hexdigest()
+            return server_insertdb(dbsql,host,core,machine_id_hash,user,key_id,named_conf, workdir, bind_vers)
         elif 'False' in status:
             return 'serv_add_permission_bad'
         return 'nothing'
