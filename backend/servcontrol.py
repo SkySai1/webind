@@ -40,18 +40,18 @@ def serveradd(dbsql):
                 bind_vers = re.search(r'BIND 9[\s\.\w\(\)\-\_]*',row).group(0)
         cmlist = ["python3",
                   "import os",
-                  "if os.path.isfile('/etc/debian_version'): print('Debian')",
-                  "elif os.path.isfile('/etc/redhat-release'): print('RedHat')",
+                  "if os.path.isfile('/etc/debian_version'): print('debian')",
+                  "elif os.path.isfile('/etc/redhat-release'): print('rhel')",
                   "\n"
                 ]
         result = send_command(host, port, user, key_id, cmlist)
         if 'debian' in result[cmlist[-1]]: 
             workdir='/etc/bind/'
-            core='debian'
+            core='Debian'
         elif 'rhel' in result[cmlist[-1]]: 
             workdir='/var/named/'
-            core='rhel'
-        else: return 'identity_bad'
+            core='RedHat'
+        else: return result[cmlist[-1]]
         cmlist = ["python3",
                 "import os",
                 f"ncf = os.access('{named_conf}', os.W_OK)",
