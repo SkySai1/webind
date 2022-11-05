@@ -109,6 +109,7 @@ list = ['pip',
         'zipp']
 for string in list:
     file = finder(string, '', f'{thispath}/archive/')
+    file = sorted(file, reverse=True)
     i=0
     print(f'{bcolors.HEADER}Installing {string}{bcolors.ENDC}')
     while True:
