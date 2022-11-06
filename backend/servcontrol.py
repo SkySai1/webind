@@ -9,6 +9,15 @@ def server(dbsql):
     if 'superadmin' in session.get('role'):
         if 'serveradd' in request.form.get('action'):
             return serveradd(dbsql)
+        elif 'getservlistbox' in request.form.get('action'):
+            return getservlistbox(dbsql)
+        elif 'servermv' in request.form.get('action'):
+            data = {'hostname':request.form.get('hostname'),
+                    'newhostname': request.form.get('newhost'),
+                    'port': request.form.get('port'),
+                    'username': request.form.get('username'),
+                    'passwd': request.form.get('passwd')}
+            return moveserver(dbsql, data)
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         if 'getservlist' in request.form.get('action'):
             return getservlist(dbsql)
@@ -26,59 +35,95 @@ def serveradd(dbsql):
         #return str(e)
         return 'serv_field_bad'
     try:
+        data = {
+            "host": host,
+            "port": port,
+            "user": user,
+            "passwd": passwd
+        }
+        return serveradd_proces(dbsql, data)
+    except Exception as e:
+        print(e)
+        return 'failure'
+    
+def moveserver(dbsql, data):
+    try:
+        host = data['hostname']
+        newhost = data['newhostname']
+        port = data['port']
+        username = data['username']
+        passwd = data['passwd']
+
+        newdata = {
+            "host": newhost,
+            "port": port,
+            "user": username,
+            "passwd": passwd
+        }
+        status = serveradd_proces(dbsql, newdata)
+        if status == 'serv_add_success':
+            return moveserver_db(dbsql, host, newhost)
+        raise Exception
+    except Exception as e:
+        print(e)
+        return 'failure'
+       
+def serveradd_proces(dbsql, data):
+    host = data['host']
+    port = data['port']
+    user = data['user']
+    passwd = data['passwd']
+    try:
         key_id = keygen(host, port, passwd, user)
-    except:
+    except Exception as e:
+        print(e)
         return 'sshkey_failure'
-    try:     
-        cmlist = ["named -V"]
+    cmlist = ["named -V"]
+    result = send_command(host, port, user, key_id, cmlist)
+    string = result[cmlist[0]].split(sep='\n')
+    for row in string:
+        if re.search(r'''named configuration''', row):
+            named_conf = re.sub(r'\s*',"", row).split(sep=':')[-1]
+        if re.search(r'BIND 9', row):
+            bind_vers = re.search(r'BIND 9[\s\.\w\(\)\-\_]*',row).group(0)
+    cmlist = ["python3",
+            "import os",
+            "if os.path.isfile('/etc/debian_version'): print('debian')",
+            "elif os.path.isfile('/etc/redhat-release'): print('rhel')",
+            "\n"
+            ]
+    result = send_command(host, port, user, key_id, cmlist)
+    if 'debian' in result[cmlist[-1]]: 
+        workdir='/etc/bind/'
+        core='Debian'
+    elif 'rhel' in result[cmlist[-1]]: 
+        workdir='/var/named/'
+        core='RedHat'
+    else: return result[cmlist[-1]]
+    cmlist = ["python3",
+            "import os",
+            f"ncf = os.access('{named_conf}', os.W_OK)",
+            f"ncp = os.access('{workdir}', os.W_OK)",
+            "if ncf is True and ncp is True: print('True')",
+            "else: print('False')",
+            "\n"
+            ]        
+    result = send_command(host, port, user, key_id, cmlist)
+    string = result[cmlist[6]].split(sep='\n')
+    for row in string:
+        if re.search(r'^False|^True', row):
+            status = row
+            break
+    if 'True' in status:
+        cmlist = ["hostnamectl"]
         result = send_command(host, port, user, key_id, cmlist)
         string = result[cmlist[0]].split(sep='\n')
         for row in string:
-            if re.search(r'''named configuration''', row):
-                named_conf = re.sub(r'\s*',"", row).split(sep=':')[-1]
-            if re.search(r'BIND 9', row):
-                bind_vers = re.search(r'BIND 9[\s\.\w\(\)\-\_]*',row).group(0)
-        cmlist = ["python3",
-                  "import os",
-                  "if os.path.isfile('/etc/debian_version'): print('debian')",
-                  "elif os.path.isfile('/etc/redhat-release'): print('rhel')",
-                  "\n"
-                ]
-        result = send_command(host, port, user, key_id, cmlist)
-        if 'debian' in result[cmlist[-1]]: 
-            workdir='/etc/bind/'
-            core='Debian'
-        elif 'rhel' in result[cmlist[-1]]: 
-            workdir='/var/named/'
-            core='RedHat'
-        else: return result[cmlist[-1]]
-        cmlist = ["python3",
-                "import os",
-                f"ncf = os.access('{named_conf}', os.W_OK)",
-                f"ncp = os.access('{workdir}', os.W_OK)",
-                "if ncf is True and ncp is True: print('True')",
-                "else: print('False')",
-                "\n"
-                ]        
-        result = send_command(host, port, user, key_id, cmlist)
-        string = result[cmlist[6]].split(sep='\n')
-        for row in string:
-            if re.search(r'^False|^True', row):
-                status = row
+            if re.search(r'''Machine ID''', row):
+                machine_id = re.sub(r'\s*',"", row).split(sep=':')[1]
                 break
-        if 'True' in status:
-            cmlist = ["hostnamectl"]
-            result = send_command(host, port, user, key_id, cmlist)
-            string = result[cmlist[0]].split(sep='\n')
-            for row in string:
-                if re.search(r'''Machine ID''', row):
-                    machine_id = re.sub(r'\s*',"", row).split(sep=':')[1]
-                    break
-            machine_id_hash = hashlib.sha1(machine_id.encode()).hexdigest()
-            return server_insertdb(dbsql,host,core,machine_id_hash,user,key_id,named_conf, workdir, bind_vers)
-        elif 'False' in status:
-            return 'serv_add_permission_bad'
-        return 'nothing'
-    except Exception as e:
-        print(e)
-        return 'failure'   
+        machine_id_hash = hashlib.sha1(machine_id.encode()).hexdigest()
+        return server_insertdb(dbsql,host,core,machine_id_hash,user,key_id,named_conf, workdir, bind_vers)
+    elif 'False' in status:
+        return 'serv_add_permission_bad'
+    return 'nothing'

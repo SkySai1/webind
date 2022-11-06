@@ -148,6 +148,7 @@
 								<h2 class="sah2">Управление серверами</h2>
 								<div>
 									<button class="sa_button" onclick="rightshow('#server-add')">Подключить</button>
+									<button class="sa_button" onclick="rightshow('#server-mv'); get_servlistbox('#servlist-on-ch')">Изменить</button>
 								</div>
 							</div>
 						{% endif %}
@@ -259,12 +260,43 @@
 						<form class="form column">
 							<input type="hidden" name="status" value="server">
 							<input type="hidden" name="action" value="serveradd">
-							<input class="right_input" type="text" name="host" placeholder="Адрес">
+							<input class="right_input" type="text" name="host" placeholder="Адрес сервера">
 							<input class="right_input" type="text" name="port" placeholder="Порт" value="22">
 							<input class="right_input" type="text" name="user" placeholder="Имя пользователя">
 							<input class="right_input" type="text" name="pass" placeholder="Пароль">
 							<button class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)">Подключиться</button>
 						</form>
+					</div>
+					{# ИЗМЕНЕНИЕ СЕРВЕРА #}
+					<div id="server-mv" class="el_right_pannel column hidden">
+						<h2 class="sah2">Изменить данные сервера</h2>
+						<div class="column">
+							<form class="form row" id="servchange-form">
+								<input type="hidden" name="status" value="server">
+								<input type="hidden" name="action" value="servermv">
+								<div>
+									<select class="right_select" style="width: auto;" id="servlist-on-ch" size="20" onchange="changeserv('#change-servhost', value)">
+									</select>
+								</div>
+								<div class="column">
+									<div>
+										<input class="right_input" id="change-servhost" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="hostname" placeholder="Адрес сервера">
+										<input class="right_input" name="newhost" placeholder="Новый адрес сервера"type="text">
+										<input class="right_input" name="port" placeholder="Порт"type="text">
+										<input class="right_input" name="username" placeholder="Пользователь"type="text">
+										<input class="right_input" type="text" name="passwd" placeholder="пароль">
+									</div>
+								</form>
+								<form class="form" id="servrm-form">
+									<input type="hidden" name="status" value="server">
+									<input type="hidden" name="action" value="serverrm">
+								</form>
+								<div class="row">
+									<button style="margin-right: 1em;" form="servchange-form" class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)" id="b-userchange">Изменить</button>
+									<button style="margin-left: 1em;" form="servrm-form"class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+								</div>
+							</div>
+						</div>	
 					</div>
 					{% endif %}
 				</div>

@@ -11,7 +11,7 @@ from pkg_resources import require
 import yaml
 import os
 import json
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, update, delete
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
 from sqlalchemy import create_engine, select
@@ -289,6 +289,7 @@ def getservlist(dbsql):
             return 'db_failed'
     return 'bad_role'
 
+
 def getserv(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         tbname = request.form.get('servname')
@@ -316,3 +317,46 @@ def getserv(dbsql):
         except:
             return 'failure'
     return 'bad_role'
+
+def getservlistbox(dbsql):
+    try:
+        stmt = select(ServList.hostname).order_by(ServList.hostname)
+        out = []
+        with dbsql.session() as ses:
+            for row in ses.execute(stmt):
+                #print(row)
+                out.append(row[-1])
+        return json.dumps(out, indent=4)
+    except Exception as e:
+        print(e)
+        return 'failure'
+
+def moveserver_db(dbsql, hostname, newhost):
+    try:
+        if 'postgresql' in str(dbsql):
+            rename_serv=f"ALTER TABLE \"{hostname}\" RENAME TO \"{newhost}\""
+            rename_seq=f"ALTER SEQUENCE \"{hostname}_id_seq\" RENAME TO \"{newhost}_id_seq\""
+            with dbsql.session() as ses:
+                ses.execute(rename_serv)
+                ses.execute(rename_seq)
+                ses.commit()
+        else:
+            rename_serv=f"RENAME TABLE `{hostname}` TO `{newhost}`"
+            with dbsql.session() as ses:
+                ses.execute(rename_serv)
+                ses.commit()
+    except Exception as e:
+        print(e)
+    try:
+        getserv = select(ServList.id).where(ServList.hostname == hostname)
+        with dbsql.session() as ses:
+            for row in ses.execute(getserv):
+                servid = row[-1]
+        delquery = delete(ServList).where(ServList.id == servid)
+        with dbsql.session() as ses:
+            ses.execute(delquery)
+            ses.commit()
+        return 'servermv_success'
+    except Exception as e:
+        print(e)
+        return 'failure'
