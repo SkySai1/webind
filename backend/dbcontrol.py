@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 Base = declarative_base()
 ServersBase = declarative_base()
 
-class NewUser(Base):  
+class Users(Base):  
     __tablename__ = "users" 
     
     id = Column(Integer, primary_key=True)  
@@ -81,7 +81,6 @@ def create_sqlite_db():
     try:
         dbname = request.form['dbname']
         engine = create_engine(f'sqlite:///bases/{dbname}.db')
-        engine.connect()
         if 'create' in request.form:
             Base.metadata.create_all(engine)
             cursor = engine.connect()
@@ -92,7 +91,7 @@ def create_sqlite_db():
                     return 'empty_login'
                 hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
                 with Session(engine) as session:
-                    superadmin = NewUser(username=request.form['sauser'], password=hashpass, role="superadmin") 
+                    superadmin = Users(username=request.form['sauser'], password=hashpass, role="superadmin") 
                     session.add(superadmin) 
                     session.commit()
             else:
@@ -123,25 +122,18 @@ def create_sql_db():
         engine = create_engine(f'{driver}://{user}:{passwd}@{host}:{port}/{db}')
         engine.connect()
         if 'create' in request.form:
-            cursor = engine.connect()
-            answer = cursor.execute("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='users';")
-            result = answer.fetchone()
-            if not result:
-                if not request.form.get('sauser') or not request.form.get('sapass'):
-                    return 'empty_login'
-                try:
-                    Base.metadata.create_all(engine)
-                    username = request.form['sauser']
-                    hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
-                    with Session(engine) as session:
-                        superadmin = NewUser(username=username, password=hashpass, role="superadmin") 
-                        session.add(superadmin) 
-                        session.commit()
-                except Exception as e:				
-                    #return 'create_bad'
-                    return(str(e))
-            else:
-                return 'table_exist'
+            if not request.form.get('sauser') or not request.form.get('sapass'):
+                return 'empty_login'
+            try:
+                Base.metadata.create_all(engine)
+                username = request.form['sauser']
+                hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
+                with Session(engine) as session:
+                    superadmin = Users(username=username, password=hashpass, role="superadmin") 
+                    session.add(superadmin) 
+                    session.commit()
+            except Exception as e:				
+                return 'create_bad'
         to_yaml = {'type': type, 'hostname': host,
                     'port': port, 'name': db, 'dbuser': user,
                     'dbpass': passwd}
@@ -169,28 +161,29 @@ def user_add(dbsql):
             elif 'user' == request.form.get('role'): role = 'user'
             else: return 'bad_role'
             hashpass = hashlib.sha1(request.form['passwd'].encode()).hexdigest()
-            connect = dbsql.session()
-            try: 
-                user = NewUser(username=request.form['username'], password=hashpass, role=role) 
-                connect.add(user) 
-                connect.commit()
+            try:
+                with dbsql.session() as ses:
+                    user = Users(username=request.form['username'], password=hashpass, role=role) 
+                    ses.add(user) 
+                    ses.commit()
             except: return 'user_exist'
             return 'add_sucess'
     except: return 'failure'
+    
 def user_change(dbsql):
     if 'superadmin' in session.get('role'):
         if 'change' == request.form.get('action'):
             username = request.form['username']
             if not request.form.get('username'): return 'empty_user'
             else:
-                connect = dbsql.session()
-                answer = connect.execute(f"SELECT username, id FROM users WHERE username = '{username}';")
-                account = {}
-                for row in answer: 
-                    account['id'] = row['id']
-                    account['username'] = row['username']
-                if not account['username']: return 'bad_username'
-                if account['id'] == 1: return 'sa_block'
+                selectq = select(Users.username, Users.id).where(Users.username == username)
+                with dbsql.session() as ses:
+                    account = {}
+                    for row in ses.execute(selectq): 
+                        account['id'] = row['id']
+                        account['username'] = row['username']
+                    if not account['username']: return 'bad_username'
+                    if account['id'] == 1: return 'sa_block'
             if 'on' == request.form.get('isnewpasswd') and not request.form.get('passwd'): return 'empty_field'
             elif 'on' == request.form.get('isnewusername') and not request.form.get('newusername'): return 'empty_field'
             elif 'on' == request.form.get('isnewrole') and not request.form.get('newrole'): return 'empty_field'
@@ -198,30 +191,48 @@ def user_change(dbsql):
             if 'on' == request.form.get('isnewpasswd'): 
                 hashpass = hashlib.sha1(request.form['passwd'].encode()).hexdigest()
                 try:
-                    connect = dbsql.session()
-                    connect.execute(f"UPDATE users SET password = '{hashpass}' WHERE username = '{username}';")
-                    connect.commit()
+                    updateq = (update(Users)
+                               .where(Users.username == username)
+                               .values(password=hashpass)
+                    )
+                    with dbsql.session() as ses: 
+                        ses.execute(updateq)
+                        ses.commit()
                     success = True
-                except: return 'failure'
+                except Exception as e: 
+                    print(e)
+                    return 'failure'
             if 'on' == request.form.get('isnewrole'):
                 if 'superadmin' == request.form.get('newrole'): role = 'superadmin'
                 elif 'admin' == request.form.get('newrole'): role = 'admin'
                 elif 'user' == request.form.get('newrole'): role = 'user'
                 else: return 'bad_role'
                 try:
-                    connect = dbsql.session()
-                    connect.execute(f"UPDATE users SET role = '{role}' WHERE username = '{username}';")
-                    connect.commit()
+                    updateq = (update(Users)
+                               .where(Users.username == username)
+                               .values(role=role)
+                    )
+                    with dbsql.session() as ses: 
+                        ses.execute(updateq)
+                        ses.commit()
                     success = True
-                except: return 'failure'
+                except Exception as e: 
+                    print(e)
+                    return 'failure'
             if 'on' == request.form.get('isnewusername'):
                 newusername = request.form.get('newusername')
                 try:
-                    connect = dbsql.session()
-                    connect.execute(f"UPDATE users SET username = '{newusername}' WHERE username = '{username}';")
-                    connect.commit()
+                    updateq = (update(Users)
+                               .where(Users.username == username)
+                               .values(username=newusername)
+                    )
+                    with dbsql.session() as ses: 
+                        ses.execute(updateq)
+                        ses.commit()
                     success = True
-                except: return 'failure'
+                except Exception as e: 
+                    print(e)
+                    return 'failure'
             if success is True: return 'change_success'
             else: return 'nothing_change'
     return 'failure'
@@ -231,14 +242,14 @@ def user_delete(dbsql):
         try:
             if not request.form.get('username'): return 'empty_user'
             username = request.form.get('username')
-            selq = select(NewUser.username, NewUser.id).where(NewUser.username == username)
+            selq = select(Users.username, Users.id).where(Users.username == username)
             account = ''
             with dbsql.session() as ses:
                 for account in ses.execute(selq):
                     pass
             if not account: return 'bad_username'
             if account['id'] == 1: return 'sa_block'
-            delq = delete(NewUser).where(NewUser.id == account['id'])
+            delq = delete(Users).where(Users.id == account['id'])
             with dbsql.session() as ses:
                 ses.execute(delq)
                 ses.commit()
@@ -252,12 +263,11 @@ def user_find(dbsql):
     if 'superadmin' in session.get('role'):
         try:
             if 'getuserlist' == request.form.get('action'):
-                connect = dbsql.session()
-                answer = connect.execute("SELECT username FROM users ORDER BY username;")
-                result = answer.fetchall()
-                out = []
-                for user in result:
-                    out.append(f"{user['username']}")
+                query = select(Users.username).order_by(Users.username)
+                with dbsql.session() as ses:
+                    out = []
+                    for user in ses.execute(query):
+                        out.append(f"{user['username']}")
                 return json.dumps({'usernames': out})
             elif not request.form.get('username'): return 'empty_user'
             return request.form.get('username')
