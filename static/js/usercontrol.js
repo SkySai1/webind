@@ -10,24 +10,13 @@ function randpass(el){
 function changeuname(input, value){
     $(input).val(value);
 };
-function user_list_filter(input, userlist) {
-    $(input).on('keyup', function() {
-      var filter = $(this).val().toLowerCase();
-      $('option').each(function() {
-        var text = $(this).text().toLowerCase();
-        //if ($(this).text().includes(filter)) {
-        if (text.includes(filter)){
-            $(this).show();
-        } else {
-          $(this).hide();
-        }
-        $(userlist).val(filter);
-      })
-    })
-  };
-  function get_user_list(to_listbox){
-    $('.preloader-hide').addClass('preloader-active');
-    clearTimeout(window.vanish);
+  function get_user_list(to_listbox, div, skip){
+    if (!skip){
+        $('#preloader').addClass('preloader-right');
+        $('#preloader').addClass('preloader-active');
+        $('.right_pannel').removeClass("right_pannel_move");
+        clearTimeout(window.vanish);
+    };
     dt = {'status' : 'userfind', 'action' : 'getuserlist'};
     $.ajax({
         url:'/',
@@ -38,6 +27,9 @@ function user_list_filter(input, userlist) {
         .done (function(data){
             $(to_listbox).empty();
             var json = JSON.parse(data)
+            if (Object.keys(json).length == 1) {
+                $('#change-username').val(json.usernames[0]);
+            }
             if (Object.keys(json.usernames).length > 10) {i = 10}
             else { i = Object.keys(json.usernames).length};
             $(to_listbox).attr('size', i);
@@ -46,23 +38,26 @@ function user_list_filter(input, userlist) {
                     return $('<option>', {text: json.usernames[key]});
                 });
             };
-            $('.preloader-hide').addClass('opacity');
-            window.vanish = setTimeout(function(){
-                $('.preloader-hide').removeClass('preloader-active');
-                $('.preloader-hide').removeClass('opacity');
-            },500);
+            if (!skip){
+                $('#preloader').addClass('opacity');
+                window.vanish = setTimeout(function(){
+                    $('#preloader').removeClass('preloader-active');
+                    $('#preloader').removeClass('preloader-right');
+                    $('#preloader').removeClass('opacity');
+                    rightshow(div); 
+                },300);
+            };
         })
         .fail (function(){
 
         });
 };
 function userdel(form){
-    newval = $('#change-username').val();
-    if (!newval) {responce_handler('empty_user')}
-    else{
-        $('#username-fordel').val(newval);
-        if (confirm('Потвердите удаление пользователя - '+newval)) { 
-            form_submit(form);
-        };
+    data = $(form).serialize().split('&')
+    data[0] = 'status=userdel'
+    data[1] = 'action=userdel'
+    newdata = data.join("&")
+    if (confirm('Подтвердите удаление пользователя!')) { 
+        form_submit(form, newdata)
     };
 }

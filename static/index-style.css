@@ -205,7 +205,7 @@ body{
 
 #servlist > form > div > a
 {
-  
+  width:auto;
 }
 #servcontrol {
   position: fixed;
@@ -275,8 +275,11 @@ body{
   z-index: 3;
 }
 .left_pannel{
-  transition: 0.3s;
+  transition: 0.3s ease-out;
+  position: absolute;
   width: 50vw;
+  min-width: 25em;
+  left: -50vw;
   height: 85vh;
   z-index: 2;
   background: linear-gradient(320deg, #6eb2eb, #f9fdff);
@@ -284,6 +287,9 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.left_pannel_move{
+  left:0px;
 }
 .menu_front{
   width: 100%;
@@ -393,19 +399,32 @@ body{
 }
 
 
+.preloader-right{
+  width: 50vw !important;
+  min-width: 25em;
+  background: transparent !important;
+  box-shadow: none !important;
+  right: 0;
+}
 .right_pannel{
-  transition: 0.3s;
+  transition: 0.3s ease-out;
   background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
   z-index: 2;
   border-radius: 15px;
   width: 50vw;
+  min-width: 25em;
   height: 85vh;
+  position: absolute;
+  right: -50vw;
+}
+.right_pannel_move{
+  right: 0;
 }
 
 .right_pannel_header{
-  height: 2em;
   display: flex;
   justify-content: flex-end;
+  height: auto;
 }
 .cl-btn{
   background: #ffffff00;
@@ -427,8 +446,33 @@ body{
   margin: 0;
   display: flex;
   align-items: center;
-  font-size: large;
-  font-family: system-ui;
+  font-family: cursive;
+  width: fit-content;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: x-large;
+}
+.neonText-green {
+  text-shadow:
+      0 0 7px #fff,
+      0 0 10px #fff,
+      0 0 21px #fff,
+      0 0 42px #0fa,
+      0 0 82px #0fa,
+      0 0 92px #0fa,
+      0 0 102px #0fa,
+      0 0 151px #0fa;
+}
+.neonText-red {
+  text-shadow: 
+      0 0 7px #fff, 
+      0 0 10px #fff, 
+      0 0 21px #fff, 
+      0 0 42px #ff0037, 
+      0 0 82px #ff0037, 
+      0 0 92px #ff0037, 
+      0 0 102px #ff0037, 
+      0 0 151px #ff0037;
 }
 .right_input{
   font-size: x-large;

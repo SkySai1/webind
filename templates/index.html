@@ -88,7 +88,37 @@
 			</div>
 		</div>
 		<div class="front">
-
+			<div id="preloader" class="preloader-hide">
+				<div class="preloader-2">
+					<ul>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+						<li></li>
+					</ul>
+				</div>
+			</div>
 			<div class="rh_block hidden">
 				<div>
 					<h1 id="rh_message"></h1>
@@ -98,37 +128,6 @@
 			</div>
 
 			<div class="mainmenu hidden">
-				<div class="preloader-hide">
-					<div class="preloader-2">
-						<ul>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-							<li></li>
-						</ul>
-					</div>
-				</div>
 				<div class="left_pannel">
 					<div class="menu_header">
 					</div>
@@ -138,8 +137,8 @@
 								<h2 class="sah2">Управление пользователями</h2>
 								<div>
 									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
-									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userchange'); get_user_list('#userlist-on-ch')">Изменить</button>
-									<button class="sa_button" id="b-useradd" onclick="rightshow('#f-userfind'); get_user_list('#userlist-on-fn')">Найти</button>
+									<button class="sa_button" id="b-useradd" onclick="get_user_list('#userlist-on-ch', '#f-userchange')">Изменить</button>
+									{# <button class="sa_button" id="b-useradd" onclick="rightshow('#f-userfind'); get_user_list('#userlist-on-fn')">Найти</button> #}
 								</div>
 							</div>
 						{% endif %}
@@ -148,7 +147,7 @@
 								<h2 class="sah2">Управление серверами</h2>
 								<div>
 									<button class="sa_button" onclick="rightshow('#server-add')">Подключить</button>
-									<button class="sa_button" onclick="rightshow('#server-mv'); get_servlistbox('#servlist-on-ch')">Изменить</button>
+									<button class="sa_button" onclick="get_servlistbox('#servlist-on-ch', '#server-mv')">Изменить</button>
 								</div>
 							</div>
 						{% endif %}
@@ -203,7 +202,7 @@
 								</div>
 								<div class="column">
 									<div>
-										<input style="width: 16em" class="right_input" id="change-username" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
+										<input style="width: 16em" class="right_input" id="change-username" onkeydown="list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
 										<div>
 											<input type="checkbox" name="isnewpasswd">
 											<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
@@ -222,16 +221,11 @@
 											</select>
 										</div>
 									</div>
+									<div class="row">
+										<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
+										<button style="margin-left: 1em;" class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+									</div>
 								</form>
-								<form class="form" id="userdel-form">
-									<input type="hidden" name="status" value="userdel">
-									<input type="hidden" name="action" value="userdel">
-									<input id="username-fordel" type="hidden" name="username" value="test">
-								</form>
-								<div class="row">
-									<button style="margin-right: 1em;" form="userchange-form" class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
-									<button style="margin-left: 1em;" form="userdel-form"class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
-								</div>
 							</div>
 						</div>	
 					</div>				
@@ -244,7 +238,7 @@
 								<select class="right_select" id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
 								</select>
 								<div>
-									<input class="right_input" id="find-username" onkeydown="user_list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
+									<input class="right_input" id="find-username" onkeydown="list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
 									<button class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
 								</div>
 							</div>
@@ -280,21 +274,17 @@
 								</div>
 								<div class="column">
 									<div>
-										<input class="right_input" id="change-servhost" onkeydown="user_list_filter(this,'#userlist-on-ch')" type="text" name="hostname" placeholder="Адрес сервера">
-										<input class="right_input" name="newhost" placeholder="Новый адрес сервера"type="text">
+										<input class="right_input" id="change-servhost" onkeydown="list_filter(this,'#servlist-on-ch')" type="text" name="hostname" placeholder="Адрес сервера">
+										<input class="right_input" name="newhostname" placeholder="Новый адрес сервера"type="text">
 										<input class="right_input" name="port" placeholder="Порт"type="text">
 										<input class="right_input" name="username" placeholder="Пользователь"type="text">
 										<input class="right_input" type="text" name="passwd" placeholder="пароль">
 									</div>
+									<div class="row">
+										<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)" id="b-userchange">Изменить</button>
+										<button style="margin-left: 1em;" class="sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+									</div>
 								</form>
-								<form class="form" id="servrm-form">
-									<input type="hidden" name="status" value="server">
-									<input type="hidden" name="action" value="serverrm">
-								</form>
-								<div class="row">
-									<button style="margin-right: 1em;" form="servchange-form" class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)" id="b-userchange">Изменить</button>
-									<button style="margin-left: 1em;" form="servrm-form"class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
-								</div>
 							</div>
 						</div>	
 					</div>

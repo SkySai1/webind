@@ -12,12 +12,10 @@ def server(dbsql):
         elif 'getservlistbox' in request.form.get('action'):
             return getservlistbox(dbsql)
         elif 'servermv' in request.form.get('action'):
-            data = {'hostname':request.form.get('hostname'),
-                    'newhostname': request.form.get('newhost'),
-                    'port': request.form.get('port'),
-                    'username': request.form.get('username'),
-                    'passwd': request.form.get('passwd')}
-            return moveserver(dbsql, data)
+            return moveserver(dbsql)
+        elif 'servdel' in request.form.get('action'):
+            hostname = request.form.get('hostname')
+            return delserver(dbsql, hostname)
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         if 'getservlist' in request.form.get('action'):
             return getservlist(dbsql)
@@ -46,14 +44,17 @@ def serveradd(dbsql):
         print(e)
         return 'failure'
     
-def moveserver(dbsql, data):
+def moveserver(dbsql):
+    out = ''
+    for key, value in request.form.items(multi=True):
+            out += f"{key}: {value}'\n'"
+            if not request.form.get(key): return 'empty_serv_field'
     try:
-        host = data['hostname']
-        newhost = data['newhostname']
-        port = data['port']
-        username = data['username']
-        passwd = data['passwd']
-
+        host = request.form.get('hostname')
+        newhost = request.form.get('newhostname')
+        port = request.form.get('port')
+        username = request.form.get('username')
+        passwd = request.form.get('passwd')
         newdata = {
             "host": newhost,
             "port": port,
@@ -63,7 +64,8 @@ def moveserver(dbsql, data):
         status = serveradd_proces(dbsql, newdata)
         if status == 'serv_add_success':
             return moveserver_db(dbsql, host, newhost)
-        raise Exception
+        return status
+        #raise Exception
     except Exception as e:
         print(e)
         return 'failure'

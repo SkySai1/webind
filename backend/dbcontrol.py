@@ -46,14 +46,18 @@ class ServList(ServersBase):
     bind_version = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
     
-def dyntable(tbname, *engine):
+def dyntable(tbname, act, *engine):
     ServBase = declarative_base()
     class Dynamic(ServBase):
         __tablename__ = tbname
         id = Column(Integer, primary_key=True)
         config = Column(String(255), unique=True)
         value = Column(String(255))
-    if engine: ServBase.metadata.create_all(engine[-1])
+
+    if act == 0: pass
+    elif act == 1: ServBase.metadata.create_all(engine[-1])
+    elif act == 2:
+        ServBase.metadata.drop_all(bind=engine[-1], tables=[Dynamic.__table__])
     return Dynamic
 
 #Функция подключения к БД
@@ -226,19 +230,22 @@ def user_delete(dbsql):
     if 'superadmin' in session.get('role') and 'userdel' == request.form.get('action'):
         try:
             if not request.form.get('username'): return 'empty_user'
-            connect = dbsql.session()
-            username = request.form['username']
-            answer = connect.execute(f"SELECT username, id FROM users WHERE username = '{username}';")
-            account = {}
-            for row in answer: 
-                account['id'] = row['id']
-                account['username'] = row['username']
-            if not account['username']: return 'bad_username'
+            username = request.form.get('username')
+            selq = select(NewUser.username, NewUser.id).where(NewUser.username == username)
+            account = ''
+            with dbsql.session() as ses:
+                for account in ses.execute(selq):
+                    pass
+            if not account: return 'bad_username'
             if account['id'] == 1: return 'sa_block'
-            connect.execute(f"DELETE FROM users WHERE username = '{username}';")
-            connect.commit()
+            delq = delete(NewUser).where(NewUser.id == account['id'])
+            with dbsql.session() as ses:
+                ses.execute(delq)
+                ses.commit()
             return 'userdel_success'
-        except: return 'failure'
+        except Exception as e:
+            print(e)
+            return 'failure'
     return 'failure'
 
 def user_find(dbsql):
@@ -294,7 +301,7 @@ def getserv(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         tbname = request.form.get('servname')
         engine = dbsql.get_engine()
-        custom = dyntable(tbname)
+        custom = dyntable(tbname, 0)
         stmt = select(custom)
         stmt2 = select(ServList).where(ServList.hostname == tbname)
         servs = {}
@@ -357,6 +364,29 @@ def moveserver_db(dbsql, hostname, newhost):
             ses.execute(delquery)
             ses.commit()
         return 'servermv_success'
+    except Exception as e:
+        print(e)
+        return 'failure'
+    
+def delserver(dbsql, hostname):
+    try:
+        if not request.form.get('hostname'): return 'empty_host'
+        hostname = request.form.get('hostname')
+        selq = select(ServList.hostname, ServList.id).where(ServList.hostname == hostname)
+        server = ''
+        with dbsql.session() as ses:
+            for server in ses.execute(selq):
+                pass
+        if not server: return 'bad_hostname'
+        delq = delete(ServList).where(ServList.id == server['id'])
+        with dbsql.session() as ses:
+            ses.execute(delq)
+            ses.commit()
+        try:
+            dyntable(server['hostname'],2,dbsql.engine)
+        except Exception as e:
+            pass
+        return 'servdel_success'
     except Exception as e:
         print(e)
         return 'failure'
