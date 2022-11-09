@@ -172,7 +172,8 @@
 					<div id="f-useradd" class="el_right_pannel column hidden">
 						<h2 class="sah2">Добавить пользователя</h2>							
 						<form class="form column" id="usercreate-form" style="align-items: flex-start;">
-							<input type="hidden" name="status" value="useradd">
+							<input type="hidden" name="status" value="user">
+							<input type="hidden" name="action" value="useradd">
 							<div class="column" >
 								<input class="right_input" type="text" name="username" placeholder="Псевдоним">
 								<select style="width: 15.3em;" class="right_input" name="role">
@@ -194,8 +195,8 @@
 						<h2 class="sah2">Изменить данные пользователя</h2>
 						<div class="column">
 							<form class="form row" id="userchange-form">
-								<input type="hidden" name="status" value="userchange">
-								<input type="hidden" name="action" value="change">
+								<input type="hidden" name="status" value="user">
+								<input type="hidden" name="action" value="userchange">
 								<div>
 									<select class="right_select" style="width: auto;" id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
 									</select>
@@ -222,7 +223,7 @@
 										</div>
 									</div>
 									<div class="row">
-										<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userchange">Изменить</button>
+										<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="userchange(this.form)" id="b-userchange">Изменить</button>
 										<button style="margin-left: 1em;" class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
 									</div>
 								</form>

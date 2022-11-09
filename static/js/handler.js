@@ -1,8 +1,9 @@
-function rmi(color, text) {
+function rmi(color, text, form) {
     $('.right_pannel_message_info').removeClass('hidden')
     clearTimeout(window.vanish);
     if (color =='green'){
         $('.right_pannel_message_info').addClass('neonText-green');
+        form.reset();
     } else if (color == 'red') {
         $('.right_pannel_message_info').addClass('neonText-red');
     }
@@ -23,67 +24,71 @@ function big_message(color, text, advise) {
     $('#rh_message').text(text);
     $('#rh_info').text(advise);
 };
-function responce_handler(data){
+function responce_handler(data, form){
     /* Блок реакций функций управления пользвотаелей*/
     switch(data) {
         case ('empty_login'):
-            rmi('red', 'Введите псевдоним и пароль!');
+            rmi('red', 'Введите псевдоним и пароль!', form);
             break;
         case ('add_sucess'):
-            rmi('green', 'Пользователь успешно создан!');
+            rmi('green', 'Пользователь успешно создан!', form);
             break;
         case ('user_exist'):
-            rmi('red', 'Ошибка, пользователь существует!');
+            rmi('red', 'Ошибка, пользователь существует!', form);
             break;
         case ('empty_user'):
-            rmi('red', 'Выберете пользователя!');
+            rmi('red', 'Выберете пользователя!', form);
             break;
         case ('sa_block'):
-            rmi('red', 'Запрещено изменять данные первого суперадмина!');
+            rmi('red', 'Запрещено изменять данные первого суперадмина!', form);
             break;
         case ('bad_username'):
-            rmi('red', 'Пользователь не найден!')
+            rmi('red', 'Пользователь не найден!', form)
             break;
         case ('empty_field'):
-            rmi('red', 'Заполните все отмеченные поля!');
+            rmi('red', 'Заполните все отмеченные поля!', form);
             break;
         case ('change_success'):
-            rmi('green', 'Данные пользователя успешно изменены!');
+            rmi('green', 'Данные пользователя успешно изменены!', form);
             get_user_list('#userlist-on-ch', "#f-userchange", 'skip');
             break;
         case ('nothing_change'):
-            rmi('red', 'Необходимо отметить поля для изменения!');
+            rmi('red', 'Необходимо отметить поля для изменения!', form);
             break;
         case ('userdel_success'):
-            rmi('green', 'Пользователь успешно удалён!');
-            get_user_list('#userlist-on-ch', "#f-userchange", 'skip');
+            rmi('green', 'Пользователь успешно удалён!', form);
+            get_user_list('#userlist-on-ch', "#f-userchange", 'skip', form);
             break;
         /* Реакция на управление списком серваеров  */
         case ('serv_add_success'):
             big_message('green', 'Сервер успешно подключен!', 'Настройте его на стартовом экране');
             break;
         case ('serv_add_permission_bad'):
-            big_message('#b99223', 'Ошибка при добавлении сервера, но подключение доступно!','Нет необходимых прав для учетной записи, от имени которой происходит подключение.\nПроверьте, рекурсивно, права на чтение, запись для файла конфиуграции "named.conf" и его директории.\nУзнать месторасположение можно через "named -V".\nИзменить права через "chmod"');
+            big_message('#b99223', 'Ошибка при добавлении сервера, но подключение доступно!',
+            'Нет необходимых прав для учетной записи, от имени которой происходит подключение.\nПроверьте, рекурсивно, права на чтение, запись для файла конфиуграции "named.conf" и его директории.\nУзнать месторасположение можно через "named -V".\nИзменить права через "chmod"');
             break;
         case ('serv_exist'):
-            big_message('yellow', 'Cервер уже подключен, SSH ключ обновлён','Проверьте ваш список серверов.');
+            big_message('#b99223', 'Cервер уже подключен, SSH ключ обновлён','Проверьте ваш список серверов.');
             break;
+        case ('sshkey_failure'):
+            big_message('red', 'Ошибка при настройке SSH ключа', 
+            'Проверьте настройки SSH сервера на включение pubkey-authentication.\nТакже убедитесь, что для пользователя создана домашняя директория')
         case ('empty_host'):
-            rmi('red', 'Выберете сервер!');
+            rmi('red', 'Выберете сервер!', form);
             break;
         case ('empty_serv_field'):
-            rmi('red', 'Заполните все поля для изменения!');
+            rmi('red', 'Заполните все поля для изменения!', form);
                 break;
         case ('bad_hostname'):
-            rmi('red', 'Сервер не найден!')
+            rmi('red', 'Сервер не найден!', form)
             break;
         case ('servermv_success'):
-            rmi('green', 'Адресс сервера успешно изменен!');
+            rmi('green', 'Адресс сервера успешно изменен!', form);
             get_servlistbox('#servlist-on-ch', '#server-mv', 'skip');
             $('#change-username').val('');
             break;
         case ('servdel_success'):
-            rmi('green', 'Сервер успешно удалён!');
+            rmi('green', 'Сервер успешно удалён!', form);
             get_servlistbox('#servlist-on-ch', '#server-mv', 'skip');
             $('#change-username').val('');
             break;

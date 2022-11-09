@@ -9,8 +9,7 @@ function form_submit(form, getdata){
     data: data
     })
     .done(function(data) {
-        form.reset();
-        responce_handler(data);
+        responce_handler(data, form);
     })
     .fail(function(){
         alert('Внутрення ошибка, перезагрузите страницу!');

@@ -13,6 +13,7 @@ from backend.function import *
 from backend.dbcontrol import *
 from backend.sshjob import *
 from backend.servcontrol import *
+from backend.usercontrol import *
 
 #Создаём объект Flask
 app = Flask(__name__)
@@ -42,7 +43,8 @@ if os.path.exists('db.yaml'):
 		app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
 		dbsql = SQLAlchemy(app)
 		dbsql.session.execute
-	except:
+	except Exception as e:
+		logging('e', e)
 		dbsql = None
 else: dbsql = None
 
@@ -65,14 +67,8 @@ def index():
 			elif 'logout' == request.form.get('status'):
 				session.pop('loggedin', None)
 				return show_the_login_form()
-			elif 'useradd' == request.form.get('status'):
-				return user_add(dbsql)
-			elif 'userchange' == request.form.get('status'):
-				return user_change(dbsql)
-			elif 'userdel' == request.form.get('status'):
-				return user_delete(dbsql)
-			elif 'userfind' == request.form.get('status'):
-				return user_find(dbsql)
+			elif 'user' == request.form.get('status'):
+				return users(dbsql)
 			elif 'server' == request.form.get('status'):
 				return server(dbsql)
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен

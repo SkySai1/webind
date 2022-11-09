@@ -10,14 +10,14 @@ function randpass(el){
 function changeuname(input, value){
     $(input).val(value);
 };
-  function get_user_list(to_listbox, div, skip){
+function get_user_list(to_listbox, div, skip){
     if (!skip){
         $('#preloader').addClass('preloader-right');
         $('#preloader').addClass('preloader-active');
         $('.right_pannel').removeClass("right_pannel_move");
         clearTimeout(window.vanish);
     };
-    dt = {'status' : 'userfind', 'action' : 'getuserlist'};
+    dt = {'status' : 'user', 'action' : 'userfind'};
     $.ajax({
         url:'/',
         method: 'POST',
@@ -27,15 +27,16 @@ function changeuname(input, value){
         .done (function(data){
             $(to_listbox).empty();
             var json = JSON.parse(data)
+            console.log(json)
             if (Object.keys(json).length == 1) {
-                $('#change-username').val(json.usernames[0]);
-            }
-            if (Object.keys(json.usernames).length > 10) {i = 10}
-            else { i = Object.keys(json.usernames).length};
+                $('#change-username').val(json[0]);
+            };
+            if (Object.keys(json).length > 10) {i = 10}
+            else { i = Object.keys(json).length};
             $(to_listbox).attr('size', i);
-            for (var key in json.usernames) {
+            for (var key in json) {
                 $(to_listbox).append(function () {
-                    return $('<option>', {text: json.usernames[key]});
+                    return $('<option>', {text: json[key]});
                 });
             };
             if (!skip){
@@ -54,10 +55,21 @@ function changeuname(input, value){
 };
 function userdel(form){
     data = $(form).serialize().split('&')
-    data[0] = 'status=userdel'
+    data[0] = 'status=user'
     data[1] = 'action=userdel'
     newdata = data.join("&")
     if (confirm('Подтвердите удаление пользователя!')) { 
         form_submit(form, newdata)
+    };
+}
+function userchange(form){
+    data = $(form).serialize()
+    console.log(data)
+    if (!data.match('isnewpasswd') & 
+        !data.match('isnewusername') & 
+        !data.match('isnewrole') ) {
+            responce_handler('nothing_change');
+    } else {
+        form_submit(form)
     };
 }

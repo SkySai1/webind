@@ -85,4 +85,5 @@ def keygen(hostname, port, passwd, username):
                         
                 return id
         except Exception as e:
-                print(e)
+                logging('e', e)
+                return 'sshkey_failure'

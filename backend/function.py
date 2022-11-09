@@ -1,21 +1,28 @@
-from ast import Return
 import hashlib
 import socket
 import sys
 from flask import Flask, render_template, session, redirect, url_for, request, flash, escape
-from flask_mysqldb import MySQL
 from jinja2 import *
-import MySQLdb
-import MySQLdb.cursors
 import os
 import yaml
 import subprocess
 import re
+import datetime
 from subprocess import PIPE
 
 def restart():
 	os.execv(sys.argv[0], sys.argv)
 
+def logging(type, e):
+       now = datetime.datetime.now()
+       logdir = os.path.dirname(os.path.abspath(__file__))+"%s" % '/logs'
+       if not os.path.exists(logdir):
+              os.makedirs(logdir)
+       if type == 'e':
+              error = f"{now}# {e}\n"
+              with open(f"{logdir}/errors.log", 'a') as file:
+                     file.write(error)
+    
 def do_the_login(dbsql):
 	if request.form.get('username') and request.form.get('password'):
 		try:
@@ -35,7 +42,7 @@ def do_the_login(dbsql):
 			else:
 				return 'badpass'
 		except Exception as e:
-			print (str(e))
+			logging('e', e)
 			return 'baddb'
 	return 'empty_login'
 
@@ -72,7 +79,8 @@ def config_check():
 				return True
 			else:
 				return False
-		except:
+		except Exception as e:
+			logging('e', e)
 			return False
 
 

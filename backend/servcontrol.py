@@ -12,7 +12,7 @@ def server(dbsql):
         elif 'getservlistbox' in request.form.get('action'):
             return getservlistbox(dbsql)
         elif 'servermv' in request.form.get('action'):
-            return moveserver(dbsql)
+            return serverchange(dbsql)
         elif 'servdel' in request.form.get('action'):
             hostname = request.form.get('hostname')
             return delserver(dbsql, hostname)
@@ -30,7 +30,7 @@ def serveradd(dbsql):
         user = request.form['user']
         passwd = request.form['pass']
     except Exception as e:
-        #return str(e)
+        logging('e', e)
         return 'serv_field_bad'
     try:
         data = {
@@ -41,10 +41,10 @@ def serveradd(dbsql):
         }
         return serveradd_proces(dbsql, data)
     except Exception as e:
-        print(e)
+        logging('e', e)
         return 'failure'
     
-def moveserver(dbsql):
+def serverchange(dbsql):
     out = ''
     for key, value in request.form.items(multi=True):
             out += f"{key}: {value}'\n'"
@@ -63,11 +63,11 @@ def moveserver(dbsql):
         }
         status = serveradd_proces(dbsql, newdata)
         if status == 'serv_add_success':
-            return moveserver_db(dbsql, host, newhost)
+            return serverchange_query(dbsql, host, newhost)
         return status
         #raise Exception
     except Exception as e:
-        print(e)
+        logging('e', e)
         return 'failure'
        
 def serveradd_proces(dbsql, data):
@@ -75,11 +75,7 @@ def serveradd_proces(dbsql, data):
     port = data['port']
     user = data['user']
     passwd = data['passwd']
-    try:
-        key_id = keygen(host, port, passwd, user)
-    except Exception as e:
-        print(e)
-        return 'sshkey_failure'
+    key_id = keygen(host, port, passwd, user) 
     cmlist = ["named -V"]
     result = send_command(host, port, user, key_id, cmlist)
     string = result[cmlist[0]].split(sep='\n')
