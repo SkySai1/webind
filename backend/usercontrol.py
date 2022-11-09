@@ -27,9 +27,13 @@ def useradd(dbsql):
         data = {'username': username,
                 'password': hashpass,
                 'role': role}
-        return useradd_query(dbsql, data)
+        try:
+            return useradd_query(dbsql, data)
+        except Exception as e:
+            logging('e', e, inspect.currentframe().f_code.co_name)
+            return 'user_exist'
     except Exception as e:
-        logging('e', e) 
+        logging('e', e, inspect.currentframe().f_code.co_name) 
         return 'failure'
 
 def userchange(dbsql):
@@ -37,7 +41,11 @@ def userchange(dbsql):
         if not request.form.get('username'): return 'empty_user'
         else:
             username = request.form.get('username')
-            userchange_checkuname_query(dbsql, username)
+            try:
+                userchange_checkuname_query(dbsql, username)
+            except Exception as e:
+                logging('e', e, inspect.currentframe().f_code.co_name)
+                return 'failure'
         if 'on' == request.form.get('isnewpasswd') and not request.form.get('passwd'): return 'empty_field'
         elif 'on' == request.form.get('isnewusername') and not request.form.get('newusername'): return 'empty_field'
         elif 'on' == request.form.get('isnewrole') and not request.form.get('newrole'): return 'empty_field'
@@ -68,13 +76,21 @@ def userchange(dbsql):
             if value is False: return 'change_fail'
         return 'change_success'
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
 
 def usersfind(dbsql):
-    return usersfind_query(dbsql)
+    try:
+        return usersfind_query(dbsql)
+    except Exception as e: 
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'failure'
 
 def userdelete(dbsql):
     if not request.form.get('username'): return 'empty_user'
     username = request.form.get('username')
-    return userdelete_query(dbsql, username)
+    try:
+        return userdelete_query(dbsql, username)
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'failure'

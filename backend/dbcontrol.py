@@ -1,5 +1,6 @@
 from email.policy import default
 import hashlib
+import inspect
 import re
 import secrets
 import string
@@ -75,7 +76,7 @@ def connect_db(app):
             app.config['MYSQL_PASSWORD'] = file['dbpass']
             return app
         except Exception as e:
-            logging('e', e) 
+            logging('e', e, inspect.currentframe().f_code.co_name) 
             return False
     return False
 
@@ -100,7 +101,7 @@ def create_sqlite_db():
             else:
                 return 'table_exist'
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'create_bad'
     dbtype='sqlite'
     to_yaml = {'type': dbtype, 'dbname': dbname}
@@ -137,7 +138,7 @@ def create_sql_db():
                     session.add(superadmin) 
                     session.commit()
             except Exception as e:
-                logging('e', e)				
+                logging('e', e, inspect.currentframe().f_code.co_name)				
                 return 'create_bad'
         to_yaml = {'type': type, 'hostname': host,
                     'port': port, 'name': db, 'dbuser': user,
@@ -149,7 +150,7 @@ def create_sql_db():
             return 'create_scuess'
         return 'connection_sucess'
     except:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'bad_connect'
 
 #Функция выбора и настройки параметров БД
@@ -159,32 +160,24 @@ def setup_db():
 
 #Фукнция добавления нового пользователя
 def useradd_query(dbsql, data):
-    try:
-        username = data['username']
-        password = data['password']
-        role = data['role']
-        with dbsql.session() as ses:
-            user = Users(username=username, password=password, role=role) 
-            ses.add(user) 
-            ses.commit()
-            return 'add_sucess'
-    except Exception as e:
-        logging('e', e)
-        return 'user_exist'
+    username = data['username']
+    password = data['password']
+    role = data['role']
+    with dbsql.session() as ses:
+        user = Users(username=username, password=password, role=role) 
+        ses.add(user) 
+        ses.commit()
+        return 'add_sucess'
 
 def userchange_checkuname_query(dbsql, username):
-    try:
-        selectq = select(Users.username, Users.id).where(Users.username == username)
-        with dbsql.session() as ses:
-            account = {}
-            for row in ses.execute(selectq): 
-                account['id'] = row['id']
-                account['username'] = row['username']
-            if not account['username']: return 'bad_username'
-            if account['id'] == 1: return 'sa_block'
-    except Exception as e:
-        logging('e', e)
-        return 'failure'
+    selectq = select(Users.username, Users.id).where(Users.username == username)
+    with dbsql.session() as ses:
+        account = {}
+        for row in ses.execute(selectq): 
+            account['id'] = row['id']
+            account['username'] = row['username']
+        if not account['username']: return 'bad_username'
+        if account['id'] == 1: return 'sa_block'
     
 def userchange_updateupass_query(dbsql, data):
     username = data['username']
@@ -199,7 +192,7 @@ def userchange_updateupass_query(dbsql, data):
             ses.commit()
         return True
     except Exception as e: 
-        logging('e', e) 
+        logging('e', e, inspect.currentframe().f_code.co_name) 
         return False
     
 def userchange_updateurole_query(dbsql, data):
@@ -215,7 +208,7 @@ def userchange_updateurole_query(dbsql, data):
             ses.commit()
         return True
     except Exception as e: 
-        logging('e', e) 
+        logging('e', e, inspect.currentframe().f_code.co_name) 
         return False
 
 def userchange_updateuname_query(dbsql, data):
@@ -231,38 +224,30 @@ def userchange_updateuname_query(dbsql, data):
             ses.commit()
         return True
     except Exception as e:
-        logging('e', e) 
+        logging('e', e, inspect.currentframe().f_code.co_name) 
         return False
     
 def usersfind_query(dbsql):
-    try:
-        query = select(Users.username).order_by(Users.username)
-        with dbsql.session() as ses:
-            out = []
-            for user in ses.execute(query):
-                out.append(f"{user['username']}")
-        return json.dumps(out)
-    except Exception as e: 
-        logging('e', e)
-        return 'failure'
+    query = select(Users.username).order_by(Users.username)
+    with dbsql.session() as ses:
+        out = []
+        for user in ses.execute(query):
+            out.append(f"{user['username']}")
+    return json.dumps(out)
 
 def userdelete_query(dbsql, username):
-    try:
-        selq = select(Users.username, Users.id).where(Users.username == username)
-        account = ''
-        with dbsql.session() as ses:
-            for account in ses.execute(selq):
-                pass
-        if not account: return 'bad_username'
-        if account['id'] == 1: return 'sa_block'
-        delq = delete(Users).where(Users.id == account['id'])
-        with dbsql.session() as ses:
-            ses.execute(delq)
-            ses.commit()
-        return 'userdel_success'
-    except Exception as e:
-        logging('e', e)
-        return 'failure'
+    selq = select(Users.username, Users.id).where(Users.username == username)
+    account = ''
+    with dbsql.session() as ses:
+        for account in ses.execute(selq):
+            pass
+    if not account: return 'bad_username'
+    if account['id'] == 1: return 'sa_block'
+    delq = delete(Users).where(Users.id == account['id'])
+    with dbsql.session() as ses:
+        ses.execute(delq)
+        ses.commit()
+    return 'userdel_success'
 
 
 def server_insertdb(dbsql, hostname, core, mid, user, key_id, confpath, workdir, bind_vers):
@@ -294,7 +279,7 @@ def getservlist(dbsql):
                     servs.append(myjson)
             return json.dumps(servs)
         except Exception as e:
-            logging('e', e)
+            logging('e', e, inspect.currentframe().f_code.co_name)
             return 'db_failed'
     return 'bad_role'
 
@@ -324,7 +309,7 @@ def getserv(dbsql):
                 servs.update(serv_controls=myjson)
             return json.dumps(servs, indent=4)
         except Exception as e:
-            logging('e', e)
+            logging('e', e, inspect.currentframe().f_code.co_name)
             return 'failure'
     return 'bad_role'
 
@@ -338,7 +323,7 @@ def getservlistbox(dbsql):
                 out.append(row[-1])
         return json.dumps(out, indent=4)
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
 
 def serverchange_query(dbsql, hostname, newhost):
@@ -356,7 +341,7 @@ def serverchange_query(dbsql, hostname, newhost):
                 ses.execute(rename_serv)
                 ses.commit()
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
     try:
         getserv = select(ServList.id).where(ServList.hostname == hostname)
@@ -369,7 +354,7 @@ def serverchange_query(dbsql, hostname, newhost):
             ses.commit()
         return 'servermv_success'
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
     
 def delserver(dbsql, hostname):
@@ -392,5 +377,5 @@ def delserver(dbsql, hostname):
             pass
         return 'servdel_success'
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'

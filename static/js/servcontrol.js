@@ -1,4 +1,7 @@
-function form_serv_submit(form){
+function form_serv_submit(form, getdata){
+    if (getdata){
+        data = getdata
+    }else{data = $(form).serialize()};
     //$('#preloader').addClass('preloader-right');
     $('#preloader').addClass('preloader-active');
     clearTimeout(window.vanish);
@@ -6,7 +9,7 @@ function form_serv_submit(form){
     url:'/',
     method: 'POST',
     dataType: 'html',
-    data: $(form).serialize()
+    data: data
     })
     .done(function(data) {
         responce_handler(data);
@@ -84,7 +87,7 @@ function servdel(form){
         rmi('red', 'Выберете сервер!');
     } else {
         if (confirm('Подтвердите удаление сервера!')) { 
-        form_submit(form, newdata);
+        form_serv_submit(form, newdata)
         };
     };
 };

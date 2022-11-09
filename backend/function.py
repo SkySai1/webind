@@ -1,4 +1,5 @@
 import hashlib
+import inspect
 import socket
 import sys
 from flask import Flask, render_template, session, redirect, url_for, request, flash, escape
@@ -13,13 +14,13 @@ from subprocess import PIPE
 def restart():
 	os.execv(sys.argv[0], sys.argv)
 
-def logging(type, e):
+def logging(type, e, frame):
        now = datetime.datetime.now()
        logdir = os.path.dirname(os.path.abspath(__file__))+"%s" % '/logs'
        if not os.path.exists(logdir):
               os.makedirs(logdir)
        if type == 'e':
-              error = f"{now}# {e}\n"
+              error = f"{now}# IN <{frame}>:: {e}\n"
               with open(f"{logdir}/errors.log", 'a') as file:
                      file.write(error)
     
@@ -42,7 +43,7 @@ def do_the_login(dbsql):
 			else:
 				return 'badpass'
 		except Exception as e:
-			logging('e', e)
+			logging('e', e, inspect.currentframe().f_code.co_name)
 			return 'baddb'
 	return 'empty_login'
 
@@ -80,7 +81,7 @@ def config_check():
 			else:
 				return False
 		except Exception as e:
-			logging('e', e)
+			logging('e', e, inspect.currentframe().f_code.co_name)
 			return False
 
 

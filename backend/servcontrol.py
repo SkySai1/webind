@@ -30,7 +30,7 @@ def serveradd(dbsql):
         user = request.form['user']
         passwd = request.form['pass']
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'serv_field_bad'
     try:
         data = {
@@ -41,7 +41,7 @@ def serveradd(dbsql):
         }
         return serveradd_proces(dbsql, data)
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
     
 def serverchange(dbsql):
@@ -67,7 +67,7 @@ def serverchange(dbsql):
         return status
         #raise Exception
     except Exception as e:
-        logging('e', e)
+        logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
        
 def serveradd_proces(dbsql, data):
@@ -75,7 +75,16 @@ def serveradd_proces(dbsql, data):
     port = data['port']
     user = data['user']
     passwd = data['passwd']
-    key_id = keygen(host, port, passwd, user) 
+    try:
+        key_id = keygen(host, port, passwd, user) 
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'connect_failure'
+    try:
+        try_connect(host, port, user, key_id)
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'sshkey_failure'
     cmlist = ["named -V"]
     result = send_command(host, port, user, key_id, cmlist)
     string = result[cmlist[0]].split(sep='\n')
