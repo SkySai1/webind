@@ -4,11 +4,12 @@ Supported version:
 - aarch64, python3.6.9+
 
 Required Packages: 
-- python3-venv, 
+- python3-venv,
+- python3-dev (python3-devel for RHEL),
 - python3-pip, 
 - default-libmysqlclient-dev, 
 - build-essential, 
-- libpq-dev.
+- libpq-dev (libpq-devel for RHEL).
 
 Required pip modules (normally its preloaded in this project): 
 - wheel, 
