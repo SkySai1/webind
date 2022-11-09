@@ -341,8 +341,8 @@ def serverchange_query(dbsql, hostname, newhost):
                 ses.execute(rename_serv)
                 ses.commit()
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
-        return 'failure'
+        #logging('e', e, inspect.currentframe().f_code.co_name)
+        pass
     try:
         getserv = select(ServList.id).where(ServList.hostname == hostname)
         with dbsql.session() as ses:

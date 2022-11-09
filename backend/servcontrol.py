@@ -81,7 +81,8 @@ def serveradd_proces(dbsql, data):
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'connect_failure'
     try:
-        try_connect(host, port, user, key_id)
+        cmlist = ["echo \"connected\""]
+        send_command(host, port, user, key_id, cmlist)
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'sshkey_failure'

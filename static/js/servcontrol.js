@@ -12,7 +12,7 @@ function form_serv_submit(form, getdata){
     data: data
     })
     .done(function(data) {
-        responce_handler(data);
+        responce_handler(data, form);
         var data = {
             status: "server",
             action: "getservlist"
@@ -87,7 +87,7 @@ function servdel(form){
         rmi('red', 'Выберете сервер!');
     } else {
         if (confirm('Подтвердите удаление сервера!')) { 
-        form_serv_submit(form, newdata)
+        form_serv_submit(form, newdata, form)
         };
     };
 };

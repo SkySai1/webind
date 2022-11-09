@@ -22,14 +22,14 @@ def send_command(hostname, port, username, key_id, commandlist):
 
     with client.invoke_shell() as ssh:
             ssh.send('echo\n')
-            ssh.settimeout(2)
-            #time.sleep(0.1)
+            ssh.settimeout(5)
+            time.sleep(0.1)
             ssh.recv(3000)
             result = {}
             for command in commandlist:
                     ssh.send(f'{command}\n')
-                    #time.sleep(0.1)
-                    ssh.settimeout(2)
+                    ssh.settimeout(5)
+                    time.sleep(0.1)
                     output = ""
                     while True:
                         try:
@@ -55,21 +55,20 @@ def keygen(hostname, port, passwd, username):
         crypto_serialization.Encoding.PEM,
         crypto_serialization.PrivateFormat.TraditionalOpenSSL,
         crypto_serialization.NoEncryption()
-        )
+        ).decode()
 
         public_key = key.public_key().public_bytes(
         crypto_serialization.Encoding.OpenSSH,
         crypto_serialization.PublicFormat.OpenSSH
-        )
-        
+        ).decode()
         id = hashlib.sha1(hostname.encode()).hexdigest()
         
         if not os.path.exists(f'{path}/.ssh/'):
                 os.makedirs(f'{path}/.ssh')
         with open(f'{path}/.ssh/{id}','w') as file:
-                file.write(private_key.decode())
+                file.write(private_key)
         with open(f'{path}/.ssh/{id}.pub','w') as file:
-                file.write(public_key.decode())
+                file.write(public_key)
         os.chmod(f'{path}/.ssh/{id}', 0o600)
         os.chmod(f'{path}/.ssh/{id}.pub', 0o600)
         
@@ -77,12 +76,14 @@ def keygen(hostname, port, passwd, username):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname=hostname, username=username, password=passwd, port=port, look_for_keys=False, allow_agent=False)
         with client.invoke_shell() as ssh:
-                ssh.settimeout(2)
                 ssh.send(f'mkdir -m 700 ~/.ssh/\n')
+                ssh.settimeout(5)
                 time.sleep(0.1)
-                ssh.send(f'echo {public_key.decode()} >> ~/.ssh/authorized_keys\n')
+                ssh.send(f'echo {public_key} >> ~/.ssh/authorized_keys\n')
+                ssh.settimeout(5)
                 time.sleep(0.1)
                 ssh.send(f'chmod 600 ~/.ssh/authorized_keys\n')
+                ssh.settimeout(5)
                 time.sleep(0.1)
         return id
 
@@ -93,6 +94,6 @@ def try_connect(hostname, port, username, key_id):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname=hostname, username=username, port=port, pkey=key)
         with client.invoke_shell() as ssh:
-                ssh.settimeout(2)
                 ssh.send(f'echo \'pubkey connected\'\n')
+                ssh.settimeout(5)
                 time.sleep(0.1)
