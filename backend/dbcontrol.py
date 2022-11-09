@@ -5,10 +5,6 @@ import re
 import secrets
 import string
 from flask import request, render_template, session, flash
-
-import MySQLdb
-import MySQLdb.cursors
-from pkg_resources import require
 import yaml
 import os
 import json
