@@ -32,17 +32,17 @@ def serveradd(dbsql):
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'serv_field_bad'
-    try:
-        data = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "passwd": passwd
-        }
-        return serveradd_proces(dbsql, data)
-    except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
-        return 'failure'
+    #try:
+    data = {
+        "host": host,
+        "port": port,
+        "user": user,
+        "passwd": passwd
+    }
+    return serveradd_proces(dbsql, data)
+    #except Exception as e:
+    #    logging('e', e, inspect.currentframe().f_code.co_name)
+    #    return 'failure'
     
 def serverchange(dbsql):
     out = ''
@@ -86,52 +86,72 @@ def serveradd_proces(dbsql, data):
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'sshkey_failure'
-    cmlist = ["named -V"]
-    result = send_command(host, port, user, key_id, cmlist)
-    string = result[cmlist[0]].split(sep='\n')
-    for row in string:
-        if re.search(r'''named configuration''', row):
-            named_conf = re.sub(r'\s*',"", row).split(sep=':')[-1]
-        if re.search(r'BIND 9', row):
-            bind_vers = re.search(r'BIND 9[\s\.\w\(\)\-\_]*',row).group(0)
-    cmlist = ["python3",
+    try:
+        cmlist = [
+            "\n",
+            "python3",
+            "import subprocess",
+            "named = subprocess.run(['named', '-V'], capture_output=True)",
+            "import re",
+            "vers = re.search(r'BIND[\\t 0-9\.-_()a-z]+',named.stdout.decode())[0]",
             "import os",
-            "if os.path.isfile('/etc/debian_version'): print('debian')",
-            "elif os.path.isfile('/etc/redhat-release'): print('rhel')",
-            "\n"
-            ]
-    result = send_command(host, port, user, key_id, cmlist)
-    if 'debian' in result[cmlist[-1]]: 
-        workdir='/etc/bind/'
-        core='Debian'
-    elif 'rhel' in result[cmlist[-1]]: 
-        workdir='/var/named/'
-        core='RedHat'
-    else: return result[cmlist[-1]]
-    cmlist = ["python3",
-            "import os",
-            f"ncf = os.access('{named_conf}', os.W_OK)",
-            f"ncp = os.access('{workdir}', os.W_OK)",
-            "if ncf is True and ncp is True: print('True')",
-            "else: print('False')",
-            "\n"
-            ]        
-    result = send_command(host, port, user, key_id, cmlist)
-    string = result[cmlist[6]].split(sep='\n')
-    for row in string:
-        if re.search(r'^False|^True', row):
-            status = row
-            break
-    if 'True' in status:
-        cmlist = ["hostnamectl"]
+            "if os.path.isfile('/etc/debian_version'):",
+            "\tsys = 'Debian'",
+            "\tdir = '/etc/bind/'",
+            "\tconf = '/etc/bind/named.conf'",
+            "elif os.path.isfile('/etc/redhat-release'):",
+            "\tsys = 'RedHat'",
+            "\tdir = '/var/named/'",
+            "\tconf = '/etc/named.conf'",
+            "\n",
+            "dir_ac = os.access(f'{dir}', os.W_OK&os.R_OK)",
+            "conf_ac = os.access(f'{conf}', os.W_OK&os.R_OK)",
+            "info = subprocess.run(['hostnamectl'], capture_output=True)",
+            "machine_id = re.search(r'Machine ID:[\\t ][\w]+', info.stdout.decode())[0]",
+            "id = re.sub(r'\s*',\"\", machine_id).split(sep=':')[1]",
+            "if dir_ac is True and conf_ac is True: access='true'",
+            "else: access='false'",
+            "\n",
+            "print(access)",
+            "print(vers)",
+            "print(sys)",
+            "print(dir)",
+            "print(conf)",
+            "print(id)"
+        ]
         result = send_command(host, port, user, key_id, cmlist)
-        string = result[cmlist[0]].split(sep='\n')
-        for row in string:
-            if re.search(r'''Machine ID''', row):
-                machine_id = re.sub(r'\s*',"", row).split(sep=':')[1]
-                break
-        machine_id_hash = hashlib.sha1(machine_id.encode()).hexdigest()
-        return server_insertdb(dbsql,host,core,machine_id_hash,user,key_id,named_conf, workdir, bind_vers)
-    elif 'False' in status:
-        return 'serv_add_permission_bad'
-    return 'nothing'
+        id=result[-1].split(sep='\n')[1]
+        conf=result[-2].split(sep='\n')[1]
+        dir=result[-3].split(sep='\n')[1]
+        sys=result[-4].split(sep='\n')[1]
+        vers=result[-5].split(sep='\n')[1]
+        access=result[-6].split(sep='\n')[1]
+        id_hash = hashlib.sha1(id.encode()).hexdigest()
+        '''
+        hostname = data['hostname']
+        core=data['core']
+        id=data['id']
+        username=data['username']
+        key_id=data['key_id']
+        conf=data['conf']
+        dir=data['dir']
+        vers=data['vers']
+        '''
+        data = {
+            'hostname': host,
+            'core': sys,
+            'id': id_hash,
+            'username': user,
+            'key_id': key_id,
+            'conf': conf,
+            'dir': dir,
+            'vers': vers
+        }
+        print(access)
+        if 'true' in access:
+            return server_insertdb(dbsql,data)
+        else:
+            return 'serv_add_permission_bad'
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'failure'

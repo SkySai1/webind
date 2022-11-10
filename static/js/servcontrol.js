@@ -23,7 +23,7 @@ function form_serv_submit(form, getdata){
             $('#preloader').removeClass('preloader-right');
             $('#preloader').removeClass('preloader-active');
             $('#preloader').removeClass('opacity');
-            rightshow(div); 
+            //rightshow(div); 
         },500);
     })
     .fail(function(){

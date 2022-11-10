@@ -10,26 +10,31 @@ from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
 
+class FastTransport(paramiko.Transport):
+        def __init__(self, sock):
+                super(FastTransport, self).__init__(sock)
+                self.window_size = 2147483647
+                self.packetizer.REKEY_BYTES = pow(2, 40)
+                self.packetizer.REKEY_PACKETS = pow(2, 40)
 
 def send_command(hostname, port, username, key_id, commandlist):
     path = os.path.dirname(os.path.abspath(__file__))
     key = paramiko.RSAKey.from_private_key_file(f'{path}/.ssh/{key_id}')
     
     client = paramiko.SSHClient()
+    #client = FastTransport((hostname, port))
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname = hostname, username = username, port = port, pkey=key)
     #client.connect(hostname=hostname, username=username, password=password, port=port, look_for_keys=False, allow_agent=False)
 
     with client.invoke_shell() as ssh:
             ssh.send('echo\n')
-            ssh.settimeout(5)
-            time.sleep(0.1)
+            ssh.settimeout(0.01)
             ssh.recv(3000)
-            result = {}
+            result = []
             for command in commandlist:
                     ssh.send(f'{command}\n')
-                    ssh.settimeout(5)
-                    time.sleep(0.1)
+                    ssh.settimeout(0.05)
                     output = ""
                     while True:
                         try:
@@ -37,7 +42,7 @@ def send_command(hostname, port, username, key_id, commandlist):
                                 output += part
                         except socket.timeout:
                                 break
-                    result[command] = output
+                    result.append(output)
     client.close()
     return result
 
@@ -95,5 +100,5 @@ def try_connect(hostname, port, username, key_id):
         client.connect(hostname=hostname, username=username, port=port, pkey=key)
         with client.invoke_shell() as ssh:
                 ssh.send(f'echo \'pubkey connected\'\n')
-                ssh.settimeout(5)
+                ssh.settimeout(0.05)
                 time.sleep(0.1)

@@ -246,13 +246,21 @@ def userdelete_query(dbsql, username):
     return 'userdel_success'
 
 
-def server_insertdb(dbsql, hostname, core, mid, user, key_id, confpath, workdir, bind_vers):
+def server_insertdb(dbsql, data):
     if 'superadmin' in session.get('role'):
+        hostname = data['hostname']
+        core=data['core']
+        id=data['id']
+        username=data['username']
+        key_id=data['key_id']
+        conf=data['conf']
+        dir=data['dir']
+        vers=data['vers']
         try:
             engine = dbsql.get_engine()
             ServersBase.metadata.create_all(engine)
             with Session(engine) as ses:
-                serv = ServList(hostname=hostname, core=core, machine_id=mid, username=user, keyid=key_id, confpath=confpath, workdirectory=workdir,bind_version=bind_vers) 
+                serv = ServList(hostname=hostname, core=core, machine_id=id, username=username, keyid=key_id, confpath=conf, workdirectory=dir,bind_version=vers) 
                 ses.add(serv)
                 ses.commit()
             return 'serv_add_success'
