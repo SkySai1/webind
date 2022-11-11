@@ -8,7 +8,7 @@ from flask import request, render_template, session, flash
 import yaml
 import os
 import json
-from sqlalchemy import Column, Integer, String, Boolean, update, delete, inspect as dbinspect
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, update, delete, inspect as dbinspect
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
 from sqlalchemy import create_engine, select
@@ -17,10 +17,10 @@ from sqlalchemy.orm import Session
 from backend.function import logging
 
 ### Раздел описания сущностей БД 
-Base = declarative_base()
+UserBase = declarative_base()
 ServersBase = declarative_base()
 
-class Users(Base):  
+class Users(UserBase):  
     __tablename__ = "users" 
     
     id = Column(Integer, primary_key=True)  
@@ -32,10 +32,10 @@ class Users(Base):
         return f"Webind(id={self.id!r}, username={self.username!r}, password={self.password!r}, role={self.role!r})"
 
 class ServList(ServersBase):
-    __tablename__ = "server_list"
+    __tablename__ = "servers"
     
     id = Column(Integer, primary_key=True)
-    hostname = Column(String(255), nullable=False)
+    hostname = Column(String(255), nullable=False, unique=True)
     core = Column(String(255), nullable=False)
     machine_id = Column(String(255), nullable=False, unique=True)
     username = Column(String(255), nullable=False)
@@ -45,19 +45,29 @@ class ServList(ServersBase):
     bind_version = Column(String(255), nullable=False)
     configured = Column(Boolean, default=False)
     
-def dyntable(tbname, act, *engine):
-    ServBase = declarative_base()
-    class Dynamic(ServBase):
-        __tablename__ = tbname
-        id = Column(Integer, primary_key=True)
-        param = Column(String(255), unique=True)
-        value = Column(String(255))
+    configs = relationship(
+        "Configs", secondary='servers_configs', back_populates="servers",
+        cascade="all, delete", single_parent=True
+    )
 
-    if act == 0: pass
-    elif act == 1: ServBase.metadata.create_all(engine[-1])
-    elif act == 2:
-        ServBase.metadata.drop_all(bind=engine[-1], tables=[Dynamic.__table__])
-    return Dynamic
+class Configs(ServersBase):
+    __tablename__ = "configs"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    param=Column(String(255))
+    block= Column(String(255), nullable=True)
+    
+    servers = relationship(
+        "ServList", secondary='servers_configs', back_populates="configs",
+        cascade="all, delete"
+    )
+
+class ServList_Configs(ServersBase):
+    __tablename__ = "servers_configs"
+
+    id = Column(Integer, primary_key=True)
+    hostname=Column(String, ForeignKey('servers.hostname'))
+    param_id=Column(Integer, ForeignKey('configs.id'))
+    value = Column(String, nullable=True)
 
 #Функция подключения к БД
 def connect_db(app):
@@ -82,7 +92,7 @@ def create_sqlite_db():
         dbname = request.form['dbname']
         engine = create_engine(f'sqlite:///bases/{dbname}.db')
         if 'create' in request.form:
-            Base.metadata.create_all(engine)
+            UserBase.metadata.create_all(engine)
             cursor = engine.connect()
             answer = cursor.execute("select * from users limit 1")
             result = answer.fetchone()
@@ -94,6 +104,10 @@ def create_sqlite_db():
                     superadmin = Users(username=request.form['sauser'], password=hashpass, role="superadmin") 
                     session.add(superadmin) 
                     session.commit()
+                try:
+                    create_confgs(engine)
+                except:
+                    raise Exception
             else:
                 return 'table_exist'
     except Exception as e:
@@ -126,7 +140,7 @@ def create_sql_db():
             if not request.form.get('sauser') or not request.form.get('sapass'):
                 return 'empty_login'
             try:
-                Base.metadata.create_all(engine)
+                UserBase.metadata.create_all(engine)
                 username = request.form['sauser']
                 hashpass = hashlib.sha1(request.form['sapass'].encode()).hexdigest()
                 with Session(engine) as session:
@@ -135,6 +149,10 @@ def create_sql_db():
                     session.commit()
             except Exception as e:
                 logging('e', e, inspect.currentframe().f_code.co_name)				
+                return 'create_bad'
+            try:
+                create_confgs(engine)
+            except:
                 return 'create_bad'
         to_yaml = {'type': type, 'hostname': host,
                     'port': port, 'name': db, 'dbuser': user,
@@ -145,9 +163,25 @@ def create_sql_db():
         if 'create' in request.form:
             return 'create_scuess'
         return 'connection_sucess'
-    except:
+    except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'bad_connect'
+    
+def create_confgs(engine):
+    try:
+        param_list = {
+            'listen-on':'options',
+            'directory':'options'
+        }
+        ServersBase.metadata.create_all(engine)
+        with Session(engine) as ses:
+            for key, value in param_list.items():
+                new = Configs(param=key, block=value)
+                ses.add(new)
+            ses.commit()
+    except Exception as e: 
+        logging('e', e, inspect.currentframe().f_code.co_name) 
+        
 
 #Функция выбора и настройки параметров БД
 def setup_db():
@@ -273,9 +307,9 @@ def server_insertdb(dbsql, data):
 def getservlist(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         try:
-            engine = dbsql.get_engine()
+            engine = dbsql.engine
+            ServersBase.metadata.create_all(engine)
             stmt = select(ServList).order_by(ServList.id)
-            #print(stmt)
             servs = []
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
@@ -290,24 +324,22 @@ def getservlist(dbsql):
 
 def getserv(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
-        tbname = request.form.get('servname')
+        hostname = request.form.get('servname')
         engine = dbsql.get_engine()
-        custom = dyntable(tbname, 0)
-        getlist = select(ServList).where(ServList.hostname == tbname)
-        servs = {}
+        getlist = select(ServList).where(ServList.hostname == hostname)
+        getServConf = select(ServList_Configs).where(ServList_Configs.hostname == hostname)
+        params = []
         try:
-            if dbinspect(dbsql.engine).has_table(tbname):
-                getparam = select(custom.param).order_by(custom.id)
-                getvalue = select(custom.value).order_by(custom.id)
-                param = []
-                value = []
-                with dbsql.session() as ses:
-                    for p in ses.execute(getparam):
-                        param.append(p[0])
-                    for v in ses.execute(getvalue):
-                        value.append(v[0])
-                total = {'param': param, 'value': value}
-                servs.update(config = total)
+            with engine.connect() as ses:
+                for row in ses.execute(getServConf):
+                    getPar = select(Configs.param, Configs.block).where(Configs.id == row['id'])
+                    for pkey in ses.execute(getPar): 
+                        values = {
+                            'value' : row['value'],
+                            'block' : pkey['block']
+                            }
+                        name = {pkey['param']: values }
+                        params.append(name)
         except Exception as e:
             logging('e', e, inspect.currentframe().f_code.co_name)
             return 'failure'
@@ -315,14 +347,14 @@ def getserv(dbsql):
             with engine.connect() as ses:
                 for row in ses.execute(getlist):
                     pass
-                myjson = {
+                controls = {
                     "hostname":row['hostname'], 
                     "core":row['core'], 
                     "bind_version":row['bind_version'], 
                     'user':row['username'],
                     'status':row['configured']
                     }
-                servs.update(serv_controls=myjson)
+                servs ={'controls': controls, 'params': params}
             return json.dumps(servs, indent=4)
         except Exception as e:
             logging('e', e, inspect.currentframe().f_code.co_name)
@@ -377,20 +409,12 @@ def delserver(dbsql, hostname):
     try:
         if not request.form.get('hostname'): return 'empty_host'
         hostname = request.form.get('hostname')
-        selq = select(ServList.hostname, ServList.id).where(ServList.hostname == hostname)
-        server = ''
+        clear = delete(ServList_Configs).where(ServList_Configs.hostname == hostname)
         with dbsql.session() as ses:
-            for server in ses.execute(selq):
-                pass
-        if not server: return 'bad_hostname'
-        delq = delete(ServList).where(ServList.id == server['id'])
-        with dbsql.session() as ses:
-            ses.execute(delq)
+            ses.execute(clear)
+            dlt = ses.query(ServList).filter(ServList.hostname==hostname).first()
+            ses.delete(dlt)
             ses.commit()
-        try:
-            dyntable(server['hostname'],2,dbsql.engine)
-        except Exception as e:
-            pass
         return 'servdel_success'
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
@@ -399,20 +423,21 @@ def delserver(dbsql, hostname):
 def updateconf_query(dbsql, data):
     try:
         hostname = data['hostname']
-        param = data['param']
+        param_id = data['param']
         value = data['value']
-        if not dbinspect(dbsql.engine).has_table(hostname):
-            custom = dyntable(hostname, 1, dbsql.engine)
-        else: 
-            custom = dyntable(hostname, 0, dbsql.engine)
+        getParam = select(Configs.id).where(Configs.id == param_id)
+        getHostname = select(ServList.hostname).where(ServList.hostname == hostname)
         update_status=(update(ServList)
             .where(ServList.hostname == hostname)
             .values(configured = True)
         )
+        ServersBase.metadata.create_all(dbsql.engine)
         with dbsql.session() as ses:
-            new = custom(param=param, value=value)
+            param_id = ses.execute(getParam).first()[0]
+            hostname = ses.execute(getHostname).first()[0]
+            setRel = ServList_Configs(hostname = hostname, param_id = param_id, value = value)
+            ses.add(setRel)
             ses.execute(update_status)
-            ses.add(new) 
             ses.commit()
         return 'update_success'
     except Exception as e:

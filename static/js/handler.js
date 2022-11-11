@@ -100,6 +100,7 @@ function responce_handler(data, form){
         /* Реакция на управление сервером */
         case ('update_success'):
             updatesuccess();
+            console.log('update!')
             break;
         /* Общие события */
         case ('failure'):

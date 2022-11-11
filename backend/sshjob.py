@@ -29,12 +29,12 @@ def send_command(hostname, port, username, key_id, commandlist):
 
     with client.invoke_shell() as ssh:
             ssh.send('echo\n')
-            ssh.settimeout(0.05)
+            ssh.settimeout(0.1)
             ssh.recv(3000)
             result = []
             for command in commandlist:
                     ssh.send(f'{command}\n')
-                    ssh.settimeout(0.05)
+                    ssh.settimeout(0.1)
                     output = ""
                     while True:
                         try:

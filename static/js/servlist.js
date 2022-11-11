@@ -10,14 +10,13 @@ function getservlist(){
     data: data
     })
     .done(function(data) {
-        if (data=='db_failed') {
+        var json = JSON.parse(data)
+        if (Object.keys(json).length < 1) {
             const $servlist = document.querySelector('#servlist');
             const $message = document.createElement('h3');
             $message.textContent ='Список серверов пуст';
             $servlist.appendChild($message);  
         } else {
-            var json = JSON.parse(data)
-            console.log(json)
             makeservlist(json)
         };
     })
@@ -117,7 +116,7 @@ function showservinfo(data){
     var json = JSON.parse(data)
     console.log(json)
 
-    $('#servcontrol_hostname').val(json['serv_controls']['hostname']);
+    $('#servcontrol_hostname').val(json['controls']['hostname']);
     const $body = document.querySelector('#servcontrols');
     $body.textContent='';
 
@@ -126,7 +125,7 @@ function showservinfo(data){
 
     //Заголовок - хост
     const $host = document.createElement('h2');
-    $host.textContent=json.serv_controls.hostname;
+    $host.textContent=json.controls.hostname;
     $body.appendChild($host);
 
     //Блок параметров сервера
@@ -137,41 +136,43 @@ function showservinfo(data){
         const $table_controls = document.createElement('table');
         $table_controls.classList.add('servtable');
         $controlsblock.appendChild($table_controls)
-        for (key in json['serv_controls']) {
-            if (json['serv_controls'][key] == false) {break;};
-            index = serv_controls_RU(key)
+        for (key in json['controls']) {
+            if (json['controls'][key] == false) {break;};
+            index = controls_RU(key)
             let row = document.createElement('tr')
             $table_controls.appendChild(row);
             let txt = document.createElement('th');
             let data = document.createElement('th');
             txt.textContent=index+':';
-            data.textContent=json['serv_controls'][key];
+            data.textContent=json['controls'][key];
             row.appendChild(txt);
             row.appendChild(data);
         };
 
         //Таблица параметров
-        if (json['serv_controls']['status'] == true) {
+        /*
+        if (json['controls']['status'] == true) {
             const $table_config = document.createElement('table');
             $table_config.classList.add('servtable');
             $config.appendChild($table_config)
-            for (key in json['config']['param']) {
-                //index = serv_controls_RU(key)
+            for (key in json['params']) {
+                //index = controls_RU(key)
                 let row = document.createElement('tr')
                 $table_config.appendChild(row);
                 let txt = document.createElement('th');
                 let data = document.createElement('th');
-                txt.textContent=json['config']['param'][key];
-                data.textContent=json['config']['value'][key];
+                txt.textContent=json['param'][key];
+                data.textContent=json['value'][key];
                 row.appendChild(txt);
                 row.appendChild(data);
             };
-        };
+            
+        };*/
     
     $('#servcontrol').removeClass('hidden');
 };
 
-function serv_controls_RU(value){
+function controls_RU(value){
     switch(value) {
         case('bind_version'): return 'Версия BIND';
         case('core'): return 'Ориентация';

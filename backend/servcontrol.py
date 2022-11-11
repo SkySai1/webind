@@ -34,17 +34,17 @@ def serveradd(dbsql):
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'serv_field_bad'
-    #try:
-    data = {
-        "host": host,
-        "port": port,
-        "user": user,
-        "passwd": passwd
-    }
-    return serveradd_proces(dbsql, data)
-    #except Exception as e:
-    #    logging('e', e, inspect.currentframe().f_code.co_name)
-    #    return 'failure'
+    try:
+        data = {
+            "host": host,
+            "port": port,
+            "user": user,
+            "passwd": passwd
+        }
+        return serveradd_proces(dbsql, data)
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'failure'
     
 def serverchange(dbsql):
     out = ''
@@ -113,7 +113,7 @@ def serveradd_proces(dbsql, data):
             "id = re.sub(r'\s*',\"\", machine_id).split(sep=':')[1]",
             "if dir_ac is True and conf_ac is True: access='true'",
             "else: access='false'",
-            "\n",
+            "\n\n",
             "print(access)",
             "print(vers)",
             "print(sys)",
@@ -129,7 +129,7 @@ def serveradd_proces(dbsql, data):
         vers=result[-5].split(sep='\n')[1]
         access=result[-6].split(sep='\n')[1]
         id_hash = hashlib.sha1(id.encode()).hexdigest()
-        print(access)
+        #print(result[-6])
         if 'true' in access:
             data = {
                 'hostname': host,
@@ -152,10 +152,12 @@ def updateconf(dbsql):
     hostname = request.form.get('hostname')
     param = request.form.get('conf')
     value = request.form.get('val')
+    block = request.form.get('block')
     data = {
         'hostname':hostname,
         'param':param,
-        'value':value
+        'value':value,
+        'block':block
     }
     return updateconf_query(dbsql,data)
     return 'failure'
