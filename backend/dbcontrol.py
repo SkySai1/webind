@@ -8,7 +8,7 @@ from flask import request, render_template, session, flash
 import yaml
 import os
 import json
-from sqlalchemy import Column, Integer, String, Boolean, update, delete
+from sqlalchemy import Column, Integer, String, Boolean, update, delete, inspect as dbinspect
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
 from sqlalchemy import create_engine, select
@@ -50,7 +50,7 @@ def dyntable(tbname, act, *engine):
     class Dynamic(ServBase):
         __tablename__ = tbname
         id = Column(Integer, primary_key=True)
-        config = Column(String(255), unique=True)
+        param = Column(String(255), unique=True)
         value = Column(String(255))
 
     if act == 0: pass
@@ -279,7 +279,7 @@ def getservlist(dbsql):
             servs = []
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
-                    myjson = {"id":row[0], "hostname":row[1], "configured":row[6]}
+                    myjson = {"id":row['id'], "hostname":row['hostname'], "status":row['configured']}
                     servs.append(myjson)
             return json.dumps(servs)
         except Exception as e:
@@ -293,23 +293,35 @@ def getserv(dbsql):
         tbname = request.form.get('servname')
         engine = dbsql.get_engine()
         custom = dyntable(tbname, 0)
-        stmt = select(custom)
-        stmt2 = select(ServList).where(ServList.hostname == tbname)
+        getlist = select(ServList).where(ServList.hostname == tbname)
         servs = {}
         try:
-            with engine.connect() as ses:
-                for row in ses.execute(stmt):
-                    pass
-                myjson = {"id":row[0], "config":row[1], "value":row[2], "clear_serv":"false"}
-                servs.update(serv_config=myjson)
-        except:
-            myjson = {'clear_serv':"true"}
-            servs.update(serv_config=myjson)
+            if dbinspect(dbsql.engine).has_table(tbname):
+                getparam = select(custom.param).order_by(custom.id)
+                getvalue = select(custom.value).order_by(custom.id)
+                param = []
+                value = []
+                with dbsql.session() as ses:
+                    for p in ses.execute(getparam):
+                        param.append(p[0])
+                    for v in ses.execute(getvalue):
+                        value.append(v[0])
+                total = {'param': param, 'value': value}
+                servs.update(config = total)
+        except Exception as e:
+            logging('e', e, inspect.currentframe().f_code.co_name)
+            return 'failure'
         try:
             with engine.connect() as ses:
-                for row in ses.execute(stmt2):
+                for row in ses.execute(getlist):
                     pass
-                myjson = {"hostname":row[1], "core":row[2], "bind_version":row[8]}
+                myjson = {
+                    "hostname":row['hostname'], 
+                    "core":row['core'], 
+                    "bind_version":row['bind_version'], 
+                    'user':row['username'],
+                    'status':row['configured']
+                    }
                 servs.update(serv_controls=myjson)
             return json.dumps(servs, indent=4)
         except Exception as e:
@@ -380,6 +392,29 @@ def delserver(dbsql, hostname):
         except Exception as e:
             pass
         return 'servdel_success'
+    except Exception as e:
+        logging('e', e, inspect.currentframe().f_code.co_name)
+        return 'failure'
+
+def updateconf_query(dbsql, data):
+    try:
+        hostname = data['hostname']
+        param = data['param']
+        value = data['value']
+        if not dbinspect(dbsql.engine).has_table(hostname):
+            custom = dyntable(hostname, 1, dbsql.engine)
+        else: 
+            custom = dyntable(hostname, 0, dbsql.engine)
+        update_status=(update(ServList)
+            .where(ServList.hostname == hostname)
+            .values(configured = True)
+        )
+        with dbsql.session() as ses:
+            new = custom(param=param, value=value)
+            ses.execute(update_status)
+            ses.add(new) 
+            ses.commit()
+        return 'update_success'
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'

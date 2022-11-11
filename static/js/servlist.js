@@ -1,4 +1,8 @@
-function getservlist(data){
+function getservlist(){
+    var data = {
+        status: "server",
+        action: "getservlist"
+    };
     $.ajax({
     url:'/',
     method: 'POST',
@@ -13,80 +17,95 @@ function getservlist(data){
             $servlist.appendChild($message);  
         } else {
             var json = JSON.parse(data)
-            var $servlist = document.getElementById('servlist');
-            $servlist.textContent='';
-            for (object in Object.keys(json)) {
-                const $button = document.createElement('button');
-                const $form = document.createElement('form');
-                const $hidden1 = document.createElement('input');
-                const $hidden2 = document.createElement('input');
-                const $hidden3 = document.createElement('input');
-                const $host = document.createElement('h3');
-                const $status = document.createElement('a');
-                const $rightdiv = document.createElement('div');
-                const $img = document.createElement('img');
-
-
-                const $servlist = document.querySelector('#servlist');
-                $servlist.appendChild($form);         
-
-                $hidden1.type='hidden';
-                $hidden1.name='status';
-                $hidden1.value='server';
-
-                $hidden2.type='hidden';
-                $hidden2.name='action';
-                $hidden2.value='getserver';
-
-                $hidden3.type='hidden';
-                $hidden3.name='servname';
-                $hidden3.value=json[object].hostname;
-                
-                $form.appendChild($hidden1);
-                $form.appendChild($hidden2);
-                $form.appendChild($hidden3);
-
-                $form.classList.add('row');
-                $form.style='align-items: center;';
-                
-                $img.src='../static/img/settings.svg';
-                $img.classList.add('settings-svg');
-                $button.appendChild($img);
-                $button.type='button';
-                $button.style='margin-right: 0.5em; background: none; border: none;';
-                $button.onclick=function(){getserv(this.form, this);};
-                $form.appendChild($button);
-
-                $form.appendChild($rightdiv);
-
-                $host.textContent = json[object].hostname;
-                $host.style='word-break: break-all;';
-                $rightdiv.appendChild($host);
-                
-                if (json[object].configured == 'true') {
-                    $status.textContent = 'Настроен'
-                } else {
-                    $status.textContent = 'Новый сервер'
-                };
-                $rightdiv.appendChild($status);
-            };
+            console.log(json)
+            makeservlist(json)
         };
     })
-    .fail(function(data){
+    .fail(function(){
         alert('Внутрення ошибка, перезагрузите страницу!');
     });
 };
 
-function getserv(form, dom){
-    $(dom).children('.settings-svg').addClass('rotate');
+function makeservlist(json) {
+    var $servlist = document.getElementById('servlist');
+    $servlist.textContent='';
+    var i = 0
+    for (object in Object.keys(json)) {
+        const $button = document.createElement('button');
+        const $form = document.createElement('form');
+        const $hidden1 = document.createElement('input');
+        const $hidden2 = document.createElement('input');
+        const $hidden3 = document.createElement('input');
+        const $host = document.createElement('h3');
+        const $status = document.createElement('a');
+        const $rightdiv = document.createElement('div');
+        const $img = document.createElement('img');
+
+
+        const $servlist = document.querySelector('#servlist');
+        $servlist.appendChild($form);         
+
+        $hidden1.type='hidden';
+        $hidden1.name='status';
+        $hidden1.value='server';
+
+        $hidden2.type='hidden';
+        $hidden2.name='action';
+        $hidden2.value='getserver';
+
+        $hidden3.type='hidden';
+        $hidden3.name='servname';
+        $hidden3.value=json[object].hostname;
+        
+        $form.appendChild($hidden1);
+        $form.appendChild($hidden2);
+        $form.appendChild($hidden3);
+
+        $form.classList.add('row');
+        $form.style='align-items: center;';
+        
+        let id='servPos-'+i;
+        $img.src='../static/img/settings.svg';
+        $img.classList.add('settings-svg');
+        $img.id=id;
+        $button.appendChild($img);
+        $button.type='button';
+        $button.style='margin-right: 0.5em; background: none; border: none;';
+        $button.onclick=function(){getserv(this.form, id);};
+        $form.appendChild($button);
+
+        $form.appendChild($rightdiv);
+
+        $host.textContent = json[object].hostname;
+        $host.style='word-break: break-all;';
+        $rightdiv.appendChild($host);
+        
+        if (json[object]['status'] == true) {
+            $status.textContent = 'Настроен'
+        } else if (json[object]['status'] == false) {
+            $status.textContent = 'Новый сервер'
+        } else {
+            $status.textContent = 'Ошибка статуса'
+        };
+        $rightdiv.appendChild($status);
+        ++i;
+    };
+};
+
+function getserv(form, id, getdata){
+    document.getElementById(id).classList.add('rotate');
+    if (getdata){
+        data = getdata
+    }else{data = $(form).serialize()};
     $.ajax({
     url:'/',
     method: 'POST',
     dataType: 'html',
-    data: $(form).serialize()
+    data: data
     })
     .done(function(data) {
-        $(dom).children('.settings-svg').removeClass('rotate');
+        document.getElementById(id).classList.remove('rotate')
+        localStorage.setItem('servPos', id);
         showservinfo(data);
     })
     .fail(function(){
@@ -96,13 +115,14 @@ function getserv(form, dom){
 
 function showservinfo(data){
     var json = JSON.parse(data)
-    if (json.serv_config.clear_serv == 'true'){
-        console.log(json);
-    } else {
-        console.log(json);
-    }
-    const $body = document.querySelector('#servcontrol_front');
+    console.log(json)
+
+    $('#servcontrol_hostname').val(json['serv_controls']['hostname']);
+    const $body = document.querySelector('#servcontrols');
     $body.textContent='';
+
+    const $config = document.querySelector('#servconfig');
+    $config.textContent='';
 
     //Заголовок - хост
     const $host = document.createElement('h2');
@@ -110,35 +130,55 @@ function showservinfo(data){
     $body.appendChild($host);
 
     //Блок параметров сервера
-    const $content = document.createElement('div');
-    $body.appendChild($content);
+    const $controlsblock = document.createElement('div');
+    $body.appendChild($controlsblock);
 
         //Таблица свойств
-        const $table = document.createElement('table');
-        $table.classList.add('servtable');
-        $content.appendChild($table)
+        const $table_controls = document.createElement('table');
+        $table_controls.classList.add('servtable');
+        $controlsblock.appendChild($table_controls)
+        for (key in json['serv_controls']) {
+            if (json['serv_controls'][key] == false) {break;};
+            index = serv_controls_RU(key)
+            let row = document.createElement('tr')
+            $table_controls.appendChild(row);
+            let txt = document.createElement('th');
+            let data = document.createElement('th');
+            txt.textContent=index+':';
+            data.textContent=json['serv_controls'][key];
+            row.appendChild(txt);
+            row.appendChild(data);
+        };
 
-            //Версия DNS
-            const $row1 = document.createElement('tr')
-            $table.appendChild($row1);
-            const $bindvers_txt = document.createElement('th');
-            const $bindvers_data = document.createElement('th');
-            $bindvers_txt.textContent='Версия DNS сервиса:'
-            $bindvers_data.textContent=json.serv_controls.bind_version;
-            $row1.appendChild($bindvers_txt);
-            $row1.appendChild($bindvers_data);
-
-            //Рабочая директория
-            const $row2 = document.createElement('tr')
-            $table.appendChild($row2);
-            const $workdir_txt = document.createElement('th');
-            const $workdir_data = document.createElement('th');
-            $workdir_txt.textContent='Ориентация:';
-            $workdir_data.textContent=json.serv_controls.core;
-            $row2.appendChild($workdir_txt);
-            $row2.appendChild($workdir_data);
+        //Таблица параметров
+        if (json['serv_controls']['status'] == true) {
+            const $table_config = document.createElement('table');
+            $table_config.classList.add('servtable');
+            $config.appendChild($table_config)
+            for (key in json['config']['param']) {
+                //index = serv_controls_RU(key)
+                let row = document.createElement('tr')
+                $table_config.appendChild(row);
+                let txt = document.createElement('th');
+                let data = document.createElement('th');
+                txt.textContent=json['config']['param'][key];
+                data.textContent=json['config']['value'][key];
+                row.appendChild(txt);
+                row.appendChild(data);
+            };
+        };
     
     $('#servcontrol').removeClass('hidden');
+};
+
+function serv_controls_RU(value){
+    switch(value) {
+        case('bind_version'): return 'Версия BIND';
+        case('core'): return 'Ориентация';
+        case('hostname'): return 'Адрес узла';
+        case('user'): return 'Пользователь';
+        default: return 'Неизвестно';
+    };
 };
 
 function servcontrol_close(){

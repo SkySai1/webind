@@ -97,6 +97,10 @@ function responce_handler(data, form){
             get_servlistbox('#servlist-on-ch', '#server-mv', 'skip');
             $('#change-username').val('');
             break;
+        /* Реакция на управление сервером */
+        case ('update_success'):
+            updatesuccess();
+            break;
         /* Общие события */
         case ('failure'):
             big_message('red', 'Ошибка выполнения функции!')

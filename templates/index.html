@@ -306,9 +306,17 @@
 							</div>
 						</button>
 					</div>
-					<div id="servcontrol_front">
-
+					<div id="servcontrols"></div>
+					<hr style="width: 45vw;">
+					<div>
+						<form class="form">
+							<input type="hidden" name="hostname" id="servcontrol_hostname">
+							<input type="text" name="conf">
+							<input type="text" name="val">
+							<button type="button" onclick="sendUpdate(this.form)">Отправить</button>
+						</form>
 					</div>
+					<div id="servconfig"></div>
 				</div>
 			{% endif %}
 		</div>

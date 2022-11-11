@@ -1,10 +1,6 @@
 $(document).ready(function(){
     window.vanish = '';
-    var data = {
-        status: "server",
-        action: "getservlist"
-    };
-    getservlist(data)
+    getservlist();
 });
 function list_filter(input, list) {
     $(input).on('keyup', function() {

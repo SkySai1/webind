@@ -17,7 +17,9 @@ def server(dbsql):
             hostname = request.form.get('hostname')
             return delserver(dbsql, hostname)
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
-        if 'getservlist' in request.form.get('action'):
+        if 'updateconf' in request.form.get('action'):
+            return updateconf(dbsql)
+        elif 'getservlist' in request.form.get('action'):
             return getservlist(dbsql)
         elif 'getserver' in request.form.get('action'):
             return getserv(dbsql)
@@ -93,14 +95,14 @@ def serveradd_proces(dbsql, data):
             "import subprocess",
             "named = subprocess.run(['named', '-V'], capture_output=True)",
             "import re",
-            "vers = re.search(r'BIND[\\t 0-9\.-_()a-z]+',named.stdout.decode())[0]",
+            "vers = re.search(r'BIND[\\t 0-9\.-_\(\)a-zA-Z]*',named.stdout.decode())[0]",
             "import os",
             "if os.path.isfile('/etc/debian_version'):",
-            "\tsys = 'Debian'",
+            "\tsys = 'debian'",
             "\tdir = '/etc/bind/'",
             "\tconf = '/etc/bind/named.conf'",
             "elif os.path.isfile('/etc/redhat-release'):",
-            "\tsys = 'RedHat'",
+            "\tsys = 'rhel'",
             "\tdir = '/var/named/'",
             "\tconf = '/etc/named.conf'",
             "\n",
@@ -127,31 +129,33 @@ def serveradd_proces(dbsql, data):
         vers=result[-5].split(sep='\n')[1]
         access=result[-6].split(sep='\n')[1]
         id_hash = hashlib.sha1(id.encode()).hexdigest()
-        '''
-        hostname = data['hostname']
-        core=data['core']
-        id=data['id']
-        username=data['username']
-        key_id=data['key_id']
-        conf=data['conf']
-        dir=data['dir']
-        vers=data['vers']
-        '''
-        data = {
-            'hostname': host,
-            'core': sys,
-            'id': id_hash,
-            'username': user,
-            'key_id': key_id,
-            'conf': conf,
-            'dir': dir,
-            'vers': vers
-        }
         print(access)
         if 'true' in access:
+            data = {
+                'hostname': host,
+                'core': sys,
+                'id': id_hash,
+                'username': user,
+                'key_id': key_id,
+                'conf': conf,
+                'dir': dir,
+                'vers': vers
+            }
             return server_insertdb(dbsql,data)
         else:
             return 'serv_add_permission_bad'
     except Exception as e:
         logging('e', e, inspect.currentframe().f_code.co_name)
         return 'failure'
+
+def updateconf(dbsql):
+    hostname = request.form.get('hostname')
+    param = request.form.get('conf')
+    value = request.form.get('val')
+    data = {
+        'hostname':hostname,
+        'param':param,
+        'value':value
+    }
+    return updateconf_query(dbsql,data)
+    return 'failure'

@@ -91,3 +91,34 @@ function servdel(form){
         };
     };
 };
+
+function servupdate_conf(form){
+    form_submit(form);
+
+}
+
+function sendUpdate(form){
+    data = $(form).serialize().split('&');
+    for (i in data) {
+        if (data[i].includes('hostname')) {
+            hostname=data[i].split('=')[1]
+        };
+    };
+    data.push("status=server");
+    data.push("action=updateconf");
+    data = data.join('&')
+    localStorage.setItem('hostname', hostname);
+    //console.log(data)
+    form_submit('',data);
+};
+function updatesuccess(){
+    getservlist();
+    hostname = localStorage['hostname'];
+    var data = {
+        status: "server",
+        action: "getserver",
+        servname: hostname
+    };
+    id = localStorage.getItem('servPos');
+    getserv('',id,data);
+}
