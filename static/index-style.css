@@ -210,17 +210,23 @@ body{
 #servcontrol {
   position: fixed;
   margin-top: 1em;
-  width: 50vw;
-  height: 75vh;
-  left: calc(50% - 50vw/2);
+  min-width: 35em;
+  width: 75vw;
+  right: -80vw;
+  height: 80vh;
   display: flex;
   justify-content: flex-start;
   border: solid;
+  border-top-width: 1em;
   overflow: auto;
   box-shadow: 5px 5px 10px 0px rgb(98 120 133 / 39%);
   border-image: linear-gradient(130deg, #ffffff, #1ca8ff) 1;
   flex-direction: column;
   align-items: center;
+  transition: all 0.5s cubic-bezier(0, 0, 0.22, 0.98);
+}
+.servercontrol-move{
+  right:0 !important;
 }
 #servcontrol_header {
   display: flex;
@@ -500,6 +506,35 @@ body{
 }
 #b-userdel:hover{
   background: #ebc3c3;
+}
+/* Незримая часть Фронта */
+.invisible{
+  position: absolute;
+}
+
+/* Видимая часть Фронта */
+.front_styling{
+  margin-top: 0.75em;
+  position: absolute;
+  display: flex;
+  width: 100vw;
+  z-index: -1;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.visible{
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100vw;
+}
+.front_left_side{
+  width: 25vw;
+}
+.front_right_side {
+  width: 75vw;
 }
 /*Стилизация главной кнопки*/
 .buttonstyle{
