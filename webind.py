@@ -64,6 +64,8 @@ def index():
 				return users(dbsql)
 			elif 'server' == request.form.get('status'):
 				return server(dbsql)
+			elif 'zone' == request.form.get('status'):
+				return zone(dbsql)
 		#Блок: Пост-запрос, ДБ НЕ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and not dbsql and 'loggedin' not in session:
 			if 'sqlsetup' == request.form.get('status'):

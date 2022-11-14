@@ -9,6 +9,7 @@ function form_submit(form, getdata){
     data: data
     })
     .done(function(data) {
+        console.log(data)
         responce_handler(data, form);
     })
     .fail(function(){

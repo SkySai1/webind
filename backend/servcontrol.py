@@ -23,7 +23,7 @@ def server(dbsql):
             return getservlist(dbsql)
         elif 'getserver' in request.form.get('action'):
             return getserv(dbsql)
-    return 'nothing'
+    return 'failure'
         
 def serveradd(dbsql):
     out = ''

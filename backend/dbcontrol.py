@@ -733,3 +733,22 @@ def updateconf_query(dbsql, data):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
+    
+def zoneadd_query(dbsql, data):
+    try:
+        with dbsql.session() as ses:
+            new = Zones(
+                zonename = data['zonename'],
+                type = data['type'],
+                serial = data['serial'],
+                ttl = data['TTL'],
+                expire = data['expire'],
+                refresh = data['refresh'],
+                retry = data['retry']
+            )
+            ses.add(new)
+            ses.commit()
+        return 'zone_add_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'

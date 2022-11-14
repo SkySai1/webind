@@ -104,12 +104,16 @@ function responce_handler(data, form){
             updatesuccess();
             console.log('update!')
             break;
+        /* Реакция на управление зоной */
+        case ('zone_add_success'):
+            rmi('green', 'Зона успешно создана!', form);
+            break;
         /* Общие события */
         case ('failure'):
-            big_message('red', 'Ошибка выполнения функции!')
+            big_message(form, 'red', 'Ошибка выполнения функции!')
             break;
         case ('bad_role'):
-            big_message('red', 'Ошибка при прямом обращении к роли!')
+            big_message(form, 'red', 'Ошибка при прямом обращении к роли!')
             break;
         default:
             alert(data);
