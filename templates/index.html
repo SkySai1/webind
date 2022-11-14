@@ -163,7 +163,7 @@
 							<div class="adm_controls">
 								<h2 class="sah2">Управление зонами</h2>
 								<div>
-									<button class="cl_button adm_button" onclick="rightshow('#new-zone')">Новая зона</button>
+									<button class="cl_button adm_button" onclick="setSerial()">Новая зона</button>
 									<button class="cl_button adm_button" onclick="">Изменить зону</button>
 									<button class="cl_button adm_button" onclick="">Новый домен</button>
 									<button class="cl_button adm_button" onclick="">Изменить домен</button>
@@ -314,22 +314,41 @@
 						{#		Окно управления зонами для роли админа:		#}
 						<div id="new-zone" class="el_right_pannel column hidden">
 							<h2 class="admh2">Новая зона</h2>
-							<form class="form column" id="usercreate-form" style="align-items: flex-start;">
+							<form class="form column" id="newZone-form" style="align-items: flex-start;">
 								<input type="hidden" name="status" value="zone">
 								<input type="hidden" name="action" value="newzone">
 								<div class="column" >
-									<input class="right_input" type="text" name="username" placeholder="Псевдоним">
-									<select style="width: 15.3em;" class="right_input" name="role">
-										<option value="user">Пользователь</option>
-										<option value="admin">Администратор</option>
-										<option value="superadmin">Суперадминистратор</option>
-									</select>
+									<input class="right_input" type="text" name="zonename" placeholder="Полное доменное имя">
+									<div class="row">
+										<a>Тип зоны:</a>
+										<select style="width: 15.3em;" class="right_input" name="role">
+											<option value="user">Первичная</option>
+											<option value="admin">Вторичная</option>
+											<option value="superadmin">Форвард</option>
+										</select>
+									</div>
+									<div class="row">
+										<a>Серийный номер:</a>
+										<input class="right_input" type="text" id="zoneSerial" name="serial" placeholder="Серийный номер">
+									</div>
+									<div class="row">
+										<a>TTL:</a>
+										<input class="right_input" type="text" name="zoneTTL" placeholder="86400">
+									</div>
+									<div class="row">
+										<a>Хранение:</a>
+										<input class="right_input" type="text" name="zoneExpre" placeholder="604800">
+									</div>
+									<div class="row">
+										<a>Обновление:</a>
+										<input class="right_input" type="text" name="zoneRefresh" placeholder="28800">
+									</div>
+									<div class="row">
+										<a>Интервал:</a>
+										<input class="right_input" type="text" name="zoneRetry" placeholder="3600">
+									</div>
+									<button id='b-useradd'class="adm_minibutton minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 								</div>
-								<div>
-									<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-									<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
-								</div>
-								<button id='b-useradd'class="sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 							</form>
 						</div>
 					</div>

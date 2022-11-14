@@ -219,10 +219,11 @@ body{
   display: flex;
   justify-content: flex-start;
   border: solid;
-  border-top-width: 1em;
+  border-top-width: 0;
   overflow: auto;
   box-shadow: 5px 5px 10px 0px rgb(98 120 133 / 39%);
-  border-image: linear-gradient(130deg, #ffffff, #1ca8ff) 1;
+  border-image: linear-gradient(98deg, #ffffff, #b6e7fc) 1;
+  background: linear-gradient(320deg, #b6e7fc, #fcfeff);
   flex-direction: column;
   align-items: center;
   transition: all 0.5s cubic-bezier(0, 0, 0.22, 0.98);
@@ -232,9 +233,10 @@ body{
 }
 #servcontrol_header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: flex-start;
   width: 100%;
+  background: linear-gradient(267deg, #b6e7fc, #fcfeff);
 }
 #servcontrols_front{
   width: 100%;
@@ -307,7 +309,7 @@ body{
   align-items: center;
 }
 .left_pannel_move{
-  left:0px;
+  left:0px !important;
   cursor: default;
 }
 .menu_front{
@@ -399,6 +401,15 @@ body{
   cursor: pointer;
 }
 
+.adm_minibutton{
+  background: #1537f885;
+}
+
+.adm_minibutton:hover{
+  background: #6679e6d8;
+  cursor: pointer;
+}
+
 .minibutton:active{
   box-shadow:inset 0px 0px 0.1em rgb(32 33 34);
 }
@@ -470,19 +481,19 @@ body{
   right: -50vw;
 }
 .right_pannel_move{
-  right: 0;
+  right: 0 !important;
   cursor: default;
 }
 
 .right_pannel_header{
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   height: auto;
 }
 .cl-btn{
   background: #ffffff00;
   border: none;
-  padding-right: 1.2em;
+  padding-left: 1.2em;
 }
 
 .el_right_pannel{
@@ -557,11 +568,22 @@ body{
 #b-userdel:hover{
   background: #ebc3c3;
 }
+
 /* Незримая часть Фронта */
 .invisible{
   position: absolute;
 }
 
+#newZone-form > div > div > a{
+  width: 10em;
+  font-family: system-ui;
+  font-size: x-large;
+  text-align: right;
+  margin-right: 1em;
+}
+#newZone-form > div > div > input{
+
+}
 /* Видимая часть Фронта */
 .front_styling{
   margin-top: 0.75em;
@@ -669,4 +691,59 @@ body{
 /*Сокрытие*/
 .hidden{
   display: none !important;
+}
+
+@media only screen and (max-width : 980px) {
+  .header{
+    height: auto;
+  }
+  .left_block > h1 {
+    font-size: x-large;
+}
+  .left_block > h2 {
+    font-size: x-large ;
+  }
+  .left_pannel{
+    width: 100vw;
+    left: -100vw;
+  }
+  .right_pannel {
+    right: -100vw;
+    width: 100vw;
+    min-width: 25em;
+    z-index: 3;
+  }
+  .el_right_pannel {
+    width: inherit;
+  }
+  .right_select {
+    max-width: none;
+  }
+  .front_left_side {
+    width: 35vw;
+  }
+  #servlist {
+    width: max-content;
+  }
+  #servlist > form {
+    height: 5em;
+    width: auto;
+    padding-right: 1em;
+  }
+  .settings-svg {
+  width: 5em;
+  }
+  #servlist > form > div > h3 {
+    font-size: x-large;
+    width: auto;
+  }
+  #servlist > form > div > a {
+    font-size: large;
+  }
+  #servcontrol {
+    margin-top: 0;
+    min-width: 35em;
+    width: 100vw;
+    right: -100vw;
+  }
 }
