@@ -122,5 +122,6 @@ def start_app():
 	app.run('0.0.0.0',5000)
  
 if __name__ == '__main__':
-	Parallel(start_app, timer)
+	#Parallel(start_app, timer)
+	start_app()
 

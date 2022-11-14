@@ -17,7 +17,7 @@ class FastTransport(paramiko.Transport):
                 self.packetizer.REKEY_BYTES = pow(2, 40)
                 self.packetizer.REKEY_PACKETS = pow(2, 40)
 
-def send_command(hostname, port, username, key_id, commandlist):
+def send_command(hostname, port, username, key_id, commandlist, to):
     path = os.path.dirname(os.path.abspath(__file__))
     key = paramiko.RSAKey.from_private_key_file(f'{path}/.ssh/{key_id}')
     
@@ -29,12 +29,12 @@ def send_command(hostname, port, username, key_id, commandlist):
 
     with client.invoke_shell() as ssh:
             ssh.send('echo\n')
-            ssh.settimeout(0.1)
+            ssh.settimeout(to)
             ssh.recv(3000)
             result = []
             for command in commandlist:
                     ssh.send(f'{command}\n')
-                    ssh.settimeout(0.1)
+                    ssh.settimeout(to)
                     output = ""
                     while True:
                         try:

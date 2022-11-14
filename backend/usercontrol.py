@@ -1,7 +1,7 @@
 from flask import request
 
 from backend.dbcontrol import *
-from backend.function import logging
+from backend.function import logger
 
 def users(dbsql):
     if 'superadmin' in session.get('role'):
@@ -30,10 +30,10 @@ def useradd(dbsql):
         try:
             return useradd_query(dbsql, data)
         except Exception as e:
-            logging('e', e, inspect.currentframe().f_code.co_name)
+            logger(inspect.currentframe().f_code.co_name)
             return 'user_exist'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name) 
+        logger(inspect.currentframe().f_code.co_name) 
         return 'failure'
 
 def userchange(dbsql):
@@ -44,7 +44,7 @@ def userchange(dbsql):
             try:
                 userchange_checkuname_query(dbsql, username)
             except Exception as e:
-                logging('e', e, inspect.currentframe().f_code.co_name)
+                logger(inspect.currentframe().f_code.co_name)
                 return 'failure'
         if 'on' == request.form.get('isnewpasswd') and not request.form.get('passwd'): return 'empty_field'
         elif 'on' == request.form.get('isnewusername') and not request.form.get('newusername'): return 'empty_field'
@@ -76,14 +76,14 @@ def userchange(dbsql):
             if value is False: return 'change_fail'
         return 'change_success'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
 def usersfind(dbsql):
     try:
         return usersfind_query(dbsql)
     except Exception as e: 
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
 def userdelete(dbsql):
@@ -92,5 +92,5 @@ def userdelete(dbsql):
     try:
         return userdelete_query(dbsql, username)
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'

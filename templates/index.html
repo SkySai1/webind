@@ -268,7 +268,7 @@
 									<input type="hidden" name="status" value="server">
 									<input type="hidden" name="action" value="servermv">
 									<div>
-										<select class="right_select" style="width: auto;" id="servlist-on-ch" size="20" onchange="changeserv('#change-servhost', value)">
+										<select class="right_select" style="width: auto;" id="servlist-on-ch" size="20" onchange="changeservname('#change-servhost', value)">
 										</select>
 									</div>
 									<div class="column">
@@ -280,7 +280,7 @@
 											<input class="right_input" type="text" name="passwd" placeholder="пароль">
 										</div>
 										<div class="row">
-											<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)" id="b-userchange">Изменить</button>
+											<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="servchange(this.form)" id="b-userchange">Изменить</button>
 											<button style="margin-left: 1em;" class="sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
 										</div>
 									</form>

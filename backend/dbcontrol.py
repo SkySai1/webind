@@ -15,7 +15,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from backend.function import logging
+from backend.function import logger
 
 ### Раздел описания сущностей БД 
 Base = declarative_base()
@@ -216,7 +216,7 @@ def connect_db(app):
             app.config['MYSQL_PASSWORD'] = file['dbpass']
             return app
         except Exception as e:
-            logging('e', e, inspect.currentframe().f_code.co_name) 
+            logger(inspect.currentframe().f_code.co_name) 
             return False
     return False
 
@@ -246,7 +246,7 @@ def create_sqlite_db():
             else:
                 return 'table_exist'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'create_bad'
     dbtype='sqlite'
     to_yaml = {'type': dbtype, 'dbname': dbname}
@@ -283,7 +283,7 @@ def create_sql_db():
                     session.add(superadmin) 
                     session.commit()
             except Exception as e:
-                logging('e', e, inspect.currentframe().f_code.co_name)				
+                logger(inspect.currentframe().f_code.co_name)				
                 return 'create_bad'
             try:
                 pass
@@ -300,7 +300,7 @@ def create_sql_db():
             return 'create_scuess'
         return 'connection_sucess'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'bad_connect'
     
 def create_confgs(engine):
@@ -319,7 +319,7 @@ def create_confgs(engine):
                 ses.add(new)
                 ses.commit()
     except Exception as e: 
-        logging('e', e, inspect.currentframe().f_code.co_name) 
+        logger(inspect.currentframe().f_code.co_name) 
         
 
 #Функция выбора и настройки параметров БД
@@ -361,7 +361,7 @@ def userchange_updateupass_query(dbsql, data):
             ses.commit()
         return True
     except Exception as e: 
-        logging('e', e, inspect.currentframe().f_code.co_name) 
+        logger(inspect.currentframe().f_code.co_name) 
         return False
     
 def userchange_updateurole_query(dbsql, data):
@@ -377,7 +377,7 @@ def userchange_updateurole_query(dbsql, data):
             ses.commit()
         return True
     except Exception as e: 
-        logging('e', e, inspect.currentframe().f_code.co_name) 
+        logger(inspect.currentframe().f_code.co_name) 
         return False
 
 def userchange_updateuname_query(dbsql, data):
@@ -399,7 +399,7 @@ def userchange_updateuname_query(dbsql, data):
             return True
         else: return False
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name) 
+        logger(inspect.currentframe().f_code.co_name) 
         return False
     
 def usersfind_query(dbsql):
@@ -473,7 +473,7 @@ def getservlist(dbsql):
                     servs.append(myjson)
             return json.dumps(servs)
         except Exception as e:
-            logging('e', e, inspect.currentframe().f_code.co_name)
+            logger(inspect.currentframe().f_code.co_name)
             return 'db_failed'
     return 'bad_role'
 
@@ -634,7 +634,7 @@ def getserv(dbsql):
             hostinfo = {'info':servInfo, 'options': options, 'views': views, 'zones': zones}
             return json.dumps(hostinfo, indent=4)
         except Exception as e:
-            logging('e', e, inspect.currentframe().f_code.co_name)
+            logger(inspect.currentframe().f_code.co_name)
             return 'failure'
     return 'bad_role'
 
@@ -647,15 +647,67 @@ def getservlistbox(dbsql):
                 out.append(row[0])
         return json.dumps(out, indent=4)
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'
-
-def serverchange_query(dbsql, hostname, newhost):
+def serveradd_query(dbsql, hostname, data):
     try:
-
+        hostname = hostname
+        newhost = data['hostname']
+        core = data['core']
+        id = data['id']
+        username = data['username']
+        keyid = data['key_id']
+        conf = data['conf']
+        dir = data['dir']
+        vers = data['vers']
+        new = Servers(hostname = newhost,
+                       core = core,
+                       machine_id = id,
+                       username = username,
+                       keyid = keyid,
+                       confpath = conf,
+                       workdirectory = dir,
+                       bind_version = vers)
+        with dbsql.session() as ses:
+            ses.add(new)
+            ses.commit()
+        return 'serv_add_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+    
+def serverchange_query(dbsql, hostname, data):
+    try:
+        hostname = hostname
+        newhost = data['hostname']
+        core = data['core']
+        id = data['id']
+        username = data['username']
+        keyid = data['key_id']
+        conf = data['conf']
+        dir = data['dir']
+        vers = data['vers']
+        with dbsql.engine.connect() as con:
+            getServID = select(Servers.id).where(Servers.hostname == hostname)
+            servID = con.execute(getServID).first()
+        if not servID: return 'missing_server'
+        with dbsql.session() as ses:
+            updt = (update(Servers)
+                    .where(Servers.id == servID[0])
+                    .values(hostname = newhost,
+                        core = core,
+                        machine_id = id,
+                        username = username,
+                        keyid = keyid,
+                        confpath = conf,
+                        workdirectory = dir,
+                        bind_version = vers)
+            )
+            ses.execute(updt)
+            ses.commit()
         return 'servermv_success'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'
     
 def delserver(dbsql, hostname):
@@ -665,9 +717,10 @@ def delserver(dbsql, hostname):
         with dbsql.session() as ses:
             dlt = ses.query(Servers).filter(Servers.hostname == hostname).first()
             ses.delete(dlt)
+            ses.commit()
         return 'servdel_success'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
 def updateconf_query(dbsql, data):
@@ -678,5 +731,5 @@ def updateconf_query(dbsql, data):
 
         return 'update_success'
     except Exception as e:
-        logging('e', e, inspect.currentframe().f_code.co_name)
+        logger(inspect.currentframe().f_code.co_name)
         return 'failure'

@@ -20,7 +20,7 @@ function f(){
     clearTimeout(window.vanish);
     window.vanish = setTimeout(function(){
         $('.left_pannel').toggleClass("left_pannel_move");
-    },1);
+    },10);
 };
 function logout(){
     var dt = {status: 'logout'};
@@ -52,7 +52,7 @@ function rightshow(id, skip){
         $('.right_pannel').removeClass('hidden');
     if ($('.right_pannel').hasClass("right_pannel_move")){
         delay=300;
-    } else {delay=1;};
+    } else {delay=10;};
     $('.right_pannel').removeClass("right_pannel_move");
     clearTimeout(window.vanish);
     window.vanish = setTimeout(function(){

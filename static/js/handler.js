@@ -16,7 +16,9 @@ function rmi(color, text, form) {
     },5000);
     
 };
-function big_message(color, text, advise) {
+function big_message(form, color, text, advise) {
+    if (color =='green'){
+        form.reset();}
     $('.rh_block').removeClass('hidden');
     $('#rh_message').text('');
     $('#rh_info').text('');
@@ -61,34 +63,34 @@ function responce_handler(data, form){
             break;
         /* Реакция на управление списком серваеров  */
         case ('serv_add_success'):
-            big_message('green', 'Сервер успешно подключен!', 'Настройте его на стартовом экране');
+            big_message(form, 'green', 'Сервер успешно подключен!', 'Настройте его на стартовом экране');
             break;
-        case ('serv_add_permission_bad'):
-            big_message('#b99223', 'Ошибка при добавлении сервера, но подключение доступно!',
+        case ('serv_permission_bad'):
+            big_message(form, '#b99223', 'Ошибка прав на сервере!',
             'Нет необходимых прав для учетной записи, от имени которой происходит подключение.\nПроверьте, рекурсивно, права на чтение, запись для файла конфиуграции "named.conf" и его директории.\nУзнать месторасположение можно через "named -V".\nИзменить права через "chmod"');
             break;
         case ('serv_exist'):
-            big_message('#b99223', 'Cервер уже подключен, SSH ключ обновлён','Проверьте ваш список серверов.');
+            big_message(form, '#b99223', 'Cервер уже подключен, SSH ключ обновлён','Проверьте ваш список серверов.');
             break;
         case ('sshkey_failure'):
-            big_message('red', 'Ошибка при настройке SSH ключа', 
+            big_message(form, 'red', 'Ошибка при настройке SSH ключа', 
             'Проверьте настройки SSH сервера на включение pubkey-authentication.\nУбедитесь, что для пользователя существует домашняя директорияю.\nВ случае с RHEL (CentOS) проверьте значения SELinux для домашней директории пользователя. ')
             break;
         case ('connect_failure'):
-            big_message('red', 'Ошибка при подключении к серверу',
+            big_message(form, 'red', 'Ошибка при подключении к серверу',
             'Проверьте введенные данные.\nУбедитесь, что на сервере работает SSH служба и открыты сетевые доступы.\n')
             break;
         case ('empty_host'):
             rmi('red', 'Выберете сервер!', form);
             break;
         case ('empty_serv_field'):
-            rmi('red', 'Заполните все поля для изменения!', form);
+            rmi('red', 'Заполните все поля!', form);
                 break;
         case ('bad_hostname'):
             rmi('red', 'Сервер не найден!', form)
             break;
         case ('servermv_success'):
-            rmi('green', 'Адресс сервера успешно изменен!', form);
+            big_message(form, 'green', 'Адресс сервера успешно изменен!', 'Изменения на главном экране');
             get_servlistbox('#servlist-on-ch', '#server-mv', 'skip');
             $('#change-username').val('');
             break;

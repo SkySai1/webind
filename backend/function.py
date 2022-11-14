@@ -9,20 +9,23 @@ import yaml
 import subprocess
 import re
 import datetime
+import logging
 from subprocess import PIPE
 
 def restart():
 	os.execv(sys.argv[0], sys.argv)
 
-def logging(type, e, frame):
-       now = datetime.datetime.now()
-       logdir = os.path.dirname(os.path.abspath(__file__))+"%s" % '/logs'
-       if not os.path.exists(logdir):
-              os.makedirs(logdir)
-       if type == 'e':
-              error = f"{now}# IN <{frame}>:: {e}\n"
-              with open(f"{logdir}/errors.log", 'a') as file:
-                     file.write(error)
+def logger(e):
+	now = datetime.datetime.now()
+	logdir = os.path.dirname(os.path.abspath(__file__))+"%s" % '/logs'
+	if not os.path.exists(logdir):
+			os.makedirs(logdir)
+	logging.basicConfig(filename=f"{logdir}/errors.log", level=logging.DEBUG)
+	logging.debug(f"\n\n{now}# DEBUG:")
+	logging.info(f"\n\n{now}# INFO:")
+	logging.warning(f"\n\n{now}# WARNING:")
+	logging.error(f"\n\n{now}# ERROR:")
+	logging.exception(f"{e}")
     
 def do_the_login(dbsql):
 	if request.form.get('username') and request.form.get('password'):
@@ -43,7 +46,7 @@ def do_the_login(dbsql):
 			else:
 				return 'badpass'
 		except Exception as e:
-			logging('e', e, inspect.currentframe().f_code.co_name)
+			logger(inspect.currentframe().f_code.co_name)
 			return 'baddb'
 	return 'empty_login'
 
@@ -81,7 +84,7 @@ def config_check():
 			else:
 				return False
 		except Exception as e:
-			logging('e', e, inspect.currentframe().f_code.co_name)
+			logger(inspect.currentframe().f_code.co_name)
 			return False
 
 

@@ -30,7 +30,7 @@ function form_serv_submit(form, getdata){
         alert('Внутрення ошибка, перезагрузите страницу!');
     });
 };
-function changeserv(input, value){
+function changeservname(input, value){
     $(input).val(value);
 };
 
@@ -71,12 +71,29 @@ function get_servlistbox(to_listbox, div, skip){
                     rightshow(div, true); 
                 },300);
             };
-            console.log(json)
         })
         .fail (function(){
 
         });
 };
+
+function servchange(form){
+    data = $(form).serialize().split('&')
+    bool = true
+    for (key in data){
+        row = data[key].split('=')
+        if (!row[1]) {
+            bool = false;
+            break;
+        }
+    };
+    if (bool != false) {
+        form_serv_submit(form)
+    } else {
+        responce_handler('empty_serv_field')
+    }
+    
+}
 function servdel(form){
     data = $(form).serialize().split('&');
     data[0] = 'status=server';
