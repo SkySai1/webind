@@ -62,9 +62,9 @@
 				{% elif session['role'] == 'admin' %}
 					<h2 class="first-mode">Администратор</h2>
 				{% else %}
-					<h2 class="second-mode">Пользователь</h2>
+					<h2 class="second-mode">{{ session['username'] }}</h2>
 				{% endif %}
-				<p>{{ session['username'] }}</p>
+				{# <p>{{ session['username'] }}</p>#}
 			</div>
 			<div class="center_block">
 				<button id="menu_button" onclick="f()">
@@ -311,6 +311,7 @@
 						{% endif %}
 
 						{#		Окно управления зонами для роли админа:		#}
+						{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
 						<div id="new-zone" class="el_right_pannel column hidden">
 							<h2 class="admh2">Новая зона</h2>
 							<form class="form column" id="newZone-form" style="align-items: flex-start;">
@@ -350,6 +351,7 @@
 								</div>
 							</form>
 						</div>
+						{% endif %}
 					</div>
 				</div>
 			</div>
