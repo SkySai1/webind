@@ -175,7 +175,6 @@
 					</div>
 					<div class="right_pannel hidden">
 						<div class="right_pannel_header">
-							<p class="right_pannel_message_info hidden"></p>
 							<button onclick="rightclose()" class="cl-btn">
 								<div class="div-cl-btn">
 									<div>
@@ -184,7 +183,7 @@
 									</div>
 								</div>
 							</button>
-
+							<p class="right_pannel_message_info hidden"></p>
 						</div>
 						{#		Окно управления пользователями для роли суперадмина:		#}
 						{% if session['role'] == 'superadmin' %}

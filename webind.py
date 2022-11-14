@@ -14,6 +14,7 @@ from backend.dbcontrol import *
 from backend.sshjob import *
 from backend.servcontrol import *
 from backend.usercontrol import *
+from backend.zonecontrol import *
 
 #Создаём объект Flask
 app = Flask(__name__)
@@ -52,16 +53,8 @@ else: dbsql = None
 @app.route('/', methods=['GET','POST'])
 def index():
 	try:
-		#Блок: Пост-запрос, ДБ НЕ настроена, Вход НЕ произведен
-		if 'POST' in request.method and 'status' in request.form and not dbsql and 'loggedin' not in session:
-			if 'sqlsetup' == request.form.get('status'):
-				return create_sql_db()
-			elif 'sqlitesetup' == request.form.get('status'):
-				return create_sqlite_db()
-			elif 'restart' == request.form.get('status'):
-				return restart()
-		#Блок: Пост-запрос, ДБ настроена, Вход произведен
-		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' in session:
+     	#Блок: Пост-запрос, ДБ настроена, Вход произведен
+		if 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' in session:
 			if 'filecheck' == request.form.get('status'):
 				return configurate()
 			elif 'logout' == request.form.get('status'):
@@ -71,6 +64,14 @@ def index():
 				return users(dbsql)
 			elif 'server' == request.form.get('status'):
 				return server(dbsql)
+		#Блок: Пост-запрос, ДБ НЕ настроена, Вход НЕ произведен
+		elif 'POST' in request.method and 'status' in request.form and not dbsql and 'loggedin' not in session:
+			if 'sqlsetup' == request.form.get('status'):
+				return create_sql_db()
+			elif 'sqlitesetup' == request.form.get('status'):
+				return create_sqlite_db()
+			elif 'restart' == request.form.get('status'):
+				return restart()
 		#Блок: Пост-запрос, ДБ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and dbsql and 'loggedin' not in session:
 			if  'login' == request.form.get('status'):
