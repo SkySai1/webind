@@ -43,6 +43,11 @@
 		<script defer src="../static/js/servinfo.js"></script>
 	{% endif %}
 
+	{#	Скрипты управления зонами (админ) #}
+	{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+		<script defer src="../static/js/zonecontrol.js"></script>
+	{% endif %}
+
 	{#  Скрипт - Обрабочтик овтетов:  #}
 	<script defer src="../static/js/handler.js"></script>
 
@@ -130,25 +135,42 @@
 						<div class="menu_header">
 						</div>
 						<div class="menu_front">
+							{# Управление пользователями (суперадмин) #}
 							{% if session['role'] == 'superadmin' %}
 								<div class="sa_controls">
 									<h2 class="sah2">Управление пользователями</h2>
 									<div>
-										<button class="sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
-										<button class="sa_button" id="b-useradd" onclick="get_user_list('#userlist-on-ch', '#f-userchange')">Изменить</button>
+										<button class="cl_button sa_button" id="b-useradd" onclick="rightshow('#f-useradd')">Добавить</button>
+										<button class="cl_button sa_button" id="b-useradd" onclick="get_user_list('#userlist-on-ch', '#f-userchange')">Изменить</button>
 										{# <button class="sa_button" id="b-useradd" onclick="rightshow('#f-userfind'); get_user_list('#userlist-on-fn')">Найти</button> #}
 									</div>
 								</div>
 							{% endif %}
+
+							{# Управление серверами (суперадмин) #}
 							{% if session['role'] == 'superadmin' %}
 								<div class="sa_controls">
 									<h2 class="sah2">Управление серверами</h2>
 									<div>
-										<button class="sa_button" onclick="rightshow('#server-add')">Подключить</button>
-										<button class="sa_button" onclick="get_servlistbox('#servlist-on-ch', '#server-mv')">Изменить</button>
+										<button class="cl_button sa_button" onclick="rightshow('#server-add')">Подключить</button>
+										<button class="cl_button sa_button" onclick="get_servlistbox('#servlist-on-ch', '#server-mv')">Изменить</button>
 									</div>
 								</div>
 							{% endif %}
+
+							{# Управление зонами (админ) #}
+							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+							<div class="adm_controls">
+								<h2 class="sah2">Управление зонами</h2>
+								<div>
+									<button class="cl_button adm_button" onclick="rightshow('#new-zone')">Новая зона</button>
+									<button class="cl_button adm_button" onclick="">Изменить зону</button>
+									<button class="cl_button adm_button" onclick="">Новый домен</button>
+									<button class="cl_button adm_button" onclick="">Изменить домен</button>
+								</div>
+							</div>
+							{% endif %}
+
 						</div>
 					</div>
 					<div class="right_pannel hidden">
@@ -182,9 +204,9 @@
 								</div>
 								<div>
 									<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-									<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
+									<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
 								</div>
-								<button id='b-useradd'class="sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
+								<button id='b-useradd'class="minibutton sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
 							</form>
 						</div>
 
@@ -205,7 +227,7 @@
 											<div>
 												<input type="checkbox" name="isnewpasswd">
 												<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
-												<button style="font-size: large;" class="minibutton" type="button" onclick="randpass('#usrpasschange')">Случайный</button>
+												<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasschange')">Случайный</button>
 											</div>
 											<div>
 												<input type="checkbox" name="isnewusername">
@@ -221,8 +243,8 @@
 											</div>
 										</div>
 										<div class="row">
-											<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="userchange(this.form)" id="b-userchange">Изменить</button>
-											<button style="margin-left: 1em;" class="sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+											<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="userchange(this.form)" id="b-userchange">Изменить</button>
+											<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
 										</div>
 									</form>
 								</div>
@@ -257,7 +279,7 @@
 								<input class="right_input" type="text" name="port" placeholder="Порт" value="22">
 								<input class="right_input" type="text" name="user" placeholder="Имя пользователя">
 								<input class="right_input" type="text" name="pass" placeholder="Пароль">
-								<button class="sa_minibutton" type="button" onclick="form_serv_submit(this.form)">Подключиться</button>
+								<button class="minibutton sa_minibutton" type="button" onclick="server(this.form)">Подключиться</button>
 							</form>
 						</div>
 						{# ИЗМЕНЕНИЕ СЕРВЕРА #}
@@ -280,14 +302,36 @@
 											<input class="right_input" type="text" name="passwd" placeholder="пароль">
 										</div>
 										<div class="row">
-											<button style="margin-right: 1em;" class="sa_minibutton" type="button" onclick="servchange(this.form)" id="b-userchange">Изменить</button>
-											<button style="margin-left: 1em;" class="sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+											<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="server(this.form)" id="b-userchange">Изменить</button>
+											<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
 										</div>
 									</form>
 								</div>
 							</div>	
 						</div>
 						{% endif %}
+
+						{#		Окно управления зонами для роли админа:		#}
+						<div id="new-zone" class="el_right_pannel column hidden">
+							<h2 class="admh2">Новая зона</h2>
+							<form class="form column" id="usercreate-form" style="align-items: flex-start;">
+								<input type="hidden" name="status" value="zone">
+								<input type="hidden" name="action" value="newzone">
+								<div class="column" >
+									<input class="right_input" type="text" name="username" placeholder="Псевдоним">
+									<select style="width: 15.3em;" class="right_input" name="role">
+										<option value="user">Пользователь</option>
+										<option value="admin">Администратор</option>
+										<option value="superadmin">Суперадминистратор</option>
+									</select>
+								</div>
+								<div>
+									<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
+									<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
+								</div>
+								<button id='b-useradd'class="sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
+							</form>
+						</div>
 					</div>
 				</div>
 			</div>

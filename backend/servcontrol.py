@@ -26,21 +26,18 @@ def server(dbsql):
     return 'nothing'
         
 def serveradd(dbsql):
-    try:
-        host = request.form['host']
-        port = request.form['port']
-        user = request.form['user']
-        passwd = request.form['pass']
-    except Exception as e:
-        logger(inspect.currentframe().f_code.co_name)
-        return 'serv_field_bad'
+    out = ''
+    for key, value in request.form.items(multi=True):
+        out += f"{key}: {value}'\n'"
+        if not request.form.get(key): return 'empty_serv_field'
     try:
         data = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "passwd": passwd
+            "host": request.form.get('host'),
+            "port": request.form.get('port'),
+            "user": request.form.get('user'),
+            "passwd": request.form.get('pass')
         }
+        host = data['host']
         data = serveradd_proces(dbsql, data)
         if not data or 'failure' in data: return 'failure'
         else:
@@ -134,7 +131,6 @@ def serveradd_proces(dbsql, data):
         timeout = 0.02
         for i in range(5):
             try:
-                print(timeout)
                 result = send_command(host, port, user, key_id, cmlist, timeout)
                 if not result: return 'connect_failure'
                 id=result[-1].split(sep='\n')[1]

@@ -77,7 +77,7 @@ function get_servlistbox(to_listbox, div, skip){
         });
 };
 
-function servchange(form){
+function server(form){
     data = $(form).serialize().split('&')
     bool = true
     for (key in data){
