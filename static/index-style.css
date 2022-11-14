@@ -32,32 +32,35 @@ body{
   background: linear-gradient(320deg, #b6e7fc, #fcfeff);
 }
 .header{
+  height: 10vh;
   display: flex;
   align-content: center;
   justify-content: space-between;
-  margin-top: 1em;
+  margin-bottom: 1em;
 }
 .left_block{
-  width: 40%;
+  width: 40vw;
   padding-left: 1em;
   border-bottom: outset;
+  flex-direction: column;
+  margin: 0;
 }
 .left_block > h1{
-  margin-bottom: 0;
+  margin: 0;
 }
 .zero-mode{
-  margin-top: 0;
   color: #7d16ef;
   font-family: DTC;
+  margin: 0;
 }
 .first-mode{
-  margin-top: 0;
+  margin: 0;
   color: #1659ef;
   font-family: system-ui;
   text-transform: uppercase;
 }
 .second-mode{
-  margin-top: 0;
+  margin: 0;
   color: #70788b;
   font-family: system-ui;
 }
@@ -68,7 +71,7 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20%;
+  width: 20vw;
   border-top: inset;
   border-left: inset;
   border-right: inset;
@@ -83,10 +86,9 @@ body{
   transition: 0.3s;
   background: #ffffff00;
   z-index: 5;
-  padding-bottom: 2em;
 }
 .right_block{
-  width: 40%;
+  width: 40vw;
   margin-right: 0em;
   display: flex;
   align-items: flex-end;
@@ -277,17 +279,26 @@ body{
   flex-direction: row;
   position: fixed;
   left: 0;
-  width: 100vw;
   justify-content: space-between;
   z-index: 3;
+  width: 100vw;
+  height: 87vh;
+  background: transparent;
+  box-shadow: none;
+  transition: all 0.2s;
+}
+.mainmenu_show{
+  background: #ffffff7d !important;
+  box-shadow: inset 0 0 20px 0px rgb(255 255 255) !important;
+  cursor: not-allowed !important;
 }
 .left_pannel{
-  transition: 0.3s ease-out;
+  transition: 0.2s ease-out;
   position: absolute;
   width: 50vw;
   min-width: 25em;
   left: -50vw;
-  height: 85vh;
+  height: inherit;
   z-index: 2;
   background: linear-gradient(320deg, #6eb2eb, #f9fdff);
   border-radius: 15px;
@@ -297,6 +308,7 @@ body{
 }
 .left_pannel_move{
   left:0px;
+  cursor: default;
 }
 .menu_front{
   width: 100%;
@@ -414,18 +426,19 @@ body{
   right: 0;
 }
 .right_pannel{
-  transition: 0.3s ease-out;
+  transition: 0.2s ease-out;
   background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
   z-index: 2;
   border-radius: 15px;
   width: 50vw;
   min-width: 25em;
-  height: 85vh;
+  height: inherit;
   position: absolute;
   right: -50vw;
 }
 .right_pannel_move{
   right: 0;
+  cursor: default;
 }
 
 .right_pannel_header{
