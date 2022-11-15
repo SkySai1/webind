@@ -51,14 +51,10 @@ class Servers(Base):
     
     configs = relationship(
         "Configs", secondary='servers_configs', back_populates="servers",
-        single_parent=True
+        single_parent=True, lazy='joined'
     )
     views = relationship(
         "Views", secondary='servers_views', back_populates="servers",
-        single_parent=True
-    )
-    zones = relationship(
-        "Zones", secondary='servers_zones', back_populates="servers",
         single_parent=True
     )
 
@@ -74,8 +70,6 @@ class Configs(Base):
     misc = Column(String)
 
 
-
-    
     servers = relationship(
         "Servers", secondary='servers_configs', back_populates="configs",
     )
@@ -95,16 +89,16 @@ class Views(Base):
     
     servers = relationship(
         "Servers", secondary='servers_views', back_populates="views",
-
     )
     configs = relationship(
         "Configs", secondary='views_configs', back_populates="views",
-
     )
+    zones = relationship("Zones", cascade="all, delete")
 
 class Zones(Base):
     __tablename__ = 'zones'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    view_id=Column(Integer, ForeignKey("views.id"), nullable=False)
     zonename = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
     serial = Column(Integer, nullable=False, default=datetime.datetime.now().strftime('%Y%m%d01'))
@@ -113,17 +107,10 @@ class Zones(Base):
     refresh = Column(Integer, nullable=False, default = 28800)
     retry = Column(Integer, nullable=False, default = 3600)
     
-    servers = relationship(
-        "Servers", secondary='servers_zones', back_populates="zones",
-
-    )
     configs = relationship(
         "Configs", secondary='zones_configs', back_populates="zones",
 
     )
-    servers_views = relationship(
-        "Servers_Views", secondary='views_zones', back_populates="zones",
-    ) 
     domains = relationship("Domains", cascade="all, delete")
     
 class Domains(Base):
@@ -161,12 +148,6 @@ class Views_Configs(Base):
     viewid=Column(Integer, ForeignKey('views.id'))
     value = Column(String, nullable=True)
     
-
-class Views_Zones(Base):
-    __tablename__ = "views_zones"
-    id = Column(Integer, primary_key=True)
-    serv_view_id=Column(Integer, ForeignKey('servers_views.id'))
-    zone_id=Column(Integer, ForeignKey("zones.id"))
     
 class Servers_Configs(Base):
     __tablename__ = "servers_configs"
@@ -183,25 +164,13 @@ class Servers_Views(Base):
     server_id=Column(Integer, ForeignKey('servers.id'))
     viewid=Column(Integer, ForeignKey('views.id'))
     
-    zones = relationship(
-        "Zones", secondary='views_zones', back_populates="servers_views",
-        single_parent=True
-    )
-    
-class Servers_Zones(Base):
-    __tablename__ = "servers_zones"
-
-    id = Column(Integer, primary_key=True)
-    server_id=Column(Integer, ForeignKey('servers.id'))
-    zone_id=Column(Integer, ForeignKey("zones.id"))
-
 class Zones_Configs(Base):
     __tablename__ = "zones_configs"
 
     id = Column(Integer, primary_key=True)
     zone_id=Column(Integer, ForeignKey("zones.id"))
     config_id=Column(Integer, ForeignKey('configs.id'))
-    value = Column(String, nullable=True)   
+    value = Column(String, nullable=True)    
 
 #Функция подключения к БД
 def connect_db(app):
@@ -481,16 +450,16 @@ def getservlist(dbsql):
 def getserv(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
         hostname = request.form.get('servname')
-        try:
-            options = {}
-            views = {}
-            view = {}
-        
+        try:      
             getHostID = select(Servers.id).where(Servers.hostname == hostname)
             with dbsql.engine.connect() as ses:
                 s_id = ses.execute(getHostID).first()[0]
             if not s_id:  return 'missing_server'
              
+            options = {}
+            viewsList = {}
+            view = {}
+                
             ##Составления списка общих сведений о сервере
             servInfo = {}
             getHostInfo = select(Servers).where(Servers.id == s_id)
@@ -501,8 +470,8 @@ def getserv(dbsql):
                     servInfo['core'] = servInfoArray['core']
                     servInfo['username'] = servInfoArray['username']
                     servInfo['conf'] = servInfoArray['confpath']
-                    servInfo['directory'] = servInfoArray['workdirectory'] 
-               
+                    servInfo['directory'] = servInfoArray['workdirectory']          
+                
             ## Поиск всех параметров привязанных к серверу    
             getHostOptsId = (
                 select(Servers_Configs.config_id, Servers_Configs.value)
@@ -522,116 +491,78 @@ def getserv(dbsql):
                     options[ses.execute(getHostOpt).first()[0]] = HostOptsValue[HostOptsId.index(id)]
                     
             ## Поиск всех View привязанных к серверу 
-            getHostViewId = select(Servers_Views.viewid).where(Servers_Views.server_id == s_id)
-            hostViews = []
-            with dbsql.engine.connect() as ses:
-                for value in ses.execute(getHostViewId):
-                    hostViews.append(value[0])
-            for id in hostViews:
-                view = {}
-                getParamsId = (
-                    select(Views_Configs.config_id, Views_Configs.value)
-                    .where(Views_Configs.viewid == id)
-                    .order_by(Views_Configs.id)
-                )
-                with dbsql.engine.connect() as ses:
-                    for idPar in ses.execute(getParamsId):
-                        getParams = (
-                            select(Configs.config)
-                            .where(Configs.id == idPar[0])
-                            .order_by(Configs.id)
-                        )
-                        for config in ses.execute(getParams):
-                            configname = config[0]
-                        value = idPar[1]
-                        view[configname] = value
-                    getViewName = (
-                        select(Views.viewname).where(Views.id == id)
-                    )
-                    viewname = ses.execute(getViewName).first()[0]
-                    views[viewname] = view
-            
-            ## Поиск всех Зон привязанных к серверу
-            getHostZonesId = (select(Servers_Zones.zone_id)
-                            .where(Servers_Zones.server_id == s_id)
-            )
-            with dbsql.engine.connect() as ses:
-                zones = {}
-                for zoneid in ses.execute(getHostZonesId):
-                    getZoneName = (select(Zones.zonename)
-                                .where(Zones.id == zoneid[0])
-                    )
-                    zonename = ses.execute(getZoneName).first()
-                    zonesInside = {}
-                    
-                    #Поиск View в которые входит зона
-                    getServViewID = (select(Views_Zones.serv_view_id)
-                                    .where(Views_Zones.zone_id == zoneid[0]))
-                    ServViewID = ses.execute(getServViewID).first()
-                    if (ServViewID):
-                        getViewId = (select(Servers_Views.viewid)
-                                .where(Servers_Views.id == ServViewID[0])
-                        )
-                        ViewId = ses.execute(getViewId).first()[0]
-                        zonesInside['view_id'] = ViewId
-                    else: zonesInside['view_id'] = 0
-                    
-                    #Поиск параметров зоны для указанного хоста
-                    zone = {}
-                    getZoneConfigs =(select(Zones_Configs.config_id, Zones_Configs.value)
-                                    .where(Zones_Configs.zone_id == zoneid[0])
-                                    .order_by(Zones_Configs.id)
-                    )
-                    for zoneConfig in ses.execute(getZoneConfigs):
-                        getConfig = (select(Configs.config)
-                                    .where(Configs.id == zoneConfig['config_id'])
-                        )
-                        config = ses.execute(getConfig).first()[0]
-                        value = zoneConfig['value']
-                        zone[config] = value
-                    zonesInside['options'] = zone
-                    
-                    #Поиск доменов входящих в зону
-                    domains = {}
-                    getDomainsID = select(Domains.id, Domains.domain).where(Domains.zone_id == zoneid[0])
-                    for domain_id in ses.execute(getDomainsID):
-                        domain = domain_id[1]
-                        DomainInfo = {}
-                        
-                        #Поиск RR принадлежащих домену
-                        Records=[]
-                        getRRs = (select(RRs.ttl, RRs.r_class, RRs.r_type, RRs.value)
-                                .where(RRs.id == domain_id[0])
-                        )
-                        for rr in ses.execute(getRRs):
-                            Record = {}
-                            Record['TTL'] = rr['ttl']
-                            Record['class'] = rr['r_class']
-                            Record['type'] = rr['r_type']
-                            Record['value'] = rr['value']
-                            Records.append(Record)
-                        DomainInfo['records']=Records
-                        #Поиск пользователей ответственных за домен
-                        UserList = []
-                        getDomainUserID = (
-                            select(Users_Domains.username_id)
-                            .where(Users_Domains.domain_id == domain_id[0])              
-                        )
-                        domainUserID = ses.execute(getDomainUserID).first()
-                        if domainUserID:
-                            getDomainUser = (
-                                select(Users.username)
-                                .where(Users.id == domainUserID[0])
-                            )
-                            for UserDomain in ses.execute(getDomainUser):
-                                    UserList.append(UserDomain[0])
-                        DomainInfo['users']=UserList
-                            
-                        domains[domain]=DomainInfo
-                    zonesInside['domains'] = domains
-                    zones[zonename[0]]=zonesInside
+            with Session(dbsql.engine) as ses:
                 
-            hostinfo = {'info':servInfo, 'options': options, 'views': views, 'zones': zones}
+                views = (ses.query(Views)
+                        .filter(Views.servers.any(Servers.id == s_id))
+                        .all()
+                )
+                for view in views:
+                    viewDesc = {}
+                    #Список параметров Обзора
+                    
+                    viewOpt = (ses.query(Configs, Views_Configs)
+                            .join(Views_Configs, Views_Configs.config_id == Configs.id)
+                            .filter(Configs.views.any(Views.id == view.id))
+                    )
+                    viewOptsList = {}
+                    for row in viewOpt:
+                        viewOptsList[row.Configs.config] = row.Views_Configs.value
+                    viewDesc['options'] = viewOptsList
+                    
+                    #Список зон входящих во View
+                    zones = ses.query(Zones).filter(Zones.view_id == view.id).all()
+                    zonesList = {}
+                    for zone in zones:
+                        zoneDesc = {}
+                        zoneInfo ={
+                            'type': zone.type,
+                            'serial': zone.serial,
+                            'ttl': zone.ttl,
+                            'expire': zone.expire,
+                            'refresh': zone.refresh,
+                            'retry': zone.retry
+                        }
+                        zoneDesc['Info'] = zoneInfo
+                        
+                    
+                        #Поиск доменов входящих в зону
+                        domains = {}
+                        domains = ses.query(Domains).filter(Domains.zone_id == zone.id).all()
+                        domainDesc = {}
+                        for domain in domains:
+                            domainInfo = {}
+                            #Поиск RR принадлежащих домену
+                            rrs = ses.query(RRs).filter(RRs.domain_id == domain.id).all()
+                            rrsList = []
+                            for rr in rrs:
+                                rrInfo ={
+                                    'ttl': rr.ttl,
+                                    'class': rr.r_class,
+                                    'type': rr.r_type,
+                                    'value': rr.value
+                                }
+                                rrsList.append(rrInfo)
+                            domainInfo['records'] = rrsList
+                            
+                            #Поиск пользователей закрепелнных за доменом
+                            
+                            usersDomain = (ses.query(Users)
+                            .filter(Users.domains.any(Domains.id == domain.id))
+                            .all()
+                            )
+                            userList =[]
+                            for user in usersDomain:
+                                userList.append(user.username)
+                            domainInfo['users'] = userList
+                            domainDesc[domain.domain] = domainInfo
+                            
+                            zoneDesc['domains'] = domainDesc
+                        zonesList[zone.zonename] = zoneDesc
+                    viewDesc['zones'] = zonesList
+                    viewsList[view.viewname] = viewDesc
+                
+            hostinfo = {'info':servInfo, 'options': options, 'views': viewsList}
             return json.dumps(hostinfo, indent=4)
         except Exception as e:
             logger(inspect.currentframe().f_code.co_name)
