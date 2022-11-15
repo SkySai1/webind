@@ -297,9 +297,9 @@ body{
 .left_pannel{
   transition: 0.2s ease-out;
   position: absolute;
-  width: 50vw;
+  width: 25vw;
   min-width: 25em;
-  left: -50vw;
+  left: -100vw;
   height: inherit;
   z-index: 2;
   background: linear-gradient(320deg, #6eb2eb, #f9fdff);
@@ -474,11 +474,11 @@ body{
   background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
   z-index: 2;
   border-radius: 15px;
-  width: 50vw;
+  width: calc(75vw - 1px);
   min-width: 25em;
   height: inherit;
   position: absolute;
-  right: -50vw;
+  right: -100vw;
 }
 .right_pannel_move{
   right: 0 !important;
@@ -495,7 +495,11 @@ body{
   border: none;
   padding-left: 1.2em;
 }
-
+.right_pannel_body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .el_right_pannel{
   z-index: 3;
   display: flex;
@@ -537,6 +541,11 @@ body{
       0 0 92px #ff0037, 
       0 0 102px #ff0037, 
       0 0 151px #ff0037;
+}
+.infoblock{
+  font-size: large;
+  text-align: justify;
+  width: 95%;
 }
 .right_input{
   font-size: x-large;

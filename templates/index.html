@@ -158,15 +158,14 @@
 								</div>
 							{% endif %}
 
-							{# Управление зонами (админ) #}
+							{# Управление DNS (админ) #}
 							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
 							<div class="adm_controls">
-								<h2 class="sah2">Управление зонами</h2>
+								<h2 class="sah2">Управление пространством имён</h2>
 								<div>
-									<button class="cl_button adm_button" onclick="setSerial()">Новая зона</button>
-									<button class="cl_button adm_button" onclick="">Изменить зону</button>
-									<button class="cl_button adm_button" onclick="">Новый домен</button>
-									<button class="cl_button adm_button" onclick="">Изменить домен</button>
+									<button class="cl_button adm_button" onclick="makeView()">Обзоры</button>
+									<button class="cl_button adm_button" onclick="setSerial()">Зоны</button>
+									<button class="cl_button adm_button" onclick="">Домены</button>
 								</div>
 							</div>
 							{% endif %}
@@ -185,173 +184,138 @@
 							</button>
 							<p class="right_pannel_message_info hidden"></p>
 						</div>
-						{#		Окно управления пользователями для роли суперадмина:		#}
-						{% if session['role'] == 'superadmin' %}
-						{# ДОБАВЛЕНИЕ ЮЗЕРА #}
-						<div id="f-useradd" class="el_right_pannel column hidden">
-							<h2 class="sah2">Добавить пользователя</h2>							
-							<form class="form column" id="usercreate-form" style="align-items: flex-start;">
-								<input type="hidden" name="status" value="user">
-								<input type="hidden" name="action" value="useradd">
-								<div class="column" >
-									<input class="right_input" type="text" name="username" placeholder="Псевдоним">
-									<select style="width: 15.3em;" class="right_input" name="role">
-										<option value="user">Пользователь</option>
-										<option value="admin">Администратор</option>
-										<option value="superadmin">Суперадминистратор</option>
-									</select>
-								</div>
-								<div>
-									<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
-									<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
-								</div>
-								<button id='b-useradd'class="minibutton sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
-							</form>
-						</div>
-
-						{# ИЗМЕНЕНИЕ ЮЗЕРА #}
-						<div id="f-userchange" class="el_right_pannel column hidden">
-							<h2 class="sah2">Изменить данные пользователя</h2>
-							<div class="column">
-								<form class="form row" id="userchange-form">
+						<div class="right_pannel_body">
+							{#		Окно управления пользователями для роли суперадмина:		#}
+							{% if session['role'] == 'superadmin' %}
+							{# ДОБАВЛЕНИЕ ЮЗЕРА #}
+							<div id="f-useradd" class="el_right_pannel column hidden">
+								<h2 class="sah2">Добавить пользователя</h2>							
+								<form class="form column" id="usercreate-form" style="align-items: flex-start;">
 									<input type="hidden" name="status" value="user">
-									<input type="hidden" name="action" value="userchange">
-									<div>
-										<select class="right_select" style="width: auto;" id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
+									<input type="hidden" name="action" value="useradd">
+									<div class="column" >
+										<input class="right_input" type="text" name="username" placeholder="Псевдоним">
+										<select style="width: 15.3em;" class="right_input" name="role">
+											<option value="user">Пользователь</option>
+											<option value="admin">Администратор</option>
+											<option value="superadmin">Суперадминистратор</option>
 										</select>
 									</div>
-									<div class="column">
+									<div>
+										<input class="right_input" id="usrpasscreate" type="text" name="passwd" placeholder="Пароль">
+										<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasscreate')">Случайный</button>
+									</div>
+									<button id='b-useradd'class="minibutton sa_minibutton" type="button" onclick="form_submit(this.form)"id="b-usercreate">Создать</button>
+								</form>
+							</div>
+
+							{# ИЗМЕНЕНИЕ ЮЗЕРА #}
+							<div id="f-userchange" class="el_right_pannel column hidden">
+								<h2 class="sah2">Изменить данные пользователя</h2>
+								<div class="column">
+									<form class="form row" id="userchange-form">
+										<input type="hidden" name="status" value="user">
+										<input type="hidden" name="action" value="userchange">
 										<div>
-											<input style="width: 16em" class="right_input" id="change-username" onkeydown="list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
-											<div>
-												<input type="checkbox" name="isnewpasswd">
-												<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
-												<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasschange')">Случайный</button>
-											</div>
-											<div>
-												<input type="checkbox" name="isnewusername">
-												<input class="right_input" name="newusername" placeholder="Новый псевдоним"type="text">
-											</div>
-											<div>
-												<input type="checkbox" name="isnewrole">
-												<select style="width: 15.3em" class="right_input" name="newrole">
-													<option value="user">Пользователь</option>
-													<option value="admin">Администратор</option>
-													<option value="superadmin">Суперадминистратор</option>
-												</select>
-											</div>
+											<select class="right_select" style="width: auto;" id="userlist-on-ch" size="20" onchange="changeuname('#change-username', value)">
+											</select>
 										</div>
-										<div class="row">
-											<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="userchange(this.form)" id="b-userchange">Изменить</button>
-											<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
-										</div>
-									</form>
-								</div>
-							</div>	
-						</div>				
-						{# НАЙТИ ЮЗЕРА #}
-						<div id="f-userfind" class="el_right_pannel column hidden">
-							<h2 class="sah2">Подробная информация</h2>
-							<form class="form">
-							<input type="hidden" name="status" value="userfind">
-								<div class="row">
-									<select class="right_select" id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
-									</select>
-									<div>
-										<input class="right_input" id="find-username" onkeydown="list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
-										<button class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
-									</div>
-								</div>
-							</form>
-						</div>
-						{% endif %}
-
-						{#		Окно управления серверами для роли суперадмина:		#}
-						{% if session['role'] == 'superadmin' %}
-						{# ДОБАВЛЕНИЕ СЕРВЕРА #}
-						<div class="el_right_pannel column hidden" id="server-add">
-							<h2 class="sah2">Добавить сервер</h2>	
-							<form class="form column">
-								<input type="hidden" name="status" value="server">
-								<input type="hidden" name="action" value="serveradd">
-								<input class="right_input" type="text" name="host" placeholder="Адрес сервера">
-								<input class="right_input" type="text" name="port" placeholder="Порт" value="22">
-								<input class="right_input" type="text" name="user" placeholder="Имя пользователя">
-								<input class="right_input" type="text" name="pass" placeholder="Пароль">
-								<button class="minibutton sa_minibutton" type="button" onclick="server(this.form)">Подключиться</button>
-							</form>
-						</div>
-						{# ИЗМЕНЕНИЕ СЕРВЕРА #}
-						<div id="server-mv" class="el_right_pannel column hidden">
-							<h2 class="sah2">Изменить данные сервера</h2>
-							<div class="column">
-								<form class="form row" id="servchange-form">
-									<input type="hidden" name="status" value="server">
-									<input type="hidden" name="action" value="servermv">
-									<div>
-										<select class="right_select" style="width: auto;" id="servlist-on-ch" size="20" onchange="changeservname('#change-servhost', value)">
-										</select>
-									</div>
-									<div class="column">
 										<div class="column">
-											<input class="right_input" id="change-servhost" onkeydown="list_filter(this,'#servlist-on-ch')" type="text" name="hostname" placeholder="Адрес сервера">
-											<input class="right_input" name="newhostname" placeholder="Новый адрес сервера"type="text">
-											<input class="right_input" name="port" placeholder="Порт"type="text">
-											<input class="right_input" name="username" placeholder="Пользователь"type="text">
-											<input class="right_input" type="text" name="passwd" placeholder="пароль">
-										</div>
-										<div class="row">
-											<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="server(this.form)" id="b-userchange">Изменить</button>
-											<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
-										</div>
-									</form>
-								</div>
-							</div>	
-						</div>
-						{% endif %}
-
-						{#		Окно управления зонами для роли админа:		#}
-						{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
-						<div id="new-zone" class="el_right_pannel column hidden">
-							<h2 class="admh2">Новая зона</h2>
-							<form class="form column" id="newZone-form" style="align-items: flex-start;">
-								<input type="hidden" name="status" value="zone">
-								<input type="hidden" name="action" value="newzone">
-								<div class="column" >
-									<input class="right_input" type="text" name="zonename" placeholder="Полное доменное имя">
+											<div>
+												<input style="width: 16em" class="right_input" id="change-username" onkeydown="list_filter(this,'#userlist-on-ch')" type="text" name="username" placeholder="Псевдоним">
+												<div>
+													<input type="checkbox" name="isnewpasswd">
+													<input class="right_input" id="usrpasschange" type="text" name="passwd" placeholder="Новый пароль">
+													<button style="font-size: large;" class="rndbutton" type="button" onclick="randpass('#usrpasschange')">Случайный</button>
+												</div>
+												<div>
+													<input type="checkbox" name="isnewusername">
+													<input class="right_input" name="newusername" placeholder="Новый псевдоним"type="text">
+												</div>
+												<div>
+													<input type="checkbox" name="isnewrole">
+													<select style="width: 15.3em" class="right_input" name="newrole">
+														<option value="user">Пользователь</option>
+														<option value="admin">Администратор</option>
+														<option value="superadmin">Суперадминистратор</option>
+													</select>
+												</div>
+											</div>
+											<div class="row">
+												<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="userchange(this.form)" id="b-userchange">Изменить</button>
+												<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="userdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+											</div>
+										</form>
+									</div>
+								</div>	
+							</div>				
+							{# НАЙТИ ЮЗЕРА #}
+							<div id="f-userfind" class="el_right_pannel column hidden">
+								<h2 class="sah2">Подробная информация</h2>
+								<form class="form">
+								<input type="hidden" name="status" value="userfind">
 									<div class="row">
-										<a>Тип зоны:</a>
-										<select style="width: 15.3em;" class="right_input" name="type">
-											<option value="master">Первичная</option>
-											<option value="slave">Вторичная</option>
-											<option value="forward">Форвард</option>
+										<select class="right_select" id="userlist-on-fn" size="20" onchange="changeuname('#find-username', value)">
 										</select>
+										<div>
+											<input class="right_input" id="find-username" onkeydown="list_filter(this, '#userlist-on-fn')" type="text" name="username" placeholder="Псевдоним">
+											<button class="sa_minibutton" type="button" onclick="form_submit(this.form)" id="b-userfind">Найти</button>
+										</div>
 									</div>
-									<div class="row">
-										<a>Серийный номер:</a>
-										<input class="right_input" type="text" id="zoneSerial" name="serial" placeholder="Серийный номер">
+								</form>
+							</div>
+							{% endif %}
+
+							{#		Окно управления серверами для роли суперадмина:		#}
+							{% if session['role'] == 'superadmin' %}
+							{# ДОБАВЛЕНИЕ СЕРВЕРА #}
+							<div class="el_right_pannel column hidden" id="server-add">
+								<h2 class="sah2">Добавить сервер</h2>	
+								<form class="form column">
+									<input type="hidden" name="status" value="server">
+									<input type="hidden" name="action" value="serveradd">
+									<input class="right_input" type="text" name="host" placeholder="Адрес сервера">
+									<input class="right_input" type="text" name="port" placeholder="Порт" value="22">
+									<input class="right_input" type="text" name="user" placeholder="Имя пользователя">
+									<input class="right_input" type="text" name="pass" placeholder="Пароль">
+									<button class="minibutton sa_minibutton" type="button" onclick="server(this.form)">Подключиться</button>
+								</form>
+							</div>
+							{# ИЗМЕНЕНИЕ СЕРВЕРА #}
+							<div id="server-mv" class="el_right_pannel column hidden">
+								<h2 class="sah2">Изменить данные сервера</h2>
+								<div class="column">
+									<form class="form row" id="servchange-form">
+										<input type="hidden" name="status" value="server">
+										<input type="hidden" name="action" value="servermv">
+										<div>
+											<select class="right_select" style="width: auto;" id="servlist-on-ch" size="20" onchange="changeservname('#change-servhost', value)">
+											</select>
+										</div>
+										<div class="column">
+											<div class="column">
+												<input class="right_input" id="change-servhost" onkeydown="list_filter(this,'#servlist-on-ch')" type="text" name="hostname" placeholder="Адрес сервера">
+												<input class="right_input" name="newhostname" placeholder="Новый адрес сервера"type="text">
+												<input class="right_input" name="port" placeholder="Порт"type="text">
+												<input class="right_input" name="username" placeholder="Пользователь"type="text">
+												<input class="right_input" type="text" name="passwd" placeholder="пароль">
+											</div>
+											<div class="row">
+												<button style="margin-right: 1em;" class="minibutton sa_minibutton" type="button" onclick="server(this.form)" id="b-userchange">Изменить</button>
+												<button style="margin-left: 1em;" class="minibutton sa_minibutton" onclick="servdel(this.form)" type="button" id="b-userdel">Удалить!</button>
+											</div>
+										</form>
 									</div>
-									<div class="row">
-										<a>TTL:</a>
-										<input class="right_input" type="text" name="TTL" value="86400">
-									</div>
-									<div class="row">
-										<a>Хранение:</a>
-										<input class="right_input" type="text" name="expire" value="604800">
-									</div>
-									<div class="row">
-										<a>Обновление:</a>
-										<input class="right_input" type="text" name="refresh" value="28800">
-									</div>
-									<div class="row">
-										<a>Интервал:</a>
-										<input class="right_input" type="text" name="retry" value="3600">
-									</div>
-									<button id='b-useradd'class="adm_minibutton minibutton" type="button" onclick="form_submit(this.form)"id="b-zoneadd">Создать</button>
-								</div>
-							</form>
+								</div>	
+							</div>
+							{% endif %}
+
+							{#	ПАНЕЛЬ ОБЗОРОВ	#}
+							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+							<div id="new-zone" class="el_right_pannel column hidden">
+							</div>
+							{% endif %}
 						</div>
-						{% endif %}
 					</div>
 				</div>
 			</div>
