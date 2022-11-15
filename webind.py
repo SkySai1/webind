@@ -15,6 +15,7 @@ from backend.sshjob import *
 from backend.servcontrol import *
 from backend.usercontrol import *
 from backend.zonecontrol import *
+from backend.viewcontrol import *
 
 #Создаём объект Flask
 app = Flask(__name__)
@@ -66,6 +67,8 @@ def index():
 				return server(dbsql)
 			elif 'zone' == request.form.get('status'):
 				return zone(dbsql)
+			elif 'view' == request.form.get('status'):
+				return view(dbsql)
 		#Блок: Пост-запрос, ДБ НЕ настроена, Вход НЕ произведен
 		elif 'POST' in request.method and 'status' in request.form and not dbsql and 'loggedin' not in session:
 			if 'sqlsetup' == request.form.get('status'):

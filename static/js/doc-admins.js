@@ -1,6 +1,7 @@
 $(document).ready(function(){
     window.vanish = '';
     getservlist();
+    sessionStorage.clear()
 });
 function list_filter(input, list) {
     $(input).on('keyup', function() {

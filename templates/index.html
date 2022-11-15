@@ -43,9 +43,10 @@
 		<script defer src="../static/js/servinfo.js"></script>
 	{% endif %}
 
-	{#	Скрипты управления зонами (админ) #}
+	{#	Скрипты управления зонами, обзорами, доменами (админ) #}
 	{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
 		<script defer src="../static/js/zonecontrol.js"></script>
+		<script defer src="../static/js/viewcontrol.js"></script>
 	{% endif %}
 
 	{#  Скрипт - Обрабочтик овтетов:  #}
@@ -163,7 +164,7 @@
 							<div class="adm_controls">
 								<h2 class="sah2">Управление пространством имён</h2>
 								<div>
-									<button class="cl_button adm_button" onclick="makeView()">Обзоры</button>
+									<button class="cl_button adm_button" onclick="get_views_list()">Обзоры</button>
 									<button class="cl_button adm_button" onclick="setSerial()">Зоны</button>
 									<button class="cl_button adm_button" onclick="">Домены</button>
 								</div>
@@ -312,7 +313,10 @@
 
 							{#	ПАНЕЛЬ ОБЗОРОВ	#}
 							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
-							<div id="new-zone" class="el_right_pannel column hidden">
+							<div id="views" class="el_right_pannel column hidden">
+								<div id="viewsMain"></div>
+								<hr style="min-width: calc(49vw - 1.3em);">
+								<div id="viewsInfo"></div>
 							</div>
 							{% endif %}
 						</div>

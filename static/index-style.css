@@ -508,7 +508,7 @@ body{
   border: inset;
   padding: 0.5em;
   position: fixed;
-  width: calc(49vw - 1.3em);
+  min-width: calc(49vw - 1.3em);
 }
 .right_pannel_message_info{
   margin: 0;
@@ -589,9 +589,6 @@ body{
   font-size: x-large;
   text-align: right;
   margin-right: 1em;
-}
-#newZone-form > div > div > input{
-
 }
 /* Видимая часть Фронта */
 .front_styling{

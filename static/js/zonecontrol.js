@@ -7,6 +7,3 @@ function setSerial(){
     $('#zoneSerial').val(today)
     rightshow('#new-zone')
 }
-function makeView(){
-
-}

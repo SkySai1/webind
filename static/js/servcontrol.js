@@ -68,7 +68,7 @@ function get_servlistbox(to_listbox, div, skip){
                     $('#preloader').removeClass('preloader-active');
                     $('#preloader').removeClass('preloader-right');
                     $('#preloader').removeClass('opacity');
-                    rightshow(div, true); 
+                    rightshow(div); 
                 },300);
             };
         })

@@ -66,7 +66,7 @@ function changer(el){
     $(el).toggleClass("hidden")
 }
 
-function rightshow(id, skip){
+function rightshow(id){
     $('.right_pannel_message_info').addClass('hidden');
         $('.right_pannel').removeClass('hidden');
     if ($('.right_pannel').hasClass("right_pannel_move")){

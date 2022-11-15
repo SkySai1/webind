@@ -664,7 +664,61 @@ def updateconf_query(dbsql, data):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
-    
+
+def get_views_list(dbsql):
+    try:
+        with Session(dbsql.engine) as ses:
+            viewsList = {}
+            views = (ses.query(Views).order_by(Views.viewname).all()
+            )
+            for view in views:
+                viewDesc = {}
+                #Список параметров Обзора
+                
+                viewOpt = (ses.query(Configs, Views_Configs)
+                           .join(Views_Configs, Views_Configs.config_id == Configs.id)
+                           .filter(Configs.views.any(Views.id == view.id))
+                )
+                viewOptsList = {}
+                for row in viewOpt:
+                    viewOptsList[row.Configs.config] = row.Views_Configs.value
+                viewDesc['options'] = viewOptsList
+                
+                #Список зон входящих во View
+                zones = ses.query(Zones).filter(Zones.view_id == view.id).all()
+                zonesList = {}
+                for zone in zones:
+                    zoneDesc = {}
+                    zoneInfo ={
+                        'type': zone.type,
+                        'serial': zone.serial,
+                        'ttl': zone.ttl,
+                        'expire': zone.expire,
+                        'refresh': zone.refresh,
+                        'retry': zone.retry
+                    }
+                    zoneDesc['Info'] = zoneInfo
+                    zonesList[zone.zonename] = zoneDesc
+                    viewDesc['zones'] = zonesList
+                    
+                #Список серверов используеющих View\
+                servers = (ses.query(Servers.id, Servers.hostname)
+                           .filter(Servers.views.any(Views.id == view.id))
+                           .order_by(Servers.hostname)
+                           .all()
+        
+                )
+                servList = []
+                for server in servers:
+                    servList.append(f"{server.id}: {server.hostname}")
+                    #print(servList)
+                viewDesc['servers'] = servList
+                viewsList[f"{view.id}: {view.viewname}"] = viewDesc
+            return json.dumps(viewsList, indent=4)
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+   
 def zoneadd_query(dbsql, data):
     try:
         with dbsql.session() as ses:
