@@ -114,7 +114,7 @@ function getserv(form, id, getdata){
 
 function showservinfo(data){
     if (data == 'missing_server' || data == 'failure'){
-        responce_handler(data)
+        response_handler(data)
     }
     var json = JSON.parse(data)
     console.log(json)

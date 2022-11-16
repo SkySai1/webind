@@ -86,6 +86,7 @@ class Views(Base):
     __tablename__ = "views"
     id = Column(Integer, primary_key=True, autoincrement=True)
     viewname = Column(String(255), nullable=True)
+    alias = Column(String(255))
     
     servers = relationship(
         "Servers", secondary='servers_views', back_populates="views",
@@ -163,6 +164,7 @@ class Servers_Views(Base):
     id = Column(Integer, primary_key=True)
     server_id=Column(Integer, ForeignKey('servers.id'))
     viewid=Column(Integer, ForeignKey('views.id'))
+    priority=Column(Integer)
     
 class Zones_Configs(Base):
     __tablename__ = "zones_configs"
@@ -459,6 +461,10 @@ def getserv(dbsql):
             options = {}
             viewsList = {}
             view = {}
+        
+            getHost = select(Servers.hostname).where(Servers.id == s_id)
+            with dbsql.engine.connect() as ses:
+                hostname = ses.execute(getHost).first()[0]
                 
             ##Составления списка общих сведений о сервере
             servInfo = {}
@@ -493,8 +499,11 @@ def getserv(dbsql):
             ## Поиск всех View привязанных к серверу 
             with Session(dbsql.engine) as ses:
                 
-                views = (ses.query(Views)
+                views = (ses.query(Views, Servers_Views)
+                        .join(Servers_Views, Servers_Views.viewid == Views.id)
                         .filter(Views.servers.any(Servers.id == s_id))
+                        .filter(Servers_Views.server_id == s_id)
+                        .order_by(Servers_Views.priority)
                         .all()
                 )
                 for view in views:
@@ -503,15 +512,17 @@ def getserv(dbsql):
                     
                     viewOpt = (ses.query(Configs, Views_Configs)
                             .join(Views_Configs, Views_Configs.config_id == Configs.id)
-                            .filter(Configs.views.any(Views.id == view.id))
+                            .filter(Configs.views.any(Views.id == view.Views.id))
                     )
+                    viewDesc['alias'] = view.Views.alias
+                    viewDesc['priority'] = view.Servers_Views.priority
                     viewOptsList = {}
                     for row in viewOpt:
                         viewOptsList[row.Configs.config] = row.Views_Configs.value
                     viewDesc['options'] = viewOptsList
                     
                     #Список зон входящих во View
-                    zones = ses.query(Zones).filter(Zones.view_id == view.id).all()
+                    zones = ses.query(Zones).filter(Zones.view_id == view.Views.id).all()
                     zonesList = {}
                     for zone in zones:
                         zoneDesc = {}
@@ -560,7 +571,7 @@ def getserv(dbsql):
                             zoneDesc['domains'] = domainDesc
                         zonesList[zone.zonename] = zoneDesc
                     viewDesc['zones'] = zonesList
-                    viewsList[view.viewname] = viewDesc
+                    viewsList[view.Views.viewname] = viewDesc
                 
             hostinfo = {'info':servInfo, 'options': options, 'views': viewsList}
             return json.dumps(hostinfo, indent=4)
@@ -673,6 +684,7 @@ def get_views_list(dbsql):
             )
             for view in views:
                 viewDesc = {}
+                viewDesc['alias'] = view.alias
                 #Список параметров Обзора
                 
                 viewOpt = (ses.query(Configs, Views_Configs)
@@ -681,7 +693,7 @@ def get_views_list(dbsql):
                 )
                 viewOptsList = {}
                 for row in viewOpt:
-                    viewOptsList[row.Configs.config] = row.Views_Configs.value
+                    viewOptsList[row.Configs.config] = row.Views_Configs.value               
                 viewDesc['options'] = viewOptsList
                 
                 #Список зон входящих во View
@@ -698,7 +710,7 @@ def get_views_list(dbsql):
                         'retry': zone.retry
                     }
                     zoneDesc['Info'] = zoneInfo
-                    zonesList[zone.zonename] = zoneDesc
+                    zonesList[f'{zone.id}: {zone.zonename}'] = zoneDesc
                     viewDesc['zones'] = zonesList
                     
                 #Список серверов используеющих View\
@@ -719,6 +731,31 @@ def get_views_list(dbsql):
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
    
+def newView_query(dbsql, data):
+    try:
+        with dbsql.session() as ses:
+            new = Views(
+                viewname = data['name'],
+                alias = data['alias'],
+            )
+            ses.add(new)
+            ses.commit()
+        return 'viewadd_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+
+def deleteView_query(dbsql, id):
+    try:
+        with dbsql.session() as ses:
+            dlt = ses.query(Views).filter(Views.id==id).first()
+            ses.delete(dlt)
+            ses.commit()
+        return 'viewdelete_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+    
 def zoneadd_query(dbsql, data):
     try:
         with dbsql.session() as ses:
@@ -737,3 +774,4 @@ def zoneadd_query(dbsql, data):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
+

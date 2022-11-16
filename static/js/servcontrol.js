@@ -12,7 +12,7 @@ function form_serv_submit(form, getdata){
     data: data
     })
     .done(function(data) {
-        responce_handler(data, form);
+        response_handler(data, form);
         var data = {
             status: "server",
             action: "getservlist"
@@ -90,7 +90,7 @@ function server(form){
     if (bool != false) {
         form_serv_submit(form)
     } else {
-        responce_handler('empty_serv_field')
+        response_handler('empty_serv_field')
     }
     
 }

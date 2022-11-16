@@ -10,7 +10,7 @@ function form_submit(form, getdata){
     })
     .done(function(data) {
         console.log(data)
-        responce_handler(data, form);
+        response_handler(data, form);
     })
     .fail(function(){
         alert('Внутрення ошибка, перезагрузите страницу!');

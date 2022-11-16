@@ -3,7 +3,7 @@ function rmi(color, text, form) {
     clearTimeout(window.vanish);
     if (color =='green'){
         $('.right_pannel_message_info').addClass('neonText-green');
-        form.reset();
+        if (form){form.reset();};
     } else if (color == 'red') {
         $('.right_pannel_message_info').addClass('neonText-red');
     }
@@ -26,7 +26,7 @@ function big_message(form, color, text, advise) {
     $('#rh_message').text(text);
     $('#rh_info').text(advise);
 };
-function responce_handler(data, form){
+function response_handler(data, form){
     /* Блок реакций функций управления пользвотаелей*/
     switch(data) {
         case ('empty_login'):
@@ -99,12 +99,21 @@ function responce_handler(data, form){
             get_servlistbox('#servlist-on-ch', '#server-mv', 'skip');
             $('#change-username').val('');
             break;
-        /* Реакция на управление сервером */
+        /* Реакция на управление серверами */
         case ('update_success'):
             updatesuccess();
             console.log('update!')
             break;
-        /* Реакция на управление зоной */
+        /*Реакция на управление обзорами */
+        case ('viewadd_success'):
+            rmi('green', 'Обзор успешно добавлен!', form);
+            get_views_list(true)
+            break;
+        case ('viewdelete_success'):
+            rmi('green', 'Обзор успешно удалён!');
+            get_views_list(true)
+            break;
+        /* Реакция на управление зонами */
         case ('zone_add_success'):
             rmi('green', 'Зона успешно создана!', form);
             break;

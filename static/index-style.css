@@ -508,7 +508,8 @@ body{
   border: inset;
   padding: 0.5em;
   position: fixed;
-  min-width: calc(49vw - 1.3em);
+  min-width: 25em;
+  width: 70vw;
 }
 .right_pannel_message_info{
   margin: 0;
@@ -589,6 +590,37 @@ body{
   font-size: x-large;
   text-align: right;
   margin-right: 1em;
+}
+#viewsInfo{
+  width: inherit;
+}
+
+.viewInfo-hedaer{
+  width: max-content;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.viewInfo-hedaer > h1 {
+  margin: 0;
+}
+
+.viewInfo-hedaer > h2 {
+  margin: 0;
+}
+.viewInfo-front{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.viewInfo-footer{
+  width: max-content;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 /* Видимая часть Фронта */
 .front_styling{

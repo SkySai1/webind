@@ -51,9 +51,7 @@ def serveradd(dbsql):
         return 'failure'
     
 def serverchange(dbsql):
-    out = ''
     for key, value in request.form.items(multi=True):
-            out += f"{key}: {value}'\n'"
             if not request.form.get(key): return 'empty_serv_field'
     try:
         host = request.form.get('hostname')

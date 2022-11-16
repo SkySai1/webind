@@ -71,7 +71,7 @@ function rightshow(id){
         $('.right_pannel').removeClass('hidden');
     if ($('.right_pannel').hasClass("right_pannel_move")){
         delay=300;
-    } else {delay=10;};
+    } else {delay=20;};
     $('.right_pannel').removeClass("right_pannel_move");
     clearTimeout(window.vanish);
     window.vanish = setTimeout(function(){

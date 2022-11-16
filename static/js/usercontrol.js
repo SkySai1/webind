@@ -68,7 +68,7 @@ function userchange(form){
     if (!data.match('isnewpasswd') & 
         !data.match('isnewusername') & 
         !data.match('isnewrole') ) {
-            responce_handler('nothing_change');
+            response_handler('nothing_change');
     } else {
         form_submit(form)
     };
