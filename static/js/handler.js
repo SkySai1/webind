@@ -113,6 +113,9 @@ function response_handler(data, form){
             rmi('green', 'Обзор успешно удалён!');
             get_views_list(true)
             break;
+        case ('view_opt_add_success'):
+            newViewOpt(form, '', false);
+            break;
         /* Реакция на управление зонами */
         case ('zone_add_success'):
             rmi('green', 'Зона успешно создана!', form);

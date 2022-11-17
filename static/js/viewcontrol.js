@@ -1,5 +1,5 @@
 function get_views_list(skip){
-    if (skip == false){
+    if (skip < 1){
         $('#preloader').addClass('preloader-right');
         $('#preloader').addClass('preloader-active');
         $('.right_pannel').removeClass("right_pannel_move");
@@ -21,8 +21,10 @@ function get_views_list(skip){
                 stop();
             }
             sessionStorage.setItem('viewsData', data);
-            makeView()
-            if (skip == false) {
+            if (skip < 2) {
+                makeView();
+            }
+            if (skip < 1) {
                 $('#preloader').addClass('opacity');
                 window.vanish = setTimeout(function(){
                     $('#preloader').removeClass('preloader-active');
@@ -89,7 +91,7 @@ function makeView(){
     iButton.type='button';
     iButton.textContent='Создать';
     $(iButton).attr('form','newViewForm');
-    iButton.onclick=function(){newView(this.form);};
+    iButton.onclick=function(){newView(this.form, true);};
 
     name.appendChild(iName);
     alias.appendChild(iAlias);
@@ -99,6 +101,7 @@ function makeView(){
     row.appendChild(name);
     row.appendChild(alias);
     row.appendChild(insert);
+    row.id='newViewRow'
 
     $views_table.appendChild(row);
     $body.appendChild($views_table)
@@ -147,7 +150,10 @@ function showView(idname){
     let header = document.createElement('div');
     header.classList.add('viewInfo-hedaer');
     let title = document.createElement('h1');
+    title.style.fontFamily = '\'current\'';
+    title.style.color = '#186b8f';
     let alias = document.createElement('h2');
+    alias.style.fontFamily = 'cursive';
 
     title.textContent=idname;
     alias.textContent=json[idname]['alias'];
@@ -161,68 +167,164 @@ function showView(idname){
     let front = document.createElement('div');
     front.classList.add('viewInfo-front');
     body.appendChild(front);
-    
-    //Создание таблицы параметров
-    makeViewOpts(front, json, idname)
 
+    sessionStorage.setItem('viewID', idname) //Кэшируем ID отырктого обзора
+
+    //Создание таблицы параметров
+    makeViewOpts(front, json)
+    
     //Создание таблицы подключенных серверов
-    makeViewServers(front, json, idname)
+    makeViewServers(front, json)
 
     //Создание таблицы зависимых зон
-    makeViewZones(front, json, idname)
+    makeViewZones(front, json)
 
     //Панель кнопок
+    console.log(idname);
     id = idname.split(':')[0];
     let footer = document.createElement('div');
     footer.classList.add('viewInfo-footer')
     body.appendChild(footer);
 
     let deleter = document.createElement('button');
+    deleter.classList.add('minibutton')
+    deleter.classList.add('deleter')
     deleter.type='button';
     deleter.textContent='Удалить';
-    deleter.onclick=function(){deleteView(id)};
+    deleter.onclick=function(){deleteView()};
     footer.appendChild(deleter);
 
 };
 
-function newView(form){
-    var olddata = $(form).serialize().split('&');
-    olddata.push('status=view');
-    olddata.push('action=new');
-    newdata = olddata.join('&');
-    form_submit(form, newdata);
-}
+function newView(form, send, json){
+    switch(send){
+        case true:
+            var olddata = $(form).serialize().split('&');
+            olddata.push('status=view');
+            olddata.push('action=new');
+            newdata = olddata.join('&');
+            getNewView(form, newdata);
+            break;
+        case false:
+            form.reset();
+            let view = json['viewname'];
+            let alias = json['alias'];
+            let id = json['id']
 
-function deleteView(id) {
-    data = {
-        'status':'view',
-        'action':'delete',
-        'id':id
+            let idView = id+': '+view;
+            let firstRow = document.querySelector('#newViewRow');
+
+            let row = document.createElement('tr');
+
+            let dId = document.createElement('td');
+            let dView = document.createElement('td');
+            let dAlias = document.createElement('td');
+            let dButton = document.createElement('td');
+            
+            let button = document.createElement('button');
+            button.type='button';
+            button.textContent='Push';
+            button.onclick=function(){showView(idView);};
+
+            
+
+            dId.textContent=id
+            dView.textContent=view;
+            dAlias.textContent=alias;
+            dButton.appendChild(button);
+
+            row.appendChild(dId);
+            row.appendChild(dView);
+            row.appendChild(dAlias);
+            row.appendChild(dButton);
+            row.style.transition = 'all 1s';
+            row.classList.add('newOpt');
+
+            firstRow.after(row);
+
+            window.vanish = setTimeout(function(){
+                row.classList.remove('newOpt');;
+            },200);
+            break;
     }
-    form_submit('', data)
 }
 
-function makeViewOpts(front, json, idname){
+function getNewView(form, data) {
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: data
+        })
+        .done(function(data) {
+            if (data == 'empty_serv_field' || data == 'failure') {
+                response_handler(data, form);
+            } else {
+                json = JSON.parse(data);
+                newView(form, false, json);
+                get_views_list(2);
+            }
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
+}
+
+function deleteView() {
+    var isDelete = confirm("Удаление обзора разрушит все зависимые связи, вы уверены?");
+    if (isDelete == true){
+        id = sessionStorage.getItem('viewID').split(':')[0]
+        data = {
+            'status':'view',
+            'action':'delete',
+            'id':id
+
+        };
+        console.log(data);
+        form_submit('', data)
+    }
+}
+
+function makeViewOpts(front, json){
+        idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
         let optBlock = document.createElement('div');
+        optBlock.id = 'viewOptBlock'
         front.appendChild(optBlock)
 
         let title = document.createElement('h3');
         title.textContent = 'Лист настроек';
         optBlock.appendChild(title);
 
-        let table = document.createElement('table');
-        optBlock.appendChild(table);
+        let div = document.createElement('div')
+        optBlock.appendChild(div);
 
-        let row = document.createElement('tr');
-        table.appendChild(row);
+        let table = document.createElement('table');
+        table.id='viewOptTable'
+        div.appendChild(table);
+
+        let hRow = document.createElement('tr');
+        hRow.id='viewOptTableHeadRow'
+        table.appendChild(hRow);
+
+        let hButton = document.createElement('button')
+        hButton.textContent = 'Open';
+        hButton.type = 'button';
+        hButton.onclick=function(){viewOptsOpen(true, hButton)};
 
         let hName = document.createElement('th'); 
         let hValue = document.createElement('th');
+        let hAction = document.createElement('th');
+        
+
         hName.textContent='Параметр';
         hValue.textContent='Значение';
-        row.appendChild(hName);
-        row.appendChild(hValue);
-        table.appendChild(row);
+        //hAction.appendChild(hButton);
+        hRow.appendChild(hName);
+        hRow.appendChild(hValue);
+        //hRow.appendChild(hAction);
+        title.appendChild(hButton);
+
+        table.appendChild(hRow);
         //Наполнение таблицы
         for (key in json[idname]['options']) {
             let config = key;
@@ -242,18 +344,129 @@ function makeViewOpts(front, json, idname){
             button.onclick=function(){};
 
             //Наполнение ячеек контентом
-            name.textContent=config;
+            name.textContent=config+':';
             value.textContent=json[idname]['options'][config];
 
             //Вставка ранее созданных элементов в строку
             push.appendChild(button);
             row.appendChild(name);
             row.appendChild(value);
-            row.appendChild(push);
+            //row.appendChild(push);
         };
 }
 
-function makeViewServers(front, json, idname){
+function viewOptsOpen(open, button) {
+    switch(open) {
+        case true:
+            button.onclick=function(){viewOptsOpen(false, button)};
+            let iName = document.createElement('input'); //Поле имени
+            let iValue = document.createElement('input'); //Поле Значения
+            let iButton = document.createElement('button'); //Кнопка отправки
+            let form = document.createElement('form')
+            form.id ='newViewOptForm'
+            iName.name='name';
+            $(iName).attr('form','newViewOptForm');
+            //iName.style.width = '90%';
+            iValue.name='value';
+            $(iValue).attr('form','newViewOptForm');
+            iValue.style.width = '90%';
+            iButton.type='button';
+            iButton.textContent='+';
+            iButton.style.float = 'left';
+            $(iButton).attr('form','newViewOptForm');
+            console.log(idname);
+            iButton.onclick=function(){newViewOpt(this.form, true);};
+
+            let row = document.createElement('tr');
+            row.id='viewOptRow-newOpt'
+
+            let rName = document.createElement('td');
+            let rValue = document.createElement('td');
+
+            rName.appendChild(iButton);
+            rName.appendChild(iName);
+            rValue.appendChild(iValue);
+
+            row.appendChild(rName);
+            row.appendChild(rValue);
+            //row.appendChild(rButton);
+
+            let hRow = document.querySelector('#viewOptTableHeadRow');
+            hRow.after(form);
+            hRow.after(row);
+            break;
+        case false:
+            button.onclick=function(){viewOptsOpen(true, button)};
+            let oRow = document.querySelector('#viewOptRow-newOpt');
+            
+            oRow.remove();
+            break;
+    }
+}
+
+function newViewOpt(form, send, buffer) {
+    switch(send){
+        case true:
+            idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
+            id = idname.split(':')
+            data = $(form).serialize().split('&');
+            data.push('viewID='+id[0])
+            data.push('status=view')
+            data.push('action=newopt')
+            newdata = data.join('&')
+            getNewViewOpt(form, newdata);
+            break;
+        case false:
+            form.reset();
+            opt = buffer['option'];
+            val = buffer['value'];
+
+            let firstRow = document.querySelector('#viewOptRow-newOpt');
+
+            let row = document.createElement('tr');
+            let name = document.createElement('td');
+            let value = document.createElement('td');
+
+            name.textContent=opt;
+            value.textContent=val;
+
+            row.appendChild(name);
+            row.appendChild(value);
+            row.style.transition = 'all 1s';
+            row.classList.add('newOpt');
+
+            firstRow.after(row);
+
+            window.vanish = setTimeout(function(){
+                row.classList.remove('newOpt');;
+            },200);
+            break;
+    };
+};
+
+function getNewViewOpt(form, data){
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: data
+        })
+        .done(function(data) {
+            if (data == 'bad_view_opt' || data == 'view_opt_exist' || data == 'empty_serv_field') {
+                response_handler(data, form);
+            } else {
+                json = JSON.parse(data);
+                newViewOpt(form, false, json);
+                get_views_list(2);
+            }
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
+};
+
+function makeViewServers(front, json){
+        idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
         let servBlock = document.createElement('div');
         front.appendChild(servBlock)
 
@@ -261,8 +474,12 @@ function makeViewServers(front, json, idname){
         title.textContent = 'Подключенные серверы';
         servBlock.appendChild(title);
 
+        let div = document.createElement('div')
+        servBlock.appendChild(div);
+
         let table = document.createElement('table');
-        servBlock.appendChild(table);
+        table.id='viewServTable'
+        div.appendChild(table);
 
         let row = document.createElement('tr');
         table.appendChild(row);
@@ -297,7 +514,9 @@ function makeViewServers(front, json, idname){
         };
 };
 
-function makeViewZones(front, json, idname){
+function makeViewZones(front, json){
+    idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
+
     let zonesBlock = document.createElement('div');
     front.appendChild(zonesBlock)
 
@@ -305,8 +524,12 @@ function makeViewZones(front, json, idname){
     title.textContent = 'Зависимые зоны';
     zonesBlock.appendChild(title);
 
+    let div = document.createElement('div')
+    zonesBlock.appendChild(div);
+
     let table = document.createElement('table');
-    zonesBlock.appendChild(table);
+    table.id='viewZonesTable'
+    div.appendChild(table);
 
     let row = document.createElement('tr');
     table.appendChild(row);

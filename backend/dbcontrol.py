@@ -690,6 +690,8 @@ def get_views_list(dbsql):
                 viewOpt = (ses.query(Configs, Views_Configs)
                            .join(Views_Configs, Views_Configs.config_id == Configs.id)
                            .filter(Configs.views.any(Views.id == view.id))
+                           .filter(Views_Configs.viewid == view.id)
+                           .all()
                 )
                 viewOptsList = {}
                 for row in viewOpt:
@@ -740,7 +742,15 @@ def newView_query(dbsql, data):
             )
             ses.add(new)
             ses.commit()
-        return 'viewadd_success'
+            getNewView = (ses.query(Views)
+                          .order_by(Views.id.desc())
+                          .first())
+            data = {
+                'id': getNewView.id,
+                'viewname': getNewView.viewname,
+                'alias': getNewView.alias
+            }
+        return data
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
@@ -755,7 +765,47 @@ def deleteView_query(dbsql, id):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
-    
+
+def viewNewOpt_query(dbsql, data):
+    try:
+        config = data['config']
+        viewID = data['viewID']
+        value = data['value']
+        with dbsql.session() as ses:
+            optID = (ses.query(Configs.id)
+                     .filter(Configs.config == config)
+                     .filter(Configs.view == True)
+                     .first()
+            )
+            if not optID: return 'bad_view_opt'
+            check = (ses.query(Views_Configs)
+                     .filter(Views_Configs.viewid == viewID)     
+                     .filter(Views_Configs.config_id == optID[0])
+                     .all()    
+            )
+            if check: return 'view_opt_exist'
+            new = Views_Configs(config_id = optID[0], 
+                                viewid = viewID,
+                                value = value)
+            ses.add(new)
+            ses.commit()
+            newViewOpt = (ses.query(Configs, Views_Configs)
+                        .join(Views_Configs, Views_Configs.config_id == Configs.id)
+                        .filter(Configs.views.any(Views.id == viewID))
+                        .filter(Views_Configs.viewid == viewID)
+                        .order_by(Views_Configs.id.desc())
+                        .first()
+            )
+            data = {
+                'option': newViewOpt.Configs.config,
+                'value': newViewOpt.Views_Configs.value
+            }
+            return data
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+
+
 def zoneadd_query(dbsql, data):
     try:
         with dbsql.session() as ses:
