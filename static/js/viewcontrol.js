@@ -41,6 +41,7 @@ function get_views_list(skip){
 
 
 function makeView(){
+    closeview();
     let saved = sessionStorage.getItem('viewsData');
     var viewsList = JSON.parse(saved)
     console.log(viewsList)
@@ -77,20 +78,30 @@ function makeView(){
     let form = document.createElement('form'); //Форма
     let iName = document.createElement('input'); //Поле имени
     let iAlias = document.createElement('input'); //Поле описания
+    iAlias.style.width = '90%';
     let iButton = document.createElement('button'); //Кнопка отправки
+    let iImg = document.createElement('div'); //Рисунок кнопки
 
     //Создание формы добавления Обзора
     form.classList.add('form');
     form.id='newViewForm'
     $body.appendChild(form);
     
-    iName.name='name';
-    $(iName).attr('form','newViewForm');
+    //Настройки первого поля
+    iName.name='name'; //Имя для формы
+    $(iName).attr('form','newViewForm'); //Привязка к форме
+    //Настройки второго поля
     iAlias.name='alias';
     $(iAlias).attr('form','newViewForm');
+
+    //Подключение картинки
+    iImg.classList.add('svg-img-24x24');
+    iImg.classList.add('img-plus');
+    iButton.classList.add('svg-btn');
     iButton.type='button';
-    iButton.textContent='Создать';
     $(iButton).attr('form','newViewForm');
+    iButton.appendChild(iImg);
+    
     iButton.onclick=function(){newView(this.form, true);};
 
     name.appendChild(iName);
@@ -122,7 +133,11 @@ function makeView(){
 
         //Функции новой кнопки
         let button = document.createElement('button'); //Кнопка
-        button.textContent='Push';
+        let img = document.createElement('div'); //Иконка
+        img.classList.add('svg-img-24x24');
+        img.classList.add('img-up');
+        button.classList.add('svg-btn');
+        button.appendChild(img);
         button.onclick=function(){showView(view);};
 
         //Наполнение ячеек контентом
@@ -140,6 +155,10 @@ function makeView(){
 }
 
 function showView(idname){
+    //$('#viewsMain').addClass('viewsMain-close');
+    $('#viewsMain').css('height', '15vh');
+    $('#viewsInfo').css('height', '62vh');
+
     let saved = sessionStorage.getItem('viewsData');
     var json = JSON.parse(saved)
 
@@ -149,17 +168,33 @@ function showView(idname){
     //Создание шапки
     let header = document.createElement('div');
     header.classList.add('viewInfo-hedaer');
+
+    
+
     let title = document.createElement('h1');
     title.style.fontFamily = '\'current\'';
     title.style.color = '#186b8f';
     let alias = document.createElement('h2');
     alias.style.fontFamily = 'cursive';
 
+
+    let hButton = document.createElement('button'); //Кнопка сокрытия
+    let cImg = document.createElement('div'); //Иконка
+    cImg.classList.add('svg-img-64x64');
+    cImg.classList.add('img-down-64');
+    hButton.onclick=function(){closeview();};
+    hButton.classList.add('svg-btn-64');
+    hButton.appendChild(cImg)
+
     title.textContent=idname;
     alias.textContent=json[idname]['alias'];
 
-    header.appendChild(title);
-    header.appendChild(alias);
+    let titleBlock = document.createElement('div')
+    titleBlock.appendChild(title);
+    titleBlock.appendChild(alias);
+
+    header.appendChild(titleBlock);
+    header.appendChild(hButton);
 
     body.appendChild(header);
 
@@ -196,6 +231,16 @@ function showView(idname){
 
 };
 
+function closeview(){
+    let body = document.querySelector('#viewsInfo');  
+    $('#viewsInfo').css('height', '0vh')
+    $('#viewsMain').css('height', '80vh')
+    window.vanish = setTimeout(function(){
+        body.textContent=''
+    },200);
+
+}
+
 function newView(form, send, json){
     switch(send){
         case true:
@@ -220,10 +265,14 @@ function newView(form, send, json){
             let dView = document.createElement('td');
             let dAlias = document.createElement('td');
             let dButton = document.createElement('td');
+            let cImg = document.createElement('div'); //Иконка
+            cImg.classList.add('svg-img-24x24');
+            cImg.classList.add('img-up');
             
             let button = document.createElement('button');
             button.type='button';
-            button.textContent='Push';
+            button.classList.add('svg-btn');
+            button.appendChild(cImg);
             button.onclick=function(){showView(idView);};
 
             
@@ -281,7 +330,7 @@ function deleteView() {
 
         };
         console.log(data);
-        form_submit('', data)
+        form_submit('', data);
     }
 }
 
@@ -291,9 +340,26 @@ function makeViewOpts(front, json){
         optBlock.id = 'viewOptBlock'
         front.appendChild(optBlock)
 
+        let blockTitle = document.createElement('div');
+
+        let img = document.createElement('div'); //блок изображения
+        img.classList.add('svg-img-24x24');
+        img.classList.add('img-right');
+        img.id='viewOptSwitch';
+
+        let hButton = document.createElement('button')
+        hButton.appendChild(img);
+        hButton.classList.add('svg-btn');
+        hButton.type = 'button';
+        hButton.onclick=function(){viewOptsOpen(true, hButton)};
+
         let title = document.createElement('h3');
         title.textContent = 'Лист настроек';
-        optBlock.appendChild(title);
+
+        blockTitle.appendChild(title);
+        blockTitle.appendChild(hButton);
+
+        optBlock.appendChild(blockTitle);
 
         let div = document.createElement('div')
         optBlock.appendChild(div);
@@ -306,23 +372,18 @@ function makeViewOpts(front, json){
         hRow.id='viewOptTableHeadRow'
         table.appendChild(hRow);
 
-        let hButton = document.createElement('button')
-        hButton.textContent = 'Open';
-        hButton.type = 'button';
-        hButton.onclick=function(){viewOptsOpen(true, hButton)};
 
         let hName = document.createElement('th'); 
         let hValue = document.createElement('th');
         let hAction = document.createElement('th');
-        
+        hAction.classList.add('viewOptsEdit');
+        hAction.classList.add('hidden');
 
         hName.textContent='Параметр';
         hValue.textContent='Значение';
-        //hAction.appendChild(hButton);
+        hRow.appendChild(hAction);
         hRow.appendChild(hName);
         hRow.appendChild(hValue);
-        //hRow.appendChild(hAction);
-        title.appendChild(hButton);
 
         table.appendChild(hRow);
         //Наполнение таблицы
@@ -333,69 +394,94 @@ function makeViewOpts(front, json){
             table.appendChild(row);
 
             //Создание ячеек
+            let push = document.createElement('td'); //Ячейки кнопки
             let name = document.createElement('td'); //Наименование
             let value = document.createElement('td'); //Описание
-            let push = document.createElement('td'); //Ячейки кнопки
+            let img = document.createElement('div'); //блок изображения
             
+            img.classList.add('svg-img-24x24');
+            img.classList.add('img-pencil');
 
             //Функции новой кнопки
             let button = document.createElement('button'); //Кнопка
-            button.textContent='Push';
-            button.onclick=function(){};
+            button.classList.add('svg-btn');
+            button.appendChild(img);
+            button.onclick=function(){viewOptEdit(row, true)};
+
+
+            push.classList.add('viewOptsEdit');
+            push.classList.add('hidden');
+            push.appendChild(button);
 
             //Наполнение ячеек контентом
-            name.textContent=config+':';
+            name.textContent=config;
             value.textContent=json[idname]['options'][config];
 
             //Вставка ранее созданных элементов в строку
-            push.appendChild(button);
+            row.appendChild(push);
             row.appendChild(name);
             row.appendChild(value);
-            //row.appendChild(push);
         };
 }
 
 function viewOptsOpen(open, button) {
     switch(open) {
         case true:
+            $('#viewOptSwitch').removeClass('img-right');
+            $('#viewOptSwitch').addClass('img-left');
+            $('.viewInfo-front > div').addClass('hidden');
+            $('#viewOptBlock').removeClass('hidden');
+            $('#viewOptBlock').css('width', '100%');
             button.onclick=function(){viewOptsOpen(false, button)};
+            $('.viewOptsEdit').removeClass('hidden');
             let iName = document.createElement('input'); //Поле имени
             let iValue = document.createElement('input'); //Поле Значения
             let iButton = document.createElement('button'); //Кнопка отправки
             let form = document.createElement('form')
             form.id ='newViewOptForm'
             iName.name='name';
+            iName.style.width = '90%';
             $(iName).attr('form','newViewOptForm');
-            //iName.style.width = '90%';
             iValue.name='value';
             $(iValue).attr('form','newViewOptForm');
             iValue.style.width = '90%';
             iButton.type='button';
-            iButton.textContent='+';
-            iButton.style.float = 'left';
             $(iButton).attr('form','newViewOptForm');
-            console.log(idname);
+            iButton.classList.add('svg-btn');
             iButton.onclick=function(){newViewOpt(this.form, true);};
+
+            let img = document.createElement('div');
+            img.classList.add('svg-img-24x24');
+            img.classList.add('img-plus');
+            iButton.appendChild(img);
 
             let row = document.createElement('tr');
             row.id='viewOptRow-newOpt'
 
             let rName = document.createElement('td');
             let rValue = document.createElement('td');
+            let rAction = document.createElement('td');
+            rAction.classList.add('viewOptsEdit');
 
-            rName.appendChild(iButton);
+            rAction.appendChild(iButton);
             rName.appendChild(iName);
             rValue.appendChild(iValue);
 
+            row.appendChild(rAction);
             row.appendChild(rName);
             row.appendChild(rValue);
-            //row.appendChild(rButton);
+
 
             let hRow = document.querySelector('#viewOptTableHeadRow');
             hRow.after(form);
             hRow.after(row);
             break;
         case false:
+            $('#viewOptSwitch').removeClass('img-left');
+            $('#viewOptSwitch').addClass('img-right');
+            $('.viewOptsEdit').addClass('hidden');
+            $('.viewInfo-front > div').removeClass('hidden');
+            $('#viewOptBlock').css('width', '40vw');
             button.onclick=function(){viewOptsOpen(true, button)};
             let oRow = document.querySelector('#viewOptRow-newOpt');
             
@@ -424,12 +510,28 @@ function newViewOpt(form, send, buffer) {
             let firstRow = document.querySelector('#viewOptRow-newOpt');
 
             let row = document.createElement('tr');
+            let push = document.createElement('td');
             let name = document.createElement('td');
             let value = document.createElement('td');
+            let img = document.createElement('div'); //блок изображения
+            
+            img.classList.add('svg-img-24x24');
+            img.classList.add('img-pencil');
+
+            //Функции новой кнопки
+            let button = document.createElement('button'); //Кнопка
+            button.classList.add('svg-btn');
+            button.appendChild(img);
+            button.onclick=function(){viewOptEdit(row, true)};
+
+
+            push.classList.add('viewOptsEdit');
+            push.appendChild(button);
 
             name.textContent=opt;
             value.textContent=val;
 
+            row.appendChild(push);
             row.appendChild(name);
             row.appendChild(value);
             row.style.transition = 'all 1s';
@@ -463,6 +565,58 @@ function getNewViewOpt(form, data){
         .fail(function(){
             alert('Внутрення ошибка, перезагрузите страницу!');
         });
+};
+
+function viewOptEdit(row, edit, data){
+    switch(edit)
+    {
+        case(true):
+            let form = document.createElement('form'); //Объявляем форму
+            form.id ='viewOptEditForm'; //Присваеваем ID
+            let option = row.childNodes[1].textContent; //Получаем значение имени
+            let value = row.childNodes[2].textContent; //Получаем значение значения
+            let action = row.childNodes[0].childNodes[0]; //Сохраняем старую кнопку
+
+            data = {
+                'option': option,
+                'value': value,
+                'action': action
+            }
+            let iOption = document.createElement('input'); //Создаём поле ввода имени
+            iOption.name='option' //Ключ имени для формы
+            $(iOption).attr('form', '#viewOptEditForm'); //Привязаем имя к форме
+            $(iOption).val(option); //Присваем имя в качестве значения
+            let iValue = document.createElement('input'); //Создаём поле ввода значения
+            iValue.name='value' //Ключ значения для формы
+            $(iValue).attr('form', '#viewOptEditForm'); //Привязаем значение к форме
+            $(iValue).val(value); //Присваем значение
+
+            let cButton = document.createElement('button'); //Создаём кнопку отмены
+            cButton.type='button'; //Явно указываем кнопку
+            cButton.onclick=function(){viewOptEdit(row, false, data)}; //Функция отмены
+            cButton.textContent='C';
+
+            let sendButton = document.createElement('button'); //Создаём кнопку отправки
+            sendButton.type='button'; //Явно указываем кнопку
+            sendButton.textContent='S';
+            sendButton.setAttribute('form', '#viewOptEditForm'); //Отпарвка формы
+
+            row.appendChild(form); //Вставляем форму
+            row.childNodes[0].textContent=''; //Обнуляем первую ячейку
+            row.childNodes[0].appendChild(cButton);
+            row.childNodes[0].appendChild(sendButton); //Добавляем кнопку сохранения
+            row.childNodes[1].textContent=''; // Обнуляем имя в ячейке
+            row.childNodes[1].appendChild(iOption)  //Вставляем в ячейку поле имени
+            row.childNodes[2].textContent=''; // Обнуляем значение в ячейке
+            row.childNodes[2].appendChild(iValue)  //Вставляем в ячейку поле значения
+            break;
+        case(false):
+            row.childNodes[0].textContent=''; //Обнуляем ячйеку с кнопкой
+            row.childNodes[0].appendChild(data['action']); //Восстанавливаем кнпоку
+            row.childNodes[1].textContent=data['option']; //Восстанавливаем имя
+            row.childNodes[2].textContent=data['value']; //Восстанавливаем значение
+
+    };
 };
 
 function makeViewServers(front, json){
