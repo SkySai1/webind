@@ -45,6 +45,7 @@
 
 	{#	Скрипты управления зонами, обзорами, доменами (админ) #}
 	{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+		<script defer src="../static/js/tablemaker.js"></script>
 		<script defer src="../static/js/zonecontrol.js"></script>
 		<script defer src="../static/js/viewcontrol.js"></script>
 	{% endif %}

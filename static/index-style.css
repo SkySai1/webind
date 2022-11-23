@@ -585,12 +585,14 @@ body{
   position: absolute;
 }
 .svg-btn{
-    width: 24px;
-    height: 24px;
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
+}
+.svg-btn > div{
+  width: 100%;
+  height: 100%;
 }
 .svg-btn-64{
   width: 64px;
@@ -652,6 +654,18 @@ body{
 }
 .img-pencil:hover{
   background: url(../static/img/pencil-h.svg);
+}
+.img-cancel{
+  background: url(../static/img/cancel.svg);
+}
+.img-cancel:hover{
+  background: url(../static/img/cancel-h.svg);
+}
+.img-save{
+  background: url(../static/img/save.svg);
+}
+.img-save:hover{
+  background: url(../static/img/save-h.svg);
 }
 #newZone-form > div > div > a{
   width: 10em;

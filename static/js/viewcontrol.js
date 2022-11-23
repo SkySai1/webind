@@ -39,120 +39,42 @@ function get_views_list(skip){
         });
 };
 
-
 function makeView(){
     closeview();
+    // -- Выводим полученный список Обзоров --
     let saved = sessionStorage.getItem('viewsData');
-    var viewsList = JSON.parse(saved)
-    console.log(viewsList)
+    var viewsList = JSON.parse(saved);
+    console.log(viewsList);
+    //
 
-    //Очитка содержимого
-    const $info = document.querySelector('#viewsInfo')
-    const $body = document.querySelector('#viewsMain')
-    $body.textContent = '';
-    $info.textContent = '';
-    //Создание таблицы Обзоров
-    const $views_table = document.createElement('table');
-    //$views_table.classList.add('servtable');
-
-    //Заголовок таблицы
-    const $head = document.createElement('tr');
-    $views_table.appendChild($head);
-    const $id = document.createElement('th');
-    const $name = document.createElement('th');
-    const $alias = document.createElement('th')
-    $id.textContent='ID';
-    $name.textContent='Наименование';
-    $alias.textContent='Описание';
-    $head.appendChild($id);
-    $head.appendChild($name);
-    $head.appendChild($alias);
-
-    //Создание строки добавления Обзора
-    let row = document.createElement('tr'); //Новая строка
-    let empty = document.createElement('td'); //Пустая ячейка
-    let name = document.createElement('td'); //Наименование
-    let alias = document.createElement('td'); //Описание
-    let insert = document.createElement('td'); //Ячейки кнопки
-
-    let form = document.createElement('form'); //Форма
-    let iName = document.createElement('input'); //Поле имени
-    let iAlias = document.createElement('input'); //Поле описания
-    iAlias.style.width = '90%';
-    let iButton = document.createElement('button'); //Кнопка отправки
-    let iImg = document.createElement('div'); //Рисунок кнопки
-
-    //Создание формы добавления Обзора
-    form.classList.add('form');
-    form.id='newViewForm'
-    $body.appendChild(form);
+    let mainBlock = document.getElementById('viewsMain'); //Получаем блок с осн. таблицей
+    header=['ID', 'Наименование', 'Краткое описание', 'Кнопка']; //Создаём заголовок
     
-    //Настройки первого поля
-    iName.name='name'; //Имя для формы
-    $(iName).attr('form','newViewForm'); //Привязка к форме
-    //Настройки второго поля
-    iAlias.name='alias';
-    $(iAlias).attr('form','newViewForm');
 
-    //Подключение картинки
-    iImg.classList.add('svg-img-24x24');
-    iImg.classList.add('img-plus');
-    iButton.classList.add('svg-btn');
-    iButton.type='button';
-    $(iButton).attr('form','newViewForm');
-    iButton.appendChild(iImg);
-    
-    iButton.onclick=function(){newView(this.form, true);};
+    // -- Создадим массив полей --
+    id = []
+    viewname = []
+    alias = []
+    action = []
+    for (let key in viewsList){
+        id.push(key);
+        viewname.push(viewsList[key]['viewname']);
+        alias.push(viewsList[key]['alias']);
 
-    name.appendChild(iName);
-    alias.appendChild(iAlias);
-    insert.appendChild(iButton);
+        // --Создадим кнопку раскрытия
+        let button = imgButton('img-up', '24px');
+        button.onclick=function(){showView(key);};
+        //
 
-    row.appendChild(empty);
-    row.appendChild(name);
-    row.appendChild(alias);
-    row.appendChild(insert);
-    row.id='newViewRow'
+        action.push(button)
 
-    $views_table.appendChild(row);
-    $body.appendChild($views_table)
-    //Наполнение таблицы
-    for (key in viewsList) {
-        let view = key;
-        viewCap = key.split(':');
-        //Создание строки
-        let row = document.createElement('tr');
-        $views_table.appendChild(row);
+    }
+    fields = [id, viewname, alias, action];
+    //
 
-        //Создание ячеек
-        let id = document.createElement('td'); //ID Обзора
-        let name = document.createElement('td'); //Наименование
-        let alias = document.createElement('td'); //Описание
-        let push = document.createElement('td'); //Ячейки кнопки
-        
-
-        //Функции новой кнопки
-        let button = document.createElement('button'); //Кнопка
-        let img = document.createElement('div'); //Иконка
-        img.classList.add('svg-img-24x24');
-        img.classList.add('img-up');
-        button.classList.add('svg-btn');
-        button.appendChild(img);
-        button.onclick=function(){showView(view);};
-
-        //Наполнение ячеек контентом
-        id.textContent=viewCap[0]+':';
-        name.textContent=viewCap[1];
-        alias.textContent=viewsList[key]['alias'];
-
-        //Вставка ранее созданных элементов в строку
-        push.appendChild(button);
-        row.appendChild(id);
-        row.appendChild(name);
-        row.appendChild(alias);
-        row.appendChild(push);
-    };
-}
+    mainTable = makeTable(header, fields);
+    mainBlock.appendChild(mainTable);
+};
 
 function showView(idname){
     //$('#viewsMain').addClass('viewsMain-close');
@@ -484,8 +406,7 @@ function viewOptsOpen(open, button) {
             $('#viewOptBlock').css('width', '40vw');
             button.onclick=function(){viewOptsOpen(true, button)};
             let oRow = document.querySelector('#viewOptRow-newOpt');
-            
-            oRow.remove();
+            get_views_list(0);
             break;
     }
 }
@@ -582,31 +503,36 @@ function viewOptEdit(row, edit, data){
                 'value': value,
                 'action': action
             }
-            let iOption = document.createElement('input'); //Создаём поле ввода имени
-            iOption.name='option' //Ключ имени для формы
-            $(iOption).attr('form', '#viewOptEditForm'); //Привязаем имя к форме
-            $(iOption).val(option); //Присваем имя в качестве значения
             let iValue = document.createElement('input'); //Создаём поле ввода значения
             iValue.name='value' //Ключ значения для формы
             $(iValue).attr('form', '#viewOptEditForm'); //Привязаем значение к форме
             $(iValue).val(value); //Присваем значение
 
+            let cImg = document.createElement('div'); //Рисунок кнопки отмены
+            cImg.classList.add('svg-img-24x24');
+            cImg.classList.add('img-cancel');
+
+            let sImg = document.createElement('div'); //Рисунок кнопки отмены
+            sImg.classList.add('svg-img-24x24');
+            sImg.classList.add('img-save');
+            
+
             let cButton = document.createElement('button'); //Создаём кнопку отмены
             cButton.type='button'; //Явно указываем кнопку
             cButton.onclick=function(){viewOptEdit(row, false, data)}; //Функция отмены
-            cButton.textContent='C';
+            cButton.appendChild(cImg);
+            cButton.classList.add('svg-btn')
 
             let sendButton = document.createElement('button'); //Создаём кнопку отправки
             sendButton.type='button'; //Явно указываем кнопку
-            sendButton.textContent='S';
             sendButton.setAttribute('form', '#viewOptEditForm'); //Отпарвка формы
+            sendButton.appendChild(sImg);
+            sendButton.classList.add('svg-btn');
 
             row.appendChild(form); //Вставляем форму
             row.childNodes[0].textContent=''; //Обнуляем первую ячейку
             row.childNodes[0].appendChild(cButton);
             row.childNodes[0].appendChild(sendButton); //Добавляем кнопку сохранения
-            row.childNodes[1].textContent=''; // Обнуляем имя в ячейке
-            row.childNodes[1].appendChild(iOption)  //Вставляем в ячейку поле имени
             row.childNodes[2].textContent=''; // Обнуляем значение в ячейке
             row.childNodes[2].appendChild(iValue)  //Вставляем в ячейку поле значения
             break;

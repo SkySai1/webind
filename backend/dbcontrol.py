@@ -685,6 +685,7 @@ def get_views_list(dbsql):
             for view in views:
                 viewDesc = {}
                 viewDesc['alias'] = view.alias
+                viewDesc['viewname'] = view.viewname
                 #Список параметров Обзора
                 
                 viewOpt = (ses.query(Configs, Views_Configs)
@@ -727,7 +728,7 @@ def get_views_list(dbsql):
                     servList.append(f"{server.id}: {server.hostname}")
                     #print(servList)
                 viewDesc['servers'] = servList
-                viewsList[f"{view.id}: {view.viewname}"] = viewDesc
+                viewsList[view.id] = viewDesc
             return json.dumps(viewsList, indent=4)
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
