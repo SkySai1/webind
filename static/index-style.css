@@ -674,22 +674,30 @@ body{
   text-align: right;
   margin-right: 1em;
 }
-#viewsMain {
+.objectMain {
   height: 80vh;
+  width: 70vw;
   overflow: auto;
   transition: all 0.2s;
 }
-#viewsMain > table {
+.mainTable {
   width: 80%;
+  text-align: left;
   margin: 0 auto;
 }
-#viewsMain * td:nth-child(3){
+.mainTable * td{
+  width: auto;
+  border-bottom: solid;
+  border-width: 1px;
+  border-color: #4a657c;
+}
+.objectMain * td:nth-child(3){
   word-break: break-all;
 }
 .viewsMain-close{
   height: 15vh !important;
 }
-#viewsInfo{
+.objectInfo{
   width: inherit;
   transition: all 0.2s;
   height: 0vh;
@@ -798,7 +806,7 @@ body{
   padding-left: 1em;
   width: auto
 }
-.newOpt{
+.newRow{
   background: #31f21442 !important;
   box-shadow: 0 0 5px 1px rgb(62 157 89) !important;
 }
@@ -1037,7 +1045,7 @@ body{
     width: 100vw;
     right: -100vw;
   }
-  #viewsMain{
+  .objectMain{
     font-size: x-large;
     width: 90vw;
     display: flex;

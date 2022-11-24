@@ -315,11 +315,11 @@
 							{#	ПАНЕЛЬ ОБЗОРОВ	#}
 							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
 							<div id="views" class="el_right_pannel column hidden">
-								<div id="viewsMain">
+								<div id="viewsMain" class="objectMain">
 									
 								</div>
 								<hr style="min-width: calc(49vw - 1.3em);">
-								<div id="viewsInfo"></div>
+								<div id="viewsInfo" class="objectInfo"></div>
 							</div>
 							{% endif %}
 						</div>

@@ -48,14 +48,32 @@ function makeView(){
     //
 
     let mainBlock = document.getElementById('viewsMain'); //Получаем блок с осн. таблицей
-    header=['ID', 'Наименование', 'Краткое описание', 'Кнопка']; //Создаём заголовок
+    mainBlock.textContent='';
+    header=['ID', 'Наименование', 'Краткое описание', '']; //Создаём заголовок
     
-
+    // -- Создадим поля ввода
+    let form = document.createElement('form'); //Создадим форму
+    form.id='buffForm'
+    let iName = document.createElement('input'); //Создадим ввод имени
+    iName.name='name';
+    iName.setAttribute('form','buffForm');
+    let iAlias = document.createElement('input'); //Создадим ввод описания
+    iAlias.name='alias';
+    iAlias.setAttribute('form','buffForm');
+    let iButton = imgButton('img-plus', '24px');
+    iButton.setAttribute('form','buffForm');
+    iButton.type='button';
+    iButton.onclick=function(){newView(this.form, true);};
+    //s
     // -- Создадим массив полей --
     id = []
     viewname = []
     alias = []
     action = []
+    id.push('');
+    viewname.push(iName);
+    alias.push(iAlias);
+    action.push(iButton);
     for (let key in viewsList){
         id.push(key);
         viewname.push(viewsList[key]['viewname']);
@@ -73,7 +91,10 @@ function makeView(){
     //
 
     mainTable = makeTable(header, fields);
+    mainTable.classList.add('mainTable');
+    mainTable.id='viewsTable'
     mainBlock.appendChild(mainTable);
+    mainBlock.appendChild(form);
 };
 
 function showView(idname){
@@ -138,7 +159,7 @@ function showView(idname){
 
     //Панель кнопок
     console.log(idname);
-    id = idname.split(':')[0];
+    id = idname;
     let footer = document.createElement('div');
     footer.classList.add('viewInfo-footer')
     body.appendChild(footer);
@@ -167,6 +188,7 @@ function newView(form, send, json){
     switch(send){
         case true:
             var olddata = $(form).serialize().split('&');
+            console.log(olddata);
             olddata.push('status=view');
             olddata.push('action=new');
             newdata = olddata.join('&');
@@ -177,45 +199,13 @@ function newView(form, send, json){
             let view = json['viewname'];
             let alias = json['alias'];
             let id = json['id']
-
-            let idView = id+': '+view;
-            let firstRow = document.querySelector('#newViewRow');
-
-            let row = document.createElement('tr');
-
-            let dId = document.createElement('td');
-            let dView = document.createElement('td');
-            let dAlias = document.createElement('td');
-            let dButton = document.createElement('td');
-            let cImg = document.createElement('div'); //Иконка
-            cImg.classList.add('svg-img-24x24');
-            cImg.classList.add('img-up');
-            
-            let button = document.createElement('button');
-            button.type='button';
-            button.classList.add('svg-btn');
-            button.appendChild(cImg);
-            button.onclick=function(){showView(idView);};
-
-            
-
-            dId.textContent=id
-            dView.textContent=view;
-            dAlias.textContent=alias;
-            dButton.appendChild(button);
-
-            row.appendChild(dId);
-            row.appendChild(dView);
-            row.appendChild(dAlias);
-            row.appendChild(dButton);
-            row.style.transition = 'all 1s';
-            row.classList.add('newOpt');
-
-            firstRow.after(row);
-
-            window.vanish = setTimeout(function(){
-                row.classList.remove('newOpt');;
-            },200);
+            // --Создадим кнопку раскрытия
+            let button = imgButton('img-up', '24px');
+            button.onclick=function(){showView(id);};
+            //
+            fields = [id, view, alias, button]
+            let table = document.getElementById('viewsTable');
+            newRow(table, fields);
             break;
     }
 }

@@ -21,10 +21,13 @@ def newView(dbsql):
     for key, value in request.form.items(multi=True):
         if not request.form.get(key): 
             return 'empty_serv_field'
-    data = {
-        'name': request.form.get('name'),
-        'alias': request.form.get('alias')
-    }
+    try:
+        data = {
+            'name': request.form['name'],
+            'alias': request.form['alias']
+        }
+    except Exception as e:
+        return 'empty_serv_field'
     return newView_query(dbsql, data)
 
 def deleteView(dbsql):
