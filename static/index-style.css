@@ -703,14 +703,14 @@ body{
   height: 0vh;
 }
 
-.viewInfo-hedaer{
+.objectInfoHedaer{
   width: 90%;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
 }
-.viewInfo-hedaer > div{
+.objectInfoHedaer > div{
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -720,15 +720,15 @@ body{
   max-height: 10vh;
   overflow: auto;
 }
-.viewInfo-hedaer * h1 {
+.objectInfoHedaer * h1 {
   margin: 0;
   font-size: x-large;
 }
 
-.viewInfo-hedaer * h2 {
+.objectInfoHedaer * h2 {
   margin: 0;
 }
-.viewInfo-front{
+.objectInfoFront{
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -736,7 +736,7 @@ body{
   overflow: auto;
   height: 47vh;
 }
-.viewInfo-front > div {
+.objectInfoFront > div {
   width: 30vw;
   display: flex;
   flex-direction: column;
@@ -744,10 +744,10 @@ body{
   overflow: auto;
   height: 45vh;
 }
-.viewInfo-front > div:nth-child(2) {
+.objectInfoFront > div:nth-child(2) {
   width: 40vw;
 }
-.viewInfo-front > div > div{
+.objectInfoFront > div > div{
   width: 100%;
   overflow: auto;
   display: flex;
@@ -755,7 +755,7 @@ body{
   align-items: center;
   max-height: inherit;
 }
-.viewInfo-front * h3{
+.objectInfoFront * h3{
   font-family: sans-serif;
 }
 
@@ -773,13 +773,13 @@ body{
   background: #ebc3c3;
   cursor: pointer;
 }
-.viewInfo-front * table {
+.objectInfoFront * table {
   font-family: 'Courier New', Courier, serif;
 }
-.viewInfo-front * td:nth-child(2) {
+.objectInfoFront * td:nth-child(2) {
   word-break: break-all;
 }
-.viewInfo-front * td:nth-child(3) {
+.objectInfoFront * td:nth-child(3) {
   word-break: break-all;
 }
 #viewOptTable {
@@ -1052,7 +1052,7 @@ body{
     justify-content: center;
     align-items: flex-start;
   }
-  .viewInfo-front {
+  .objectInfoFront {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1062,17 +1062,17 @@ body{
     border-bottom: solid;
     align-items: center;
   }
-  .viewInfo-front > div{
+  .objectInfoFront > div{
     border-top: solid;
     width: 75vw !important;
   }
 }
 
 @media only screen and (max-width : 980px) and (max-height : 980px) {
-  .viewInfo-front * {
+  .objectInfoFront * {
     font-size:medium;
   }
-  .viewInfo-front > div {
+  .objectInfoFront > div {
     height: 15vh;
   }
 

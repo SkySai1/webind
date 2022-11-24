@@ -97,7 +97,53 @@ function makeView(){
     mainBlock.appendChild(form);
 };
 
-function showView(idname){
+function showView(id){
+    $('#viewsMain').css('height', '15vh'); //Уменьшить высоту основной таблицы
+    $('#viewsInfo').css('height', '62vh'); //Увеличить высоту блока инфо
+    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    let body = document.getElementById('viewsInfo'); //иницалиизруем контейнер
+    body.textContent='';
+    let header = document.createElement('div'); //Создание шапки
+    let titleBlock = document.createElement('div') //Блок заголовка
+    header.classList.add('objectInfoHedaer'); 
+    let title = document.createElement('h1'); //Создание заголовка
+    title.style.fontFamily = '\'current\'';
+    title.style.color = '#186b8f';
+    let alias = document.createElement('h2'); //Создание описания
+    alias.style.fontFamily = 'cursive';
+    let hButton = imgButton('img-down-64', '64px'); //Создание кпноки
+    hButton.onclick=function(){closeview();}; //Закрытие обзора
+    title.textContent=json[id]['viewname']; //Имя обзора
+    alias.textContent=json[id]['alias']; //Описание обзора
+    titleBlock.appendChild(title); //Имя -> Блок заголовка
+    titleBlock.appendChild(alias); //Описание -> Блок заголовка
+    header.appendChild(titleBlock); //Блог заголовка -> Заголовок
+    header.appendChild(hButton); //Кнопка -> Заголовок
+    body.appendChild(header); //Заголовок -> основной контейнер
+    let front = document.createElement('div'); //Тело с инфо таблицами
+    front.classList.add('objectInfoFront');
+    body.appendChild(front);
+
+    // -- Строим таблицу опций
+    var optHedaer = ['Наименование', 'Значение'];
+    var action = []
+    var name = []
+    var value = []
+    for (key in json[id]['options']){
+        name.push(key);
+        value.push(json[id]['options'][key]);
+    };
+    fields = [name, value];
+    optTable = makeTable(optHedaer, fields);
+    optTable.id='viewOptTable';
+    front.appendChild(optTable);
+    //
+
+
+
+}
+
+function showView_old(idname){
     //$('#viewsMain').addClass('viewsMain-close');
     $('#viewsMain').css('height', '15vh');
     $('#viewsInfo').css('height', '62vh');
