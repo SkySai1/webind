@@ -1,7 +1,7 @@
 import inspect
 from flask import request, session
 
-from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query
+from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query
 from backend.function import logger
 
 def view(dbsql):
@@ -14,6 +14,8 @@ def view(dbsql):
             return deleteView(dbsql)
         if 'newopt' == request.form.get('action'):
             return viewNewOpt(dbsql)
+        if 'remove_opt' == request.form.get('action'):
+            return viewRemoveOpt(dbsql)
     return 'failure'
 
 
@@ -45,3 +47,13 @@ def viewNewOpt(dbsql):
         'value': request.form.get('value')
     }
     return viewNewOpt_query(dbsql, data)
+
+def viewRemoveOpt(dbsql):
+    try:
+        data = {
+            'name': request.form['name'],
+            'id': request.form['id']
+        }
+        return viewRemoveOpt_query(dbsql, data)
+    except Exception as e:
+        return 'empty_serv_field'

@@ -667,6 +667,12 @@ body{
 .img-save:hover{
   background: url(../static/img/save-h.svg);
 }
+.img-trash{
+  background: url(../static/img/trash.svg);
+}
+.img-trash:hover{
+  background: url(../static/img/trash-h.svg);
+}
 #newZone-form > div > div > a{
   width: 10em;
   font-family: system-ui;
@@ -737,15 +743,20 @@ body{
   height: 47vh;
 }
 .objectInfoFront > div {
-  width: 30vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: auto;
   height: 45vh;
 }
+.objectInfoFront > div:nth-child(1) {
+  width: 50vw;
+}
 .objectInfoFront > div:nth-child(2) {
-  width: 40vw;
+  width: 25vw;
+}
+.objectInfoFront > div:nth-child(3) {
+  width: 25vw;
 }
 .objectInfoFront > div > div{
   width: 100%;
@@ -759,7 +770,7 @@ body{
   font-family: sans-serif;
 }
 
-.viewInfo-footer{
+.objectInfoFooter{
   width: max-content;
   margin: 0 auto;
   display: flex;
@@ -782,77 +793,84 @@ body{
 .objectInfoFront * td:nth-child(3) {
   word-break: break-all;
 }
-#viewOptTable {
+.objectOptTable{
   width: inherit;
 }
-#viewOptTable > tr:nth-child(1){
+.objectOptTable > tr:nth-child(1){
   background-color: #4e71866b !important;
 }
-#viewOptTable > tr:nth-child(2n){
+.objectOptTable > tr:nth-child(2n){
   background-color: #e3f4ffc7;
 }
-#viewOptTable > tr:nth-child(2n+1){
+.objectOptTable > tr:nth-child(2n+1){
   background-color: #b3dcf5;
 }
-#viewOptTable > tr > td:nth-child(1){
-  text-align: center;
+.objectOptTable > tr > td:nth-child(1){
+  text-align: left;
+  width: auto;
+}
+.objectOptTable > tr > td:nth-child(2){
+  text-align: left;
+  width: auto
+}
+.objectOptTable > tr > td:nth-child(3){
   width: 24px;
-}
-#viewOptTable > tr > td:nth-child(2){
-  text-align: right;
-  width: auto
-}
-#viewOptTable > tr > td:nth-child(3){
-  padding-left: 1em;
-  width: auto
 }
 .newRow{
   background: #31f21442 !important;
   box-shadow: 0 0 5px 1px rgb(62 157 89) !important;
 }
+.delRow{
+  background: #f11b14d7 !important;
+  box-shadow: 0 0 5px 1px rgb(224, 22, 22) !important;
+}
+.editRow > td{
+  border-bottom: 2px solid #1659ef;
+  border-top: 2px solid #1659ef;
+}
 .viewOptsEdit{
 
 }
 
-#viewServTable > tr:nth-child(1){
+.objectServTable > tr:nth-child(1){
   background-color: #4e71866b !important;
 }
-#viewServTable > tr:nth-child(2n){
+.objectServTable > tr:nth-child(2n){
   background-color: #d5daddc7;
 }
-#viewServTable > tr:nth-child(2n+1){
+.objectServTable > tr:nth-child(2n+1){
   background-color: #d1e2ec;
 }
-#viewServTable > tr > td:nth-child(1){
+.objectServTable > tr > td:nth-child(1){
   text-align: right;
 }
-#viewServTable > tr > td:nth-child(2){
+.objectServTable > tr > td:nth-child(2){
   padding-left: 1em;
 }
 
-#viewZonesTable > tr:nth-child(1){
+.objectZonesTable > tr:nth-child(1){
   background-color: #4e71866b !important;
 }
-#viewZonesTable > tr:nth-child(2n){
+.objectZonesTable > tr:nth-child(2n){
   background-color: #b3d6dfc7;
 }
-#viewZonesTable > tr:nth-child(2n+1){
+.objectZonesTable > tr:nth-child(2n+1){
   background-color: #a1cbd6;
 }
-#viewZonesTable > tr > td:nth-child(1){
+.objectZonesTable > tr > td:nth-child(1){
   text-align: right;
 }
-#viewZonesTable > tr > td:nth-child(2){
+.objectZonesTable > tr > td:nth-child(2){
   padding-left: 1em;
 }
 
-#viewOptBlock{
+.objectOptBlock{
   transition-duration:  0.2s;
   transition-property: font-size, top, background;
   background: transparent;
   width: 40vw;
 }
-#viewOptBlock > div:nth-child(1){
+.objectOptBlock > div:nth-child(1){
   min-height: 3em;
   overflow: hidden;
   display: flex;
@@ -860,7 +878,7 @@ body{
   align-items: center;
   justify-content: center;
 }
-#viewOptBlock * h3{
+.objectOptBlock * h3{
   margin-right: 1em;
 }
 .viewOptsOpen {

@@ -705,6 +705,7 @@ def get_views_list(dbsql):
                 for zone in zones:
                     zoneDesc = {}
                     zoneInfo ={
+                        'id' : zone.id,
                         'type': zone.type,
                         'serial': zone.serial,
                         'ttl': zone.ttl,
@@ -713,7 +714,7 @@ def get_views_list(dbsql):
                         'retry': zone.retry
                     }
                     zoneDesc['Info'] = zoneInfo
-                    zonesList[f'{zone.id}: {zone.zonename}'] = zoneDesc
+                    zonesList[zone.zonename] = zoneDesc
                     viewDesc['zones'] = zonesList
                     
                 #Список серверов используеющих View\
@@ -725,7 +726,7 @@ def get_views_list(dbsql):
                 )
                 servList = []
                 for server in servers:
-                    servList.append(f"{server.id}: {server.hostname}")
+                    servList.append(server.hostname)
                     #print(servList)
                 viewDesc['servers'] = servList
                 viewsList[view.id] = viewDesc
@@ -806,6 +807,23 @@ def viewNewOpt_query(dbsql, data):
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
+def viewRemoveOpt_query(dbsql, data):
+    try:
+        config = data['name']
+        viewID = data['id']
+        with dbsql.session() as ses:
+            optID = (ses.query(Views_Configs.id)
+                     .join(Configs, Configs.config == config)
+                     .filter(Views_Configs.viewid == viewID)
+                     .first()
+            )[0]
+            delete = ses.query(Views_Configs).filter(Views_Configs.id == optID).first()
+            ses.delete(delete)
+            ses.commit()
+        return 'viewOptRemove_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
 
 def zoneadd_query(dbsql, data):
     try:

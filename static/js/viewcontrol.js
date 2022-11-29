@@ -64,7 +64,7 @@ function makeView(){
     iButton.setAttribute('form','buffForm');
     iButton.type='button';
     iButton.onclick=function(){newView(this.form, true);};
-    //s
+    //
     // -- Создадим массив полей --
     id = []
     viewname = []
@@ -100,6 +100,7 @@ function makeView(){
 function showView(id){
     $('#viewsMain').css('height', '15vh'); //Уменьшить высоту основной таблицы
     $('#viewsInfo').css('height', '62vh'); //Увеличить высоту блока инфо
+    sessionStorage.setItem('viewID', id); //Сохраним ID View в сессию
     let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
     let body = document.getElementById('viewsInfo'); //иницалиизруем контейнер
     body.textContent='';
@@ -124,90 +125,15 @@ function showView(id){
     front.classList.add('objectInfoFront');
     body.appendChild(front);
 
-    // -- Строим таблицу опций
-    var optHedaer = ['Наименование', 'Значение'];
-    var action = []
-    var name = []
-    var value = []
-    for (key in json[id]['options']){
-        name.push(key);
-        value.push(json[id]['options'][key]);
-    };
-    fields = [name, value];
-    optTable = makeTable(optHedaer, fields);
-    optTable.id='viewOptTable';
-    front.appendChild(optTable);
-    //
+    makeViewOpts(front, id) //Таблица опций
 
+    makeViewServers(front, id) //Таблица зависимых серверов
 
+    makeViewZones(front, id) //Таблица подключенных зон
 
-}
-
-function showView_old(idname){
-    //$('#viewsMain').addClass('viewsMain-close');
-    $('#viewsMain').css('height', '15vh');
-    $('#viewsInfo').css('height', '62vh');
-
-    let saved = sessionStorage.getItem('viewsData');
-    var json = JSON.parse(saved)
-
-    //Создание формы
-    let body = document.querySelector('#viewsInfo');
-    body.textContent='';
-    //Создание шапки
-    let header = document.createElement('div');
-    header.classList.add('viewInfo-hedaer');
-
-    
-
-    let title = document.createElement('h1');
-    title.style.fontFamily = '\'current\'';
-    title.style.color = '#186b8f';
-    let alias = document.createElement('h2');
-    alias.style.fontFamily = 'cursive';
-
-
-    let hButton = document.createElement('button'); //Кнопка сокрытия
-    let cImg = document.createElement('div'); //Иконка
-    cImg.classList.add('svg-img-64x64');
-    cImg.classList.add('img-down-64');
-    hButton.onclick=function(){closeview();};
-    hButton.classList.add('svg-btn-64');
-    hButton.appendChild(cImg)
-
-    title.textContent=idname;
-    alias.textContent=json[idname]['alias'];
-
-    let titleBlock = document.createElement('div')
-    titleBlock.appendChild(title);
-    titleBlock.appendChild(alias);
-
-    header.appendChild(titleBlock);
-    header.appendChild(hButton);
-
-    body.appendChild(header);
-
-    //Центральная панель
-    let front = document.createElement('div');
-    front.classList.add('viewInfo-front');
-    body.appendChild(front);
-
-    sessionStorage.setItem('viewID', idname) //Кэшируем ID отырктого обзора
-
-    //Создание таблицы параметров
-    makeViewOpts(front, json)
-    
-    //Создание таблицы подключенных серверов
-    makeViewServers(front, json)
-
-    //Создание таблицы зависимых зон
-    makeViewZones(front, json)
-
-    //Панель кнопок
-    console.log(idname);
-    id = idname;
+    // -- Футер
     let footer = document.createElement('div');
-    footer.classList.add('viewInfo-footer')
+    footer.classList.add('objectInfoFooter')
     body.appendChild(footer);
 
     let deleter = document.createElement('button');
@@ -215,10 +141,128 @@ function showView_old(idname){
     deleter.classList.add('deleter')
     deleter.type='button';
     deleter.textContent='Удалить';
-    deleter.onclick=function(){deleteView()};
+    deleter.onclick=function(){deleteView(id)};
     footer.appendChild(deleter);
 
-};
+
+}
+
+function makeViewOpts(front, id){
+    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    // --Объвление сущностей
+    let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
+    let blockTitle = document.createElement('div'); //Блок заголовка
+    let title = document.createElement('h3'); //Заголовок таблицы
+    let div = document.createElement('div') //Блок таблицы
+    //
+    mainBlock.id = 'viewOptBlock'
+    mainBlock.classList.add('objectOptBlock')
+    title.textContent = 'Лист настроек';
+    // -- Создадим поля ввода
+    let form = document.createElement('form'); //Создадим форму
+    form.id='buffForm-NewOpt'
+    let iName = document.createElement('input'); //Создадим ввод имени
+    iName.name='name';
+    iName.setAttribute('form','buffForm-NewOpt');
+    let iAlias = document.createElement('input'); //Создадим ввод описания
+    iAlias.name='value';
+    iAlias.setAttribute('form','buffForm-NewOpt');
+    let iButton = imgButton('img-plus', '24px');
+    iButton.setAttribute('form','buffForm-NewOpt');
+    iButton.type='button';
+    iButton.onclick=function(){sendNewViewOpt(this.form, 'viewOptTable', id);};
+    //
+    // -- Настройка кнопки правки
+    //
+    // -- Строим таблицу опций
+    var hedaer = ['Наименование', 'Значение'];
+    var name = []
+    var value = []
+    var action = []
+    name.push(iName);
+    value.push(iAlias);
+    action.push(iButton);
+    for (let key in json[id]['options']){
+        let button = imgButton('img-pencil', '24px');
+        button.onclick=function(){viewOptEdit(this)};
+        name.push(key);
+        value.push(json[id]['options'][key]);
+        action.push(button);
+    };
+    fields = [name, value, action];
+    table = makeTable(hedaer, fields);
+    table.id='viewOptTable';
+    table.classList.add('objectOptTable')
+    table.appendChild(form);
+    //
+    // --Скеливание сущностей
+    blockTitle.appendChild(title); //Заголовок -> Блок заголовка
+    div.appendChild(table); //Таблица -> Блок таблицы
+    mainBlock.appendChild(blockTitle); //Блок заголовка -> Блок с таблицей и её названием
+    mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
+    front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
+    //
+}
+
+function makeViewServers(front, id){
+    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    // --Объвление сущностей
+    let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
+    let blockTitle = document.createElement('div'); //Блок заголовка
+    let title = document.createElement('h3'); //Заголовок таблицы
+    let div = document.createElement('div') //Блок таблицы
+    //
+    mainBlock.id = 'viewServBlock'
+    title.textContent = 'Зависимые серверы';
+    // -- Строим таблицу серверов
+    var hedaer = ['Адрес'];
+    var value = []
+    for (key in json[id]['servers']){
+        value.push(json[id]['servers'][key]);
+    };
+    fields = [value];
+    table = makeTable(hedaer, fields);
+    table.id='viewServTable';
+    table.classList.add('objectServTable')
+    //
+    // --Скеливание сущностей
+    blockTitle.appendChild(title); //Заголовок -> Блок заголовка
+    div.appendChild(table); //Таблица -> Блок таблицы
+    mainBlock.appendChild(blockTitle); //Блок заголовка -> Блок с таблицей и её названием
+    mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
+    front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
+    //
+}
+
+function makeViewZones(front, id){
+    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    // --Объвление сущностей
+    let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
+    let blockTitle = document.createElement('div'); //Блок заголовка
+    let title = document.createElement('h3'); //Заголовок таблицы
+    let div = document.createElement('div') //Блок таблицы
+    //
+    mainBlock.id = 'viewZonesBlock'
+    title.textContent = 'Подключенные зоны';
+    // -- Строим таблицу зон
+    var hedaer = ['Домен'];
+    var value = []
+    for (key in json[id]['zones']){
+        value.push(key);
+    };
+    fields = [value];
+    table = makeTable(hedaer, fields);
+    table.id='viewZonesTable';
+    table.classList.add('objectZonesTable')
+    //
+    // --Скеливание сущностей
+    blockTitle.appendChild(title); //Заголовок -> Блок заголовка
+    div.appendChild(table); //Таблица -> Блок таблицы
+    mainBlock.appendChild(blockTitle); //Блок заголовка -> Блок с таблицей и её названием
+    mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
+    front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
+    //
+}
 
 function closeview(){
     let body = document.querySelector('#viewsInfo');  
@@ -277,111 +321,18 @@ function getNewView(form, data) {
         });
 }
 
-function deleteView() {
+function deleteView(id) {
     var isDelete = confirm("Удаление обзора разрушит все зависимые связи, вы уверены?");
     if (isDelete == true){
-        id = sessionStorage.getItem('viewID').split(':')[0]
         data = {
             'status':'view',
             'action':'delete',
             'id':id
 
         };
-        console.log(data);
         form_submit('', data);
     }
 }
-
-function makeViewOpts(front, json){
-        idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
-        let optBlock = document.createElement('div');
-        optBlock.id = 'viewOptBlock'
-        front.appendChild(optBlock)
-
-        let blockTitle = document.createElement('div');
-
-        let img = document.createElement('div'); //блок изображения
-        img.classList.add('svg-img-24x24');
-        img.classList.add('img-right');
-        img.id='viewOptSwitch';
-
-        let hButton = document.createElement('button')
-        hButton.appendChild(img);
-        hButton.classList.add('svg-btn');
-        hButton.type = 'button';
-        hButton.onclick=function(){viewOptsOpen(true, hButton)};
-
-        let title = document.createElement('h3');
-        title.textContent = 'Лист настроек';
-
-        blockTitle.appendChild(title);
-        blockTitle.appendChild(hButton);
-
-        optBlock.appendChild(blockTitle);
-
-        let div = document.createElement('div')
-        optBlock.appendChild(div);
-
-        let table = document.createElement('table');
-        table.id='viewOptTable'
-        div.appendChild(table);
-
-        let hRow = document.createElement('tr');
-        hRow.id='viewOptTableHeadRow'
-        table.appendChild(hRow);
-
-
-        let hName = document.createElement('th'); 
-        let hValue = document.createElement('th');
-        let hAction = document.createElement('th');
-        hAction.classList.add('viewOptsEdit');
-        hAction.classList.add('hidden');
-
-        hName.textContent='Параметр';
-        hValue.textContent='Значение';
-        hRow.appendChild(hAction);
-        hRow.appendChild(hName);
-        hRow.appendChild(hValue);
-
-        table.appendChild(hRow);
-        //Наполнение таблицы
-        for (key in json[idname]['options']) {
-            let config = key;
-            //Создание строки
-            let row = document.createElement('tr');
-            table.appendChild(row);
-
-            //Создание ячеек
-            let push = document.createElement('td'); //Ячейки кнопки
-            let name = document.createElement('td'); //Наименование
-            let value = document.createElement('td'); //Описание
-            let img = document.createElement('div'); //блок изображения
-            
-            img.classList.add('svg-img-24x24');
-            img.classList.add('img-pencil');
-
-            //Функции новой кнопки
-            let button = document.createElement('button'); //Кнопка
-            button.classList.add('svg-btn');
-            button.appendChild(img);
-            button.onclick=function(){viewOptEdit(row, true)};
-
-
-            push.classList.add('viewOptsEdit');
-            push.classList.add('hidden');
-            push.appendChild(button);
-
-            //Наполнение ячеек контентом
-            name.textContent=config;
-            value.textContent=json[idname]['options'][config];
-
-            //Вставка ранее созданных элементов в строку
-            row.appendChild(push);
-            row.appendChild(name);
-            row.appendChild(value);
-        };
-}
-
 function viewOptsOpen(open, button) {
     switch(open) {
         case true:
@@ -447,63 +398,25 @@ function viewOptsOpen(open, button) {
     }
 }
 
-function newViewOpt(form, send, buffer) {
-    switch(send){
-        case true:
-            idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
-            id = idname.split(':')
-            data = $(form).serialize().split('&');
-            data.push('viewID='+id[0])
-            data.push('status=view')
-            data.push('action=newopt')
-            newdata = data.join('&')
-            getNewViewOpt(form, newdata);
-            break;
-        case false:
-            form.reset();
-            opt = buffer['option'];
-            val = buffer['value'];
+function sendNewViewOpt(form, tableID, id){
+    data = $(form).serialize().split('&');
+    data.push('viewID='+id);
+    data.push('status=view');
+    data.push('action=newopt');
+    newdata = data.join('&');
+    getNewViewOpt(form, newdata, tableID);
+}
 
-            let firstRow = document.querySelector('#viewOptRow-newOpt');
+function appendNewViewOpt(form, json, tableID){
+    form.reset();
+    let table = document.getElementById(tableID);
+    let button = imgButton('img-pencil', '24px');
+    button.onclick=function(){viewOptEdit(this)};
+    var fields = [json['option'], json['value'], button];
+    newRow(table, fields);
+}
 
-            let row = document.createElement('tr');
-            let push = document.createElement('td');
-            let name = document.createElement('td');
-            let value = document.createElement('td');
-            let img = document.createElement('div'); //блок изображения
-            
-            img.classList.add('svg-img-24x24');
-            img.classList.add('img-pencil');
-
-            //Функции новой кнопки
-            let button = document.createElement('button'); //Кнопка
-            button.classList.add('svg-btn');
-            button.appendChild(img);
-            button.onclick=function(){viewOptEdit(row, true)};
-
-
-            push.classList.add('viewOptsEdit');
-            push.appendChild(button);
-
-            name.textContent=opt;
-            value.textContent=val;
-
-            row.appendChild(push);
-            row.appendChild(name);
-            row.appendChild(value);
-            row.style.transition = 'all 1s';
-            row.classList.add('newOpt');
-
-            firstRow.after(row);
-
-            window.vanish = setTimeout(function(){
-                row.classList.remove('newOpt');;
-            },200);
-            break;
-    };
-};
-
-function getNewViewOpt(form, data){
+function getNewViewOpt(form, data, tableID){
     $.ajax({
         url:'/',
         method: 'POST',
@@ -511,170 +424,56 @@ function getNewViewOpt(form, data){
         data: data
         })
         .done(function(data) {
-            if (data == 'bad_view_opt' || data == 'view_opt_exist' || data == 'empty_serv_field') {
-                response_handler(data, form);
-            } else {
+            try {
                 json = JSON.parse(data);
-                newViewOpt(form, false, json);
+                console.log(json);
+                appendNewViewOpt(form, json, tableID);
                 get_views_list(2);
             }
+            catch{
+                response_handler(data, form);
+            };
         })
         .fail(function(){
             alert('Внутрення ошибка, перезагрузите страницу!');
         });
 };
 
-function viewOptEdit(row, edit, data){
-    switch(edit)
-    {
-        case(true):
-            let form = document.createElement('form'); //Объявляем форму
-            form.id ='viewOptEditForm'; //Присваеваем ID
-            let option = row.childNodes[1].textContent; //Получаем значение имени
-            let value = row.childNodes[2].textContent; //Получаем значение значения
-            let action = row.childNodes[0].childNodes[0]; //Сохраняем старую кнопку
+function viewOptEdit(cell){
+    let row = cell.parentNode.parentNode;
+    let buttons = rowEdit(row, true);
+    buttons[0].onclick=function(){
+        var data = {
+            'option': row.childNodes[0].textContent,
+            'value': row.childNodes[1].childNodes[0].value
+        }
+        console.log(data)
+    };
+    buttons[1].onclick=function(){viewOptRemove(this.form, row)};
+}
 
-            data = {
-                'option': option,
-                'value': value,
-                'action': action
+function viewOptRemove(form, row){
+    var vId = sessionStorage.getItem('viewID');
+    data = $(form).serialize().split('&');
+    data.push('status=view');
+    data.push('action=remove_opt');
+    data.push('id='+vId);
+    var newdata = data.join('&');
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: newdata
+        })
+        .done(function(data) {
+            if (data == 'viewOptRemove_success') {
+                deleteRow(row);
             }
-            let iValue = document.createElement('input'); //Создаём поле ввода значения
-            iValue.name='value' //Ключ значения для формы
-            $(iValue).attr('form', '#viewOptEditForm'); //Привязаем значение к форме
-            $(iValue).val(value); //Присваем значение
-
-            let cImg = document.createElement('div'); //Рисунок кнопки отмены
-            cImg.classList.add('svg-img-24x24');
-            cImg.classList.add('img-cancel');
-
-            let sImg = document.createElement('div'); //Рисунок кнопки отмены
-            sImg.classList.add('svg-img-24x24');
-            sImg.classList.add('img-save');
-            
-
-            let cButton = document.createElement('button'); //Создаём кнопку отмены
-            cButton.type='button'; //Явно указываем кнопку
-            cButton.onclick=function(){viewOptEdit(row, false, data)}; //Функция отмены
-            cButton.appendChild(cImg);
-            cButton.classList.add('svg-btn')
-
-            let sendButton = document.createElement('button'); //Создаём кнопку отправки
-            sendButton.type='button'; //Явно указываем кнопку
-            sendButton.setAttribute('form', '#viewOptEditForm'); //Отпарвка формы
-            sendButton.appendChild(sImg);
-            sendButton.classList.add('svg-btn');
-
-            row.appendChild(form); //Вставляем форму
-            row.childNodes[0].textContent=''; //Обнуляем первую ячейку
-            row.childNodes[0].appendChild(cButton);
-            row.childNodes[0].appendChild(sendButton); //Добавляем кнопку сохранения
-            row.childNodes[2].textContent=''; // Обнуляем значение в ячейке
-            row.childNodes[2].appendChild(iValue)  //Вставляем в ячейку поле значения
-            break;
-        case(false):
-            row.childNodes[0].textContent=''; //Обнуляем ячйеку с кнопкой
-            row.childNodes[0].appendChild(data['action']); //Восстанавливаем кнпоку
-            row.childNodes[1].textContent=data['option']; //Восстанавливаем имя
-            row.childNodes[2].textContent=data['value']; //Восстанавливаем значение
-
-    };
-};
-
-function makeViewServers(front, json){
-        idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
-        let servBlock = document.createElement('div');
-        front.appendChild(servBlock)
-
-        let title = document.createElement('h3');
-        title.textContent = 'Подключенные серверы';
-        servBlock.appendChild(title);
-
-        let div = document.createElement('div')
-        servBlock.appendChild(div);
-
-        let table = document.createElement('table');
-        table.id='viewServTable'
-        div.appendChild(table);
-
-        let row = document.createElement('tr');
-        table.appendChild(row);
-
-        let hHost = document.createElement('th'); 
-        let hId = document.createElement('th');
-        hId.textContent='ID';
-        hHost.textContent='Адрес';
-        row.appendChild(hId);
-        row.appendChild(hHost);
-        table.appendChild(row);
-        //Наполнение таблицы
-        for (let key in json[idname]['servers']) {
-
-            let sInfo = json[idname]['servers'][key].split(':')
-            
-            //Создание строки
-            let row = document.createElement('tr');
-            table.appendChild(row);
-
-            //Создание ячеек
-            let id = document.createElement('td'); //ID в базе
-            let name = document.createElement('td'); //Наименование                
-
-            //Наполнение ячеек контентом
-            id.textContent=sInfo[0];
-            name.textContent=sInfo[1];
-
-            //Вставка ранее созданных элементов в строку
-            row.appendChild(id);
-            row.appendChild(name);
-        };
-};
-
-function makeViewZones(front, json){
-    idname = sessionStorage.getItem('viewID'); //Получаем ID Обзора
-
-    let zonesBlock = document.createElement('div');
-    front.appendChild(zonesBlock)
-
-    let title = document.createElement('h3');
-    title.textContent = 'Зависимые зоны';
-    zonesBlock.appendChild(title);
-
-    let div = document.createElement('div')
-    zonesBlock.appendChild(div);
-
-    let table = document.createElement('table');
-    table.id='viewZonesTable'
-    div.appendChild(table);
-
-    let row = document.createElement('tr');
-    table.appendChild(row);
-
-    let hHost = document.createElement('th'); 
-    let hId = document.createElement('th');
-    hId.textContent='ID';
-    hHost.textContent='FQDN';
-    row.appendChild(hId);
-    row.appendChild(hHost);
-    table.appendChild(row);
-    //Наполнение таблицы
-    for (let key in json[idname]['zones']) {
-
-        let zInfo = key.split(':');
-        //Создание строки
-        let row = document.createElement('tr');
-        table.appendChild(row);
-
-        //Создание ячеек
-        let id = document.createElement('td'); //ID в базе
-        let name = document.createElement('td'); //Наименование                
-
-        //Наполнение ячеек контентом
-        id.textContent=zInfo[0];
-        name.textContent=zInfo[1];
-
-        //Вставка ранее созданных элементов в строку
-        row.appendChild(id);
-        row.appendChild(name);
-    };
-};
+            else{
+                response_handler(data, form);
+            };
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
+}

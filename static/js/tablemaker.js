@@ -10,6 +10,7 @@ function imgButton(image, size){
     //img.classList.add('svg-img-24x24');
     img.classList.add(image);
     button.classList.add('svg-btn');
+    button.type='button';
     button.style.width = size;
     button.style.height = size;
     button.appendChild(img);
@@ -62,6 +63,65 @@ function newRow(table, fields){
     row.style.transition = '1s';
     fRow.after(row);
     window.vanish = setTimeout(function(){
-        row.classList.remove('newRow');;
-    },500);
+        row.classList.remove('newRow');
+        row.style.transition = 'none';
+    },1000);
+}
+
+function rowEdit(row, edit, data){
+    switch(edit){
+        case true:
+            var data = {
+                'option': row.childNodes[0].textContent, //Получаем значение имени
+                'value': row.childNodes[1].textContent, //Получаем значение значения
+                'action': row.childNodes[2].childNodes[0] //Сохраняем старую кнопку
+            }
+            let iValue = document.createElement('input'); //Создаём поле ввода значения
+            let save = imgButton('img-save', '24px'); //Кнопка сохранения
+            let cancel = imgButton('img-cancel', '24px'); //Кнопка отмены
+            let trash = imgButton('img-trash', '24px') //Кнопка удаления
+            let form = document.createElement('form'); //Форма изменений
+            let option = document.createElement('input'); //Имя опции
+            form.id='rowEdit-form';
+            option.type='hidden';
+            option.name='name';
+            option.value=data['option'];
+            option.setAttribute('form', 'rowEdit-form');
+            cancel.onclick=function(){rowEdit(row, false, data)};
+            iValue.name='value' //Ключ значения для формы
+            iValue.value=data['value'];
+            iValue.setAttribute('form', 'rowEdit-form');
+            save.setAttribute('form', 'rowEdit-form');
+            trash.setAttribute('form', 'rowEdit-form');
+            form.appendChild(option);
+            row.appendChild(form);
+            row.classList.add('editRow');
+            row.childNodes[1].textContent='';
+            row.childNodes[1].appendChild(iValue); //Меняем строку на поле
+            row.childNodes[2].textContent='';
+            row.childNodes[2].appendChild(save);
+            row.childNodes[2].appendChild(cancel);
+            row.childNodes[2].appendChild(trash);
+            actives = [save, trash];
+            return actives
+            break;
+        case false:
+            row.classList.remove('editRow');
+            row.childNodes[2].textContent=''; //Обнуляем ячйеку с кнопкой
+            row.childNodes[2].appendChild(data['action']); //Восстанавливаем кнпоку
+            row.childNodes[0].textContent=data['option']; //Восстанавливаем имя
+            row.childNodes[1].textContent=data['value']; //Восстанавливаем значение
+            break;
+
+    }
+    
+}
+
+function deleteRow(row){
+    row.classList.add('delRow');
+    row.style.opacity = '0';
+    row.style.transition = '1s';
+    window.vanish = setTimeout(function(){
+        row.remove();
+    },1000);
 }

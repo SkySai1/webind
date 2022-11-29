@@ -88,3 +88,27 @@ function rightclose(){
     $('.square2').removeClass('move-right');
     $('.right_pannel').removeClass("right_pannel_move");
 };
+
+function whatIsIt(object) {
+    var stringConstructor = "txt".constructor;
+    var arrayConstructor = [].constructor;
+    var objectConstructor = ({}).constructor;
+    if (object === null) {
+        return "null";
+    }
+    if (object === undefined) {
+        return "undefined";
+    }
+    if (object.constructor === stringConstructor) {
+        return "String";
+    }
+    if (object.constructor === arrayConstructor) {
+        return "Array";
+    }
+    if (object.constructor === objectConstructor) {
+        return "Object";
+    }
+    {
+        return "don't know";
+    }
+}
