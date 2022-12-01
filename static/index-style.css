@@ -303,10 +303,11 @@ body{
   left: -100vw;
   position: absolute;
   transition: all 0.2s;
-  overflow: auto;
 }
 #tooltip > div {
   text-align: left;
+  overflow: auto;
+  height: calc(100% - 3em);
 }
 .tooltip_move{
   left: 0vw !important;
