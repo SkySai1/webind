@@ -294,6 +294,24 @@ body{
   box-shadow: inset 0 0 20px 0px rgb(255 255 255) !important;
   cursor: not-allowed !important;
 }
+#tooltip {
+  width: 25vw;
+  height: inherit;
+  z-index: 3;
+  background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
+  border-radius: 0 15px 15px 0;
+  left: -100vw;
+  position: absolute;
+  transition: all 0.2s;
+  overflow: auto;
+}
+#tooltip > div {
+  text-align: left;
+}
+.tooltip_move{
+  left: 0vw !important;
+  cursor: default;
+}
 .left_pannel{
   transition: 0.2s ease-out;
   position: absolute;
@@ -474,7 +492,7 @@ body{
   background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
   z-index: 2;
   border-radius: 15px;
-  width: 72vw;
+  width: 75vw;
   min-width: 25em;
   height: inherit;
   position: absolute;
@@ -680,6 +698,13 @@ body{
   text-align: right;
   margin-right: 1em;
 }
+#views * input, #views * textarea {
+  background: linear-gradient(45deg, #c0eeff, transparent);
+  width: 90%;
+  border: 1px solid #003f5c;
+  border-radius: 5px;
+  min-height: 1.5em;
+}
 .objectMain {
   height: 80vh;
   width: 70vw;
@@ -823,6 +848,10 @@ body{
 .delRow{
   background: #f11b14d7 !important;
   box-shadow: 0 0 5px 1px rgb(224, 22, 22) !important;
+}
+.updateRow{
+  background: #4cdef89a !important;
+  box-shadow: 0 0 5px 1px rgb(62 157 89) !important;
 }
 .editRow > td{
   border-bottom: 2px solid #1659ef;

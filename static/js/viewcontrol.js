@@ -3,6 +3,7 @@ function get_views_list(skip){
         $('#preloader').addClass('preloader-right');
         $('#preloader').addClass('preloader-active');
         $('.right_pannel').removeClass("right_pannel_move");
+        getViewOptsList();
         clearTimeout(window.vanish);
     }
     data ={
@@ -163,16 +164,17 @@ function makeViewOpts(front, id){
     form.id='buffForm-NewOpt'
     let iName = document.createElement('input'); //Создадим ввод имени
     iName.name='name';
+    iName.onfocus=function(){lefttooltip(true)};
     iName.setAttribute('form','buffForm-NewOpt');
-    let iAlias = document.createElement('input'); //Создадим ввод описания
-    iAlias.name='value';
-    iAlias.setAttribute('form','buffForm-NewOpt');
+    let iValue = document.createElement('textarea'); //Создадим ввод описания
+    iValue.onkeydown=function(){dynamicheight(this)};
+    iValue.onchange=function(){dynamicheight(this)};
+    iValue.name='value';
+    iValue.setAttribute('form','buffForm-NewOpt');
     let iButton = imgButton('img-plus', '24px');
     iButton.setAttribute('form','buffForm-NewOpt');
     iButton.type='button';
     iButton.onclick=function(){sendNewViewOpt(this.form, 'viewOptTable', id);};
-    //
-    // -- Настройка кнопки правки
     //
     // -- Строим таблицу опций
     var hedaer = ['Наименование', 'Значение'];
@@ -180,7 +182,7 @@ function makeViewOpts(front, id){
     var value = []
     var action = []
     name.push(iName);
-    value.push(iAlias);
+    value.push(iValue);
     action.push(iButton);
     for (let key in json[id]['options']){
         let button = imgButton('img-pencil', '24px');
@@ -333,70 +335,6 @@ function deleteView(id) {
         form_submit('', data);
     }
 }
-function viewOptsOpen(open, button) {
-    switch(open) {
-        case true:
-            $('#viewOptSwitch').removeClass('img-right');
-            $('#viewOptSwitch').addClass('img-left');
-            $('.viewInfo-front > div').addClass('hidden');
-            $('#viewOptBlock').removeClass('hidden');
-            $('#viewOptBlock').css('width', '100%');
-            button.onclick=function(){viewOptsOpen(false, button)};
-            $('.viewOptsEdit').removeClass('hidden');
-            let iName = document.createElement('input'); //Поле имени
-            let iValue = document.createElement('input'); //Поле Значения
-            let iButton = document.createElement('button'); //Кнопка отправки
-            let form = document.createElement('form')
-            form.id ='newViewOptForm'
-            iName.name='name';
-            iName.style.width = '90%';
-            $(iName).attr('form','newViewOptForm');
-            iValue.name='value';
-            $(iValue).attr('form','newViewOptForm');
-            iValue.style.width = '90%';
-            iButton.type='button';
-            $(iButton).attr('form','newViewOptForm');
-            iButton.classList.add('svg-btn');
-            iButton.onclick=function(){newViewOpt(this.form, true);};
-
-            let img = document.createElement('div');
-            img.classList.add('svg-img-24x24');
-            img.classList.add('img-plus');
-            iButton.appendChild(img);
-
-            let row = document.createElement('tr');
-            row.id='viewOptRow-newOpt'
-
-            let rName = document.createElement('td');
-            let rValue = document.createElement('td');
-            let rAction = document.createElement('td');
-            rAction.classList.add('viewOptsEdit');
-
-            rAction.appendChild(iButton);
-            rName.appendChild(iName);
-            rValue.appendChild(iValue);
-
-            row.appendChild(rAction);
-            row.appendChild(rName);
-            row.appendChild(rValue);
-
-
-            let hRow = document.querySelector('#viewOptTableHeadRow');
-            hRow.after(form);
-            hRow.after(row);
-            break;
-        case false:
-            $('#viewOptSwitch').removeClass('img-left');
-            $('#viewOptSwitch').addClass('img-right');
-            $('.viewOptsEdit').addClass('hidden');
-            $('.viewInfo-front > div').removeClass('hidden');
-            $('#viewOptBlock').css('width', '40vw');
-            button.onclick=function(){viewOptsOpen(true, button)};
-            let oRow = document.querySelector('#viewOptRow-newOpt');
-            get_views_list(0);
-            break;
-    }
-}
 
 function sendNewViewOpt(form, tableID, id){
     data = $(form).serialize().split('&');
@@ -442,14 +380,35 @@ function getNewViewOpt(form, data, tableID){
 function viewOptEdit(cell){
     let row = cell.parentNode.parentNode;
     let buttons = rowEdit(row, true);
-    buttons[0].onclick=function(){
-        var data = {
-            'option': row.childNodes[0].textContent,
-            'value': row.childNodes[1].childNodes[0].value
-        }
-        console.log(data)
-    };
+    buttons[0].onclick=function(){viewOptUpdate(this.form, row)};
     buttons[1].onclick=function(){viewOptRemove(this.form, row)};
+}
+
+function viewOptUpdate(form, row){
+    var vId = sessionStorage.getItem('viewID');
+    data = $(form).serialize().split('&');
+    data.push('status=view');
+    data.push('action=update_opt');
+    data.push('id='+vId);
+    var newdata = data.join('&');
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: newdata
+        })
+        .done(function(data) {
+            try {
+                json = JSON.parse(data)
+                updateRow(row, json)
+            }
+            catch {
+                response_handler(data);
+            };
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
 }
 
 function viewOptRemove(form, row){
@@ -471,6 +430,31 @@ function viewOptRemove(form, row){
             }
             else{
                 response_handler(data, form);
+            };
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
+}
+
+function getViewOptsList(){
+    data= {
+        'status': 'view',
+        'action': 'show_opts'
+    };
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: data
+        })
+        .done(function(data) {
+            try {
+                json = JSON.parse(data)
+                sessionStorage.setItem('viewsOptsList', JSON.stringify(json))
+            }
+            catch {
+                response_handler(data);
             };
         })
         .fail(function(){

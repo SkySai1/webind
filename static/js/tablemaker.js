@@ -60,12 +60,11 @@ function newRow(table, fields){
         row.appendChild(field)
     }
     row.classList.add('newRow');
-    row.style.transition = '1s';
     fRow.after(row);
     window.vanish = setTimeout(function(){
         row.classList.remove('newRow');
-        row.style.transition = 'none';
-    },1000);
+        row.style.transition = '0.5s';
+    },500);
 }
 
 function rowEdit(row, edit, data){
@@ -76,7 +75,7 @@ function rowEdit(row, edit, data){
                 'value': row.childNodes[1].textContent, //Получаем значение значения
                 'action': row.childNodes[2].childNodes[0] //Сохраняем старую кнопку
             }
-            let iValue = document.createElement('input'); //Создаём поле ввода значения
+            let iValue = document.createElement('textarea'); //Создаём поле ввода значения
             let save = imgButton('img-save', '24px'); //Кнопка сохранения
             let cancel = imgButton('img-cancel', '24px'); //Кнопка отмены
             let trash = imgButton('img-trash', '24px') //Кнопка удаления
@@ -89,6 +88,8 @@ function rowEdit(row, edit, data){
             option.setAttribute('form', 'rowEdit-form');
             cancel.onclick=function(){rowEdit(row, false, data)};
             iValue.name='value' //Ключ значения для формы
+            iValue.onkeydown=function(){dynamicheight(this)};
+            iValue.onchange=function(){dynamicheight(this)};
             iValue.value=data['value'];
             iValue.setAttribute('form', 'rowEdit-form');
             save.setAttribute('form', 'rowEdit-form');
@@ -124,4 +125,53 @@ function deleteRow(row){
     window.vanish = setTimeout(function(){
         row.remove();
     },1000);
+}
+
+function updateRow(row, json) {
+    row.classList.add('updateRow');
+    let button = imgButton('img-pencil', '24px');
+    button.onclick=function(){viewOptEdit(this)};
+    data = {
+        'option': json['config'],
+        'value': json['value'],
+        'action': button
+    }
+    rowEdit(row, false, data)
+    window.vanish = setTimeout(function(){
+        row.style.transition = '0.5s';
+        row.classList.remove('updateRow');
+    },500);
+}
+
+function lefttooltip(open){
+    let tooltip = document.getElementById('tooltip');
+    let body = tooltip.childNodes[3];
+    body.textContent='';
+    for (key in tooltip.childNodes) { console.log(tooltip.childNodes[key])};
+    switch(open){
+        case true:
+            tooltip.classList.remove('hidden');
+            //tooltip.onblur=function(){lefttooltip(false)};
+            data = JSON.parse(sessionStorage.getItem('viewsOptsList'));
+            header = ['Параметр', 'Описание']
+            option = []
+            desc = []
+            for (let key in data){
+                option.push(key);
+                desc.push(data[key]); 
+            }
+            fields = [option, desc];
+            let table = makeTable(header, fields);
+            body.appendChild(table);
+            window.vanish = setTimeout(function(){
+                tooltip.classList.add('tooltip_move');
+            },10);
+            break;
+        case false:
+            tooltip.classList.remove('tooltip_move');
+            window.vanish = setTimeout(function(){
+                tooltip.classList.add('hidden');;
+            },300);
+            break;
+    }
 }

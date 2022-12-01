@@ -62,6 +62,7 @@ class Configs(Base):
     __tablename__ = "configs"
     id = Column(Integer, primary_key=True, autoincrement=True)
     config=Column(String(255), unique=True)
+    description = Column(String)
     version = Column(Integer, nullable=False)
     options = Column(Boolean, nullable=False, default=False)
     view = Column(Boolean, nullable=False, default=False)
@@ -94,12 +95,12 @@ class Views(Base):
     configs = relationship(
         "Configs", secondary='views_configs', back_populates="views",
     )
-    zones = relationship("Zones", cascade="all, delete")
+    zones = relationship("Zones", secondary="views_zones", back_populates="views")
+
 
 class Zones(Base):
     __tablename__ = 'zones'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    view_id=Column(Integer, ForeignKey("views.id"), nullable=False)
     zonename = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
     serial = Column(Integer, nullable=False, default=datetime.datetime.now().strftime('%Y%m%d01'))
@@ -113,6 +114,8 @@ class Zones(Base):
 
     )
     domains = relationship("Domains", cascade="all, delete")
+
+    views = relationship("Views", secondary="views_zones", back_populates="zones" )
     
 class Domains(Base):
     __tablename__ = 'domains'
@@ -133,6 +136,12 @@ class RRs(Base):
     r_class = Column(String, default='IN')
     r_type = Column(String)
     value = Column(String)
+
+class Views_Zones(Base):
+    __tablename__ = 'views_zones'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    view_id = Column(Integer, ForeignKey('views.id'))
+    zone_id = Column(Integer, ForeignKey('zones.id'))
 
 class Users_Domains(Base):
     __tablename__ = 'users_domains'
@@ -522,7 +531,10 @@ def getserv(dbsql):
                     viewDesc['options'] = viewOptsList
                     
                     #Список зон входящих во View
-                    zones = ses.query(Zones).filter(Zones.view_id == view.Views.id).all()
+                    zones = (ses.query(Zones)
+                        .filter(Zones.views.any(Views.id == view.Views.id))
+                        .all()
+                    )
                     zonesList = {}
                     for zone in zones:
                         zoneDesc = {}
@@ -692,6 +704,7 @@ def get_views_list(dbsql):
                            .join(Views_Configs, Views_Configs.config_id == Configs.id)
                            .filter(Configs.views.any(Views.id == view.id))
                            .filter(Views_Configs.viewid == view.id)
+                           .order_by(Configs.config)
                            .all()
                 )
                 viewOptsList = {}
@@ -700,7 +713,10 @@ def get_views_list(dbsql):
                 viewDesc['options'] = viewOptsList
                 
                 #Список зон входящих во View
-                zones = ses.query(Zones).filter(Zones.view_id == view.id).all()
+                zones = (ses.query(Zones)
+                    .filter(Zones.views.any(Views.id == view.id))
+                    .all()
+                )                
                 zonesList = {}
                 for zone in zones:
                     zoneDesc = {}
@@ -734,7 +750,7 @@ def get_views_list(dbsql):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
-   
+
 def newView_query(dbsql, data):
     try:
         with dbsql.session() as ses:
@@ -757,6 +773,22 @@ def newView_query(dbsql, data):
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
+def viewShowOpts_query(dbsql, data):
+    try:
+        type = data['type']
+        with dbsql.session() as ses:
+            if 'view' in type:
+                optsViewList = (ses.query(Configs)
+                            .filter(Configs.view == True)
+                            .all()
+                )
+            opts = {}
+            for opt in optsViewList:
+                opts[opt.config] = opt.description
+            return opts
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
 def deleteView_query(dbsql, id):
     try:
         with dbsql.session() as ses:
@@ -807,6 +839,42 @@ def viewNewOpt_query(dbsql, data):
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
+def viewUpdateOpt_query(dbsql, data):
+    try:
+        viewID = data['viewID']
+        config = data['config']
+        value = data['value']
+        with dbsql.session() as ses: 
+            viewOpt = (ses.query(Configs, Views_Configs)
+                .join(Views_Configs, Views_Configs.config_id == Configs.id)
+                .filter(Configs.views.any(Views.id == viewID))
+                .filter(Configs.config == config)
+                .filter(Views_Configs.viewid == viewID)
+                .first()
+            )
+            if not viewOpt: return 'bad_view_opt'
+            (ses.query(Views_Configs)
+                   .filter(Views_Configs.viewid == viewID)
+                   .filter(Views_Configs.config_id == viewOpt.Configs.id)
+                   .update({'value': value})
+            )
+            ses.commit() 
+            newOpt = (ses.query(Configs, Views_Configs)
+                .join(Views_Configs, Views_Configs.config_id == Configs.id)
+                .filter(Configs.views.any(Views.id == viewID))
+                .filter(Configs.config == config)
+                .filter(Views_Configs.viewid == viewID)
+                .first()
+            )
+            data = {
+                'config': newOpt.Configs.config,
+                'value': newOpt.Views_Configs.value
+            }    
+        return data
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+
 def viewRemoveOpt_query(dbsql, data):
     try:
         config = data['name']
@@ -817,6 +885,7 @@ def viewRemoveOpt_query(dbsql, data):
                      .filter(Views_Configs.viewid == viewID)
                      .first()
             )[0]
+            if not optID: return 'bad_view_opt'
             delete = ses.query(Views_Configs).filter(Views_Configs.id == optID).first()
             ses.delete(delete)
             ses.commit()

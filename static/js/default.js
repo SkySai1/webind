@@ -112,3 +112,7 @@ function whatIsIt(object) {
         return "don't know";
     }
 }
+function dynamicheight(object) {
+    object.style.height = 0;
+    object.style.height = (object.scrollHeight) + "px";
+  };

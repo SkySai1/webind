@@ -1,7 +1,7 @@
 import inspect
 from flask import request, session
 
-from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query
+from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query, viewUpdateOpt_query, viewShowOpts_query
 from backend.function import logger
 
 def view(dbsql):
@@ -14,6 +14,10 @@ def view(dbsql):
             return deleteView(dbsql)
         if 'newopt' == request.form.get('action'):
             return viewNewOpt(dbsql)
+        if 'show_opts' == request.form.get('action'):
+            return viewShowOpts(dbsql)
+        if 'update_opt' == request.form.get('action'):
+            return viewUpdateOpt(dbsql)
         if 'remove_opt' == request.form.get('action'):
             return viewRemoveOpt(dbsql)
     return 'failure'
@@ -29,6 +33,7 @@ def newView(dbsql):
             'alias': request.form['alias']
         }
     except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
         return 'empty_serv_field'
     return newView_query(dbsql, data)
 
@@ -48,6 +53,18 @@ def viewNewOpt(dbsql):
     }
     return viewNewOpt_query(dbsql, data)
 
+def viewUpdateOpt(dbsql):
+    try:
+        data = {
+            'viewID': request.form['id'],
+            'config': request.form['name'],
+            'value': request.form['value']
+        }
+        return viewUpdateOpt_query(dbsql, data)
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'empty_serv_field'
+
 def viewRemoveOpt(dbsql):
     try:
         data = {
@@ -56,4 +73,15 @@ def viewRemoveOpt(dbsql):
         }
         return viewRemoveOpt_query(dbsql, data)
     except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'empty_serv_field'
+
+def viewShowOpts(dbsql):
+    try:
+        data = {
+            'type': 'view'
+        }
+        return viewShowOpts_query(dbsql, data)
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
         return 'empty_serv_field'
