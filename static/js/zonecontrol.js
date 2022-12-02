@@ -7,3 +7,11 @@ function setSerial(){
     $('#zoneSerial').val(today)
     rightshow('#new-zone')
 }
+
+function get_zones_list(skip){
+    var command ={
+        'status': 'zone',
+        'action': 'getzones'
+    };
+    get_object_list(skip, command);
+}

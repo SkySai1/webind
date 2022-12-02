@@ -1,3 +1,74 @@
+function get_object_list(skip, command){
+    if (skip < 1){
+        $('#preloader').addClass('preloader-right');
+        $('#preloader').addClass('preloader-active');
+        $('.right_pannel').removeClass("right_pannel_move");
+        clearTimeout(window.vanish);
+    }
+    console.log(command);
+    var data = $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: command
+        })
+        .done (function(data){
+            if (data == 'failure'){
+                response_handler(data);
+                stop();
+            }
+            getObjectOptsList(command['status']);
+            sessionStorage.setItem('objectData', data);
+            if (skip < 2) {
+                switch(command['status']){
+                    case 'view':
+                        makeView();
+                        block = '#views'
+                        break;
+                }  
+            }
+            if (skip < 1) {
+                $('#preloader').addClass('opacity');
+                window.vanish = setTimeout(function(){
+                    $('#preloader').removeClass('preloader-active');
+                    $('#preloader').removeClass('preloader-right');
+                    $('#preloader').removeClass('opacity');
+                    rightshow(block)
+                },300);
+            };
+            return data
+        })
+        .fail (function(){
+
+        });
+    return data
+};
+
+function getObjectOptsList(status){
+    data= {
+        'status': status,
+        'action': 'show_opts'
+    };
+    $.ajax({
+        url:'/',
+        method: 'POST',
+        dataType: 'html',
+        data: data
+        })
+        .done(function(data) {
+            try {
+                json = JSON.parse(data)
+                sessionStorage.setItem('objectOptsList', JSON.stringify(json))
+            }
+            catch {
+                response_handler(data);
+            };
+        })
+        .fail(function(){
+            alert('Внутрення ошибка, перезагрузите страницу!');
+        });
+};
+
 function transpose(matrix) {
     return Object.keys(matrix[0]).map(function(c) {
         return matrix.map(function(r) { return r[c]; });
@@ -152,7 +223,7 @@ function lefttooltip(open){
         case true:
             tooltip.classList.remove('hidden');
             //tooltip.onblur=function(){lefttooltip(false)};
-            data = JSON.parse(sessionStorage.getItem('viewsOptsList'));
+            data = JSON.parse(sessionStorage.getItem('objectOptsList'));
             header = ['Параметр', 'Описание']
             option = []
             desc = []
@@ -174,4 +245,57 @@ function lefttooltip(open){
             },300);
             break;
     }
+}
+
+function optsTable(front, id, data, actions){
+    // --Объвление сущностей
+    let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
+    let blockTitle = document.createElement('div'); //Блок заголовка
+    let title = document.createElement('h3'); //Заголовок таблицы
+    let div = document.createElement('div') //Блок таблицы
+    //
+    mainBlock.id = 'objectOptBlock'
+    mainBlock.classList.add('objectOptBlock')
+    title.textContent = 'Лист настроек';
+    // -- Создадим поля ввода
+    let form = document.createElement('form'); //Создадим форму
+    form.id='buffForm-NewOpt'
+    let iName = document.createElement('input'); //Создадим ввод имени
+    iName.name='name';
+    iName.onfocus=function(){lefttooltip(true)};
+    iName.setAttribute('form','buffForm-NewOpt');
+    let iValue = document.createElement('textarea'); //Создадим ввод описания
+    iValue.onkeydown=function(){dynamicheight(this)};
+    iValue.onchange=function(){dynamicheight(this)};
+    iValue.name='value';
+    iValue.setAttribute('form','buffForm-NewOpt');
+    let iButton = actions[0];
+    //
+    // -- Строим таблицу опций
+    var hedaer = ['Наименование', 'Значение'];
+    var name = []
+    var value = []
+    var action = []
+    name.push(iName);
+    value.push(iValue);
+    action.push(iButton);
+    for (let key in data[id]['options']){
+        let button = actions[1].cloneNode(true);
+        name.push(key);
+        value.push(data[id]['options'][key]);
+        action.push(button);
+    };
+    fields = [name, value, action];
+    table = makeTable(hedaer, fields);
+    table.id='objectOptTable';
+    table.classList.add('objectOptTable')
+    table.appendChild(form);
+    //
+    // --Скеливание сущностей
+    blockTitle.appendChild(title); //Заголовок -> Блок заголовка
+    div.appendChild(table); //Таблица -> Блок таблицы
+    mainBlock.appendChild(blockTitle); //Блок заголовка -> Блок с таблицей и её названием
+    mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
+    front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
+    //
 }

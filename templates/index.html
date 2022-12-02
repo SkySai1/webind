@@ -177,7 +177,7 @@
 								<h2 class="sah2">Управление пространством имён</h2>
 								<div>
 									<button class="cl_button adm_button" onclick="get_views_list(0)">Обзоры</button>
-									<button class="cl_button adm_button" onclick="setSerial()">Зоны</button>
+									<button class="cl_button adm_button" onclick="get_zones_list(0)">Зоны</button>
 									<button class="cl_button adm_button" onclick="">Домены</button>
 								</div>
 							</div>
@@ -323,14 +323,18 @@
 							</div>
 							{% endif %}
 
-							{#	ПАНЕЛЬ ОБЗОРОВ	#}
 							{% if session['role'] == 'superadmin' or session['role'] == 'admin' %}
+							{#	ПАНЕЛЬ ОБЗОРОВ	#}
 							<div id="views" class="el_right_pannel column hidden">
-								<div id="viewsMain" class="objectMain">
-									
-								</div>
+								<div id="viewsMain" class="objectMain"></div>
 								<hr style="min-width: calc(49vw - 1.3em);">
 								<div id="viewsInfo" class="objectInfo"></div>
+							</div>
+							{#	ПАНЕЛЬ ЗОН	#}
+							<div id="zones" class="el_right_pannel column hidden">
+								<div id="zonesMain" class="objectMain"></div>
+								<hr style="min-width: calc(49vw - 1.3em);">
+								<div id="zonesInfo" class="objectInfo"></div>
 							</div>
 							{% endif %}
 						</div>

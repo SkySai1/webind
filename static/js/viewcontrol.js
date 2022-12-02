@@ -1,49 +1,15 @@
 function get_views_list(skip){
-    if (skip < 1){
-        $('#preloader').addClass('preloader-right');
-        $('#preloader').addClass('preloader-active');
-        $('.right_pannel').removeClass("right_pannel_move");
-        getViewOptsList();
-        clearTimeout(window.vanish);
-    }
-    data ={
+    var command ={
         'status': 'view',
         'action': 'getviews'
-    }
-    $.ajax({
-        url:'/',
-        method: 'POST',
-        dataType: 'html',
-        data: data
-        })
-        .done (function(data){
-            if (data == 'failure'){
-                response_handler(data);
-                stop();
-            }
-            sessionStorage.setItem('viewsData', data);
-            if (skip < 2) {
-                makeView();
-            }
-            if (skip < 1) {
-                $('#preloader').addClass('opacity');
-                window.vanish = setTimeout(function(){
-                    $('#preloader').removeClass('preloader-active');
-                    $('#preloader').removeClass('preloader-right');
-                    $('#preloader').removeClass('opacity');
-                    rightshow('#views')
-                },300);
-            };
-        })
-        .fail (function(){
-
-        });
+    };
+    get_object_list(skip, command);
 };
 
 function makeView(){
     closeview();
     // -- Выводим полученный список Обзоров --
-    let saved = sessionStorage.getItem('viewsData');
+    let saved = sessionStorage.getItem('objectData');
     var viewsList = JSON.parse(saved);
     console.log(viewsList);
     //
@@ -102,7 +68,7 @@ function showView(id){
     $('#viewsMain').css('height', '15vh'); //Уменьшить высоту основной таблицы
     $('#viewsInfo').css('height', '62vh'); //Увеличить высоту блока инфо
     sessionStorage.setItem('viewID', id); //Сохраним ID View в сессию
-    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
     let body = document.getElementById('viewsInfo'); //иницалиизруем контейнер
     body.textContent='';
     let header = document.createElement('div'); //Создание шапки
@@ -149,65 +115,24 @@ function showView(id){
 }
 
 function makeViewOpts(front, id){
-    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
-    // --Объвление сущностей
-    let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
-    let blockTitle = document.createElement('div'); //Блок заголовка
-    let title = document.createElement('h3'); //Заголовок таблицы
-    let div = document.createElement('div') //Блок таблицы
-    //
-    mainBlock.id = 'viewOptBlock'
-    mainBlock.classList.add('objectOptBlock')
-    title.textContent = 'Лист настроек';
-    // -- Создадим поля ввода
-    let form = document.createElement('form'); //Создадим форму
-    form.id='buffForm-NewOpt'
-    let iName = document.createElement('input'); //Создадим ввод имени
-    iName.name='name';
-    iName.onfocus=function(){lefttooltip(true)};
-    iName.setAttribute('form','buffForm-NewOpt');
-    let iValue = document.createElement('textarea'); //Создадим ввод описания
-    iValue.onkeydown=function(){dynamicheight(this)};
-    iValue.onchange=function(){dynamicheight(this)};
-    iValue.name='value';
-    iValue.setAttribute('form','buffForm-NewOpt');
+    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
+    // -- Кнопка отправки нового параметра
     let iButton = imgButton('img-plus', '24px');
     iButton.setAttribute('form','buffForm-NewOpt');
     iButton.type='button';
-    iButton.onclick=function(){sendNewViewOpt(this.form, 'viewOptTable', id);};
+    iButton.setAttribute("onclick","sendNewViewOpt(this.form, 'objectOptTable', id)");
     //
-    // -- Строим таблицу опций
-    var hedaer = ['Наименование', 'Значение'];
-    var name = []
-    var value = []
-    var action = []
-    name.push(iName);
-    value.push(iValue);
-    action.push(iButton);
-    for (let key in json[id]['options']){
-        let button = imgButton('img-pencil', '24px');
-        button.onclick=function(){viewOptEdit(this)};
-        name.push(key);
-        value.push(json[id]['options'][key]);
-        action.push(button);
-    };
-    fields = [name, value, action];
-    table = makeTable(hedaer, fields);
-    table.id='viewOptTable';
-    table.classList.add('objectOptTable')
-    table.appendChild(form);
+    // -- Кнопка редактирование существующего параметра
+    let button = imgButton('img-pencil', '24px');
+    button.type='button';
+    button.setAttribute("onclick","viewOptEdit(this)");
     //
-    // --Скеливание сущностей
-    blockTitle.appendChild(title); //Заголовок -> Блок заголовка
-    div.appendChild(table); //Таблица -> Блок таблицы
-    mainBlock.appendChild(blockTitle); //Блок заголовка -> Блок с таблицей и её названием
-    mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
-    front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
-    //
+    var actions = [iButton, button]
+    optsTable(front, id, json, actions);
 }
 
 function makeViewServers(front, id){
-    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
     // --Объвление сущностей
     let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
     let blockTitle = document.createElement('div'); //Блок заголовка
@@ -237,7 +162,7 @@ function makeViewServers(front, id){
 }
 
 function makeViewZones(front, id){
-    let json = JSON.parse(sessionStorage.getItem('viewsData')); //Получаем выгрузку обзоров из кэша
+    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
     // --Объвление сущностей
     let mainBlock = document.createElement('div'); //Блок с таблицей и её названием
     let blockTitle = document.createElement('div'); //Блок заголовка
@@ -435,29 +360,4 @@ function viewOptRemove(form, row){
         .fail(function(){
             alert('Внутрення ошибка, перезагрузите страницу!');
         });
-}
-
-function getViewOptsList(){
-    data= {
-        'status': 'view',
-        'action': 'show_opts'
-    };
-    $.ajax({
-        url:'/',
-        method: 'POST',
-        dataType: 'html',
-        data: data
-        })
-        .done(function(data) {
-            try {
-                json = JSON.parse(data)
-                sessionStorage.setItem('viewsOptsList', JSON.stringify(json))
-            }
-            catch {
-                response_handler(data);
-            };
-        })
-        .fail(function(){
-            alert('Внутрення ошибка, перезагрузите страницу!');
-        });
-}
+};
