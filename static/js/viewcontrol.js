@@ -7,7 +7,7 @@ function get_views_list(skip){
 };
 
 function makeView(){
-    closeview();
+    closeobject('views');
     // -- Выводим полученный список Обзоров --
     let saved = sessionStorage.getItem('objectData');
     var viewsList = JSON.parse(saved);
@@ -80,7 +80,7 @@ function showView(id){
     let alias = document.createElement('h2'); //Создание описания
     alias.style.fontFamily = 'cursive';
     let hButton = imgButton('img-down-64', '64px'); //Создание кпноки
-    hButton.onclick=function(){closeview();}; //Закрытие обзора
+    hButton.onclick=function(){closeobject('views');}; //Закрытие обзора
     title.textContent=json[id]['viewname']; //Имя обзора
     alias.textContent=json[id]['alias']; //Описание обзора
     titleBlock.appendChild(title); //Имя -> Блок заголовка
@@ -191,15 +191,7 @@ function makeViewZones(front, id){
     //
 }
 
-function closeview(){
-    let body = document.querySelector('#viewsInfo');  
-    $('#viewsInfo').css('height', '0vh')
-    $('#viewsMain').css('height', '80vh')
-    window.vanish = setTimeout(function(){
-        body.textContent=''
-    },200);
 
-}
 
 function newView(form, send, json){
     switch(send){

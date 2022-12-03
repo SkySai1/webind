@@ -15,3 +15,63 @@ function get_zones_list(skip){
     };
     get_object_list(skip, command);
 }
+
+
+function makeZones(){
+    closeobject('zones')
+    // -- Выводим полученный список Зон --
+    let saved = sessionStorage.getItem('objectData');
+    var zones = JSON.parse(saved);
+    console.log(zones);
+    //
+
+    let mainBlock = document.getElementById('zonesMain'); //Получаем блок с осн. таблицей
+    mainBlock.textContent='';
+    //Создаём заголовок
+    header=['ID', 
+            'Доменное имя', 
+            'type',
+            'Expire', 
+            'Refresh',
+            'Retry',
+            'TTL'
+    ];
+    // -- Создадим поля ввода
+        let form = document.createElement('form'); //Создадим форму
+        form.id='buffForm'
+    // -- Создадим массив полей --
+    id = []
+    fqdn = []
+    type = []
+    expire = []
+    refresh = []
+    retry = []
+    ttl = []
+    action = []
+
+    for (let key in zones){
+        id.push(key);
+        fqdn.push(zones[key]['info']['zonename'])
+        type.push(zones[key]['info']['type'])
+        expire.push(zones[key]['info']['expire'])
+        refresh.push(zones[key]['info']['refresh'])
+        retry.push(zones[key]['info']['retry'])
+        ttl.push(zones[key]['info']['ttl'])
+
+        // --Создадим кнопку раскрытия
+        let button = imgButton('img-up', '24px');
+        button.onclick=function(){showZone(key);};
+        //
+
+        action.push(button)
+
+    }
+    fields = [id, fqdn, type, expire, refresh, retry, ttl, action];
+    //
+
+    mainTable = makeTable(header, fields);
+    mainTable.classList.add('mainTable');
+    mainTable.id='zoneTable'
+    mainBlock.appendChild(mainTable);
+    mainBlock.appendChild(form);
+}

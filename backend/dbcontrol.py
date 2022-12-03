@@ -773,17 +773,22 @@ def newView_query(dbsql, data):
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
 
-def viewShowOpts_query(dbsql, data):
+def showOpts_query(dbsql, data):
     try:
         type = data['type']
         with dbsql.session() as ses:
             if 'view' in type:
-                optsViewList = (ses.query(Configs)
+                optsList = (ses.query(Configs)
                             .filter(Configs.view == True)
                             .all()
                 )
+            elif 'zone' in type:
+                optsList = (ses.query(Configs)
+                            .filter(Configs.zone == True)
+                            .all()
+                )
             opts = {}
-            for opt in optsViewList:
+            for opt in optsList:
                 opts[opt.config] = opt.description
             return opts
     except Exception as e:
@@ -890,6 +895,65 @@ def viewRemoveOpt_query(dbsql, data):
             ses.delete(delete)
             ses.commit()
         return 'viewOptRemove_success'
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'failure'
+
+def get_zones_list(dbsql):
+    try:
+        with dbsql.session() as ses:
+            zoneList={}
+            zonesList = (ses.query(Zones)
+                        .all()
+            )
+            #Формируоем список зон
+            for zone in zonesList:
+                zoneInfo={}
+                zoneDesc={}
+                zoneDesc['zonename'] = zone.zonename
+                zoneDesc['type'] = zone.type
+                zoneDesc['serial'] = zone.serial
+                zoneDesc['ttl'] = zone.ttl
+                zoneDesc['expire'] = zone.expire
+                zoneDesc['refresh'] = zone.refresh
+                zoneDesc['retry'] = zone.retry
+                zoneInfo['info'] = zoneDesc
+
+                #Формируем список мастер Обзорв
+                zoneViews = (ses.query(Views)
+                            .filter(Views.zones.any(Zones.id == zone.id))
+                            .all()
+                )
+                viewsList={}
+                for view in zoneViews:
+                    viewDesc={}
+                    viewDesc['viewname'] = view.viewname
+                    viewsList[view.id] = viewDesc
+                zoneInfo['views'] = viewsList
+
+                #Формируем список параметров
+                zoneOpts = (ses.query(Configs, Zones_Configs)
+                            .join(Zones_Configs)
+                            .filter(Zones_Configs.zone_id == zone.id)
+                            .filter(Configs.zones.any(Zones.id == zone.id))
+                            .all()
+                )
+                optsList = {}
+                for opt in zoneOpts:
+                    optsList[opt.Configs.config] = opt.Zones_Configs.value
+                zoneInfo['options'] = optsList
+
+                #Формируем список серверов с данной зоной
+                zoneServers = (ses.query(Servers)
+                                .filter(Servers.views.any(Views.zones.any(Zones.id == zone.id)))
+                                .all()
+                )
+                servList = {}
+                for serv in zoneServers:
+                    servList[serv.id] = serv.hostname
+                zoneInfo['servers'] = servList
+                zoneList[zone.id] = zoneInfo
+            return json.dumps(zoneList,indent=4)
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'

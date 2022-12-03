@@ -1,14 +1,18 @@
 import inspect
 from flask import request, session
 
-from backend.dbcontrol import zoneadd_query
+from backend.dbcontrol import zoneadd_query, get_zones_list, showOpts_query
 from backend.function import logger
 
 def zone(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
+        if 'getzones' == request.form.get('action'):
+            return get_zones_list(dbsql)
+        if 'show_opts' == request.form.get('action'):
+            return zoneShowOpts(dbsql)
         if 'newzone' in request.form.get('action'):
             return zoneadd(dbsql)
-    return 'nothing'
+    return 'failure'
 
 def zoneadd(dbsql):
     try:
@@ -40,3 +44,14 @@ def zoneadd(dbsql):
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'failure'
+
+def zoneShowOpts(dbsql):
+    try:
+        data = {
+            'type': 'zone'
+        }
+        return showOpts_query(dbsql, data)
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'empty_serv_field'
+

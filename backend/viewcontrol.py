@@ -1,7 +1,7 @@
 import inspect
 from flask import request, session
 
-from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query, viewUpdateOpt_query, viewShowOpts_query
+from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query, viewUpdateOpt_query, showOpts_query
 from backend.function import logger
 
 def view(dbsql):
@@ -81,7 +81,7 @@ def viewShowOpts(dbsql):
         data = {
             'type': 'view'
         }
-        return viewShowOpts_query(dbsql, data)
+        return showOpts_query(dbsql, data)
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
         return 'empty_serv_field'

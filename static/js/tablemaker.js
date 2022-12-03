@@ -25,6 +25,10 @@ function get_object_list(skip, command){
                         makeView();
                         block = '#views'
                         break;
+                    case 'zone':
+                        makeZones();
+                        block = '#zones'
+                        break;
                 }  
             }
             if (skip < 1) {
@@ -43,6 +47,16 @@ function get_object_list(skip, command){
         });
     return data
 };
+
+function closeobject(id){
+    let body = document.getElementById(id+'Info');  
+    $('#'+id+'Info').css('height', '0vh')
+    $('#'+id+'Main').css('height', '80vh')
+    window.vanish = setTimeout(function(){
+        body.textContent=''
+    },200);
+
+}
 
 function getObjectOptsList(status){
     data= {
