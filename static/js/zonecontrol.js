@@ -22,7 +22,6 @@ function makeZones(){
     // -- Выводим полученный список Зон --
     let saved = sessionStorage.getItem('objectData');
     var zones = JSON.parse(saved);
-    console.log(zones);
     //
 
     let mainBlock = document.getElementById('zonesMain'); //Получаем блок с осн. таблицей
@@ -60,7 +59,7 @@ function makeZones(){
 
         // --Создадим кнопку раскрытия
         let button = imgButton('img-up', '24px');
-        button.onclick=function(){showZone(key);};
+        button.onclick=function(){showZone(key, zones);};
         //
 
         action.push(button)
@@ -74,4 +73,8 @@ function makeZones(){
     mainTable.id='zoneTable'
     mainBlock.appendChild(mainTable);
     mainBlock.appendChild(form);
+}
+
+function showZone(id, json){
+    front = expandDetail('zones', id, json[id]['info']['zonename'], '')
 }

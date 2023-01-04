@@ -11,7 +11,6 @@ function makeView(){
     // -- Выводим полученный список Обзоров --
     let saved = sessionStorage.getItem('objectData');
     var viewsList = JSON.parse(saved);
-    console.log(viewsList);
     //
 
     let mainBlock = document.getElementById('viewsMain'); //Получаем блок с осн. таблицей
@@ -48,7 +47,7 @@ function makeView(){
 
         // --Создадим кнопку раскрытия
         let button = imgButton('img-up', '24px');
-        button.onclick=function(){showView(key);};
+        button.onclick=function(){showView(key, viewsList);};
         //
 
         action.push(button)
@@ -64,54 +63,14 @@ function makeView(){
     mainBlock.appendChild(form);
 };
 
-function showView(id){
-    $('#viewsMain').css('height', '15vh'); //Уменьшить высоту основной таблицы
-    $('#viewsInfo').css('height', '62vh'); //Увеличить высоту блока инфо
-    sessionStorage.setItem('viewID', id); //Сохраним ID View в сессию
-    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
-    let body = document.getElementById('viewsInfo'); //иницалиизруем контейнер
-    body.textContent='';
-    let header = document.createElement('div'); //Создание шапки
-    let titleBlock = document.createElement('div') //Блок заголовка
-    header.classList.add('objectInfoHedaer'); 
-    let title = document.createElement('h1'); //Создание заголовка
-    title.style.fontFamily = '\'current\'';
-    title.style.color = '#186b8f';
-    let alias = document.createElement('h2'); //Создание описания
-    alias.style.fontFamily = 'cursive';
-    let hButton = imgButton('img-down-64', '64px'); //Создание кпноки
-    hButton.onclick=function(){closeobject('views');}; //Закрытие обзора
-    title.textContent=json[id]['viewname']; //Имя обзора
-    alias.textContent=json[id]['alias']; //Описание обзора
-    titleBlock.appendChild(title); //Имя -> Блок заголовка
-    titleBlock.appendChild(alias); //Описание -> Блок заголовка
-    header.appendChild(titleBlock); //Блог заголовка -> Заголовок
-    header.appendChild(hButton); //Кнопка -> Заголовок
-    body.appendChild(header); //Заголовок -> основной контейнер
-    let front = document.createElement('div'); //Тело с инфо таблицами
-    front.classList.add('objectInfoFront');
-    body.appendChild(front);
-
-    makeViewOpts(front, id) //Таблица опций
+function showView(id, json){
+    front = expandDetail('views', id, json[id]['viewname'], json[id]['alias'])
 
     makeViewServers(front, id) //Таблица зависимых серверов
 
     makeViewZones(front, id) //Таблица подключенных зон
 
-    // -- Футер
-    let footer = document.createElement('div');
-    footer.classList.add('objectInfoFooter')
-    body.appendChild(footer);
-
-    let deleter = document.createElement('button');
-    deleter.classList.add('minibutton')
-    deleter.classList.add('deleter')
-    deleter.type='button';
-    deleter.textContent='Удалить';
-    deleter.onclick=function(){deleteView(id)};
-    footer.appendChild(deleter);
-
-
+    makeViewOpts(front, id) //Таблица опций
 }
 
 function makeViewOpts(front, id){
@@ -120,7 +79,7 @@ function makeViewOpts(front, id){
     let iButton = imgButton('img-plus', '24px');
     iButton.setAttribute('form','buffForm-NewOpt');
     iButton.type='button';
-    iButton.setAttribute("onclick","sendNewViewOpt(this.form, 'objectOptTable', id)");
+    iButton.setAttribute("onclick","sendNewViewOpt(this.form, 'objectOptTable',"+id+")");
     //
     // -- Кнопка редактирование существующего параметра
     let button = imgButton('img-pencil', '24px');
@@ -205,16 +164,18 @@ function newView(form, send, json){
             break;
         case false:
             form.reset();
-            let view = json['viewname'];
-            let alias = json['alias'];
-            let id = json['id']
-            // --Создадим кнопку раскрытия
-            let button = imgButton('img-up', '24px');
-            button.onclick=function(){showView(id);};
-            //
-            fields = [id, view, alias, button]
-            let table = document.getElementById('viewsTable');
-            newRow(table, fields);
+            for (key in json){
+                let id = key
+                let view = json[key]['viewname']
+                let alias = json[key]['alias']
+                // --Создадим кнопку раскрытия
+                let button = imgButton('img-up', '24px');
+                button.onclick=function(){showView(id, json);};
+                //
+                fields = [id, view, alias, button]
+                let table = document.getElementById('viewsTable');
+                newRow(table, fields);
+            }
             break;
     }
 }
@@ -240,22 +201,11 @@ function getNewView(form, data) {
         });
 }
 
-function deleteView(id) {
-    var isDelete = confirm("Удаление обзора разрушит все зависимые связи, вы уверены?");
-    if (isDelete == true){
-        data = {
-            'status':'view',
-            'action':'delete',
-            'id':id
 
-        };
-        form_submit('', data);
-    }
-}
 
 function sendNewViewOpt(form, tableID, id){
     data = $(form).serialize().split('&');
-    data.push('viewID='+id);
+    data.push('id='+id);
     data.push('status=view');
     data.push('action=newopt');
     newdata = data.join('&');
@@ -302,7 +252,7 @@ function viewOptEdit(cell){
 }
 
 function viewOptUpdate(form, row){
-    var vId = sessionStorage.getItem('viewID');
+    var vId = sessionStorage.getItem('viewsID');
     data = $(form).serialize().split('&');
     data.push('status=view');
     data.push('action=update_opt');
@@ -329,11 +279,12 @@ function viewOptUpdate(form, row){
 }
 
 function viewOptRemove(form, row){
-    var vId = sessionStorage.getItem('viewID');
+    var vId = sessionStorage.getItem('viewsID');
     data = $(form).serialize().split('&');
     data.push('status=view');
     data.push('action=remove_opt');
     data.push('id='+vId);
+    console.log(data)
     var newdata = data.join('&');
     $.ajax({
         url:'/',

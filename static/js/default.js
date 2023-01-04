@@ -35,6 +35,7 @@ function f(){
         $('.square').removeClass('move-left');
         $('.left_pannel').removeClass("left_pannel_move");
         $('.mainmenu').removeClass("mainmenu_show")
+        lefttooltip(false);
         clearTimeout(window.vanish);
         window.vanish = setTimeout(function(){
             $('.mainmenu').addClass("hidden");

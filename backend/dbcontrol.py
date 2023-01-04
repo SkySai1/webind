@@ -763,11 +763,12 @@ def newView_query(dbsql, data):
             getNewView = (ses.query(Views)
                           .order_by(Views.id.desc())
                           .first())
-            data = {
-                'id': getNewView.id,
-                'viewname': getNewView.viewname,
-                'alias': getNewView.alias
-            }
+            data = {}
+            viewDesc = {}
+            viewDesc['viewname'] = getNewView.viewname
+            viewDesc['alias'] = getNewView.alias
+            data[getNewView.id] = viewDesc
+
         return data
     except Exception as e:
         logger(inspect.currentframe().f_code.co_name)
@@ -885,13 +886,16 @@ def viewRemoveOpt_query(dbsql, data):
         config = data['name']
         viewID = data['id']
         with dbsql.session() as ses:
-            optID = (ses.query(Views_Configs.id)
-                     .join(Configs, Configs.config == config)
-                     .filter(Views_Configs.viewid == viewID)
+            optID = (ses.query(Configs.id)
+                     .filter(Configs.config == config)
                      .first()
             )[0]
             if not optID: return 'bad_view_opt'
-            delete = ses.query(Views_Configs).filter(Views_Configs.id == optID).first()
+            delete = (ses.query(Views_Configs)
+                .filter(Views_Configs.config_id == optID)
+                .filter(Views_Configs.viewid == viewID)
+                .first()
+            )
             ses.delete(delete)
             ses.commit()
         return 'viewOptRemove_success'

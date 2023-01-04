@@ -111,7 +111,7 @@ function response_handler(data, form){
             break;
         case ('viewdelete_success'):
             rmi('green', 'Обзор успешно удалён!');
-            closeview();
+            closeobject('views');
             get_views_list(true)
             break;
         case ('view_opt_add_success'):

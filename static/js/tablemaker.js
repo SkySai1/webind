@@ -5,7 +5,6 @@ function get_object_list(skip, command){
         $('.right_pannel').removeClass("right_pannel_move");
         clearTimeout(window.vanish);
     }
-    console.log(command);
     var data = $.ajax({
         url:'/',
         method: 'POST',
@@ -18,6 +17,7 @@ function get_object_list(skip, command){
                 stop();
             }
             getObjectOptsList(command['status']);
+            console.log(JSON.parse(data))
             sessionStorage.setItem('objectData', data);
             if (skip < 2) {
                 switch(command['status']){
@@ -132,6 +132,51 @@ function makeTable(header, fields){
     return table;
 }
 
+function expandDetail(object, id, titleText, subtitileText){
+    $('#'+object+'Main').css('height', '15vh'); //Уменьшить высоту основной таблицы
+    $('#'+object+'Info').css('height', '62vh'); //Увеличить высоту блока инфо
+    sessionStorage.setItem(object+'ID', id); //Сохраним ID View в сессию
+    let json = JSON.parse(sessionStorage.getItem('objectData')); //Получаем выгрузку обзоров из кэша
+    let body = document.getElementById(object+'Info'); //иницалиизруем контейнер
+    body.textContent='';
+    let header = document.createElement('div'); //Создание шапки
+    let titleBlock = document.createElement('div') //Блок заголовка
+    header.classList.add('objectInfoHedaer'); 
+    let title = document.createElement('h1'); //Создание заголовка
+    title.style.fontFamily = '\'current\'';
+    title.style.color = '#186b8f';
+    let alias = document.createElement('h2'); //Создание описания
+    alias.style.fontFamily = 'cursive';
+    let hButton = imgButton('img-down-64', '64px'); //Создание кпноки
+    hButton.onclick=function(){closeobject(object);}; //Закрытие обзора
+    title.textContent=titleText; //Имя обзора
+    alias.textContent=subtitileText; //Описание обзора
+    titleBlock.appendChild(title); //Имя -> Блок заголовка
+    titleBlock.appendChild(alias); //Описание -> Блок заголовка
+    header.appendChild(titleBlock); //Блог заголовка -> Заголовок
+    header.appendChild(hButton); //Кнопка -> Заголовок
+    body.appendChild(header); //Заголовок -> основной контейнер
+    let front = document.createElement('div'); //Тело с инфо таблицами
+    front.classList.add('objectInfoFront');
+    body.appendChild(front);
+
+    // -- Футер
+    let footer = document.createElement('div');
+    footer.classList.add('objectInfoFooter')
+    body.appendChild(footer);
+
+    let deleter = document.createElement('button');
+    deleter.classList.add('minibutton')
+    deleter.classList.add('deleter')
+    deleter.type='button';
+    deleter.textContent='Удалить';
+    deleter.onclick=function(){deleteObject(object, id)};
+    footer.appendChild(deleter);
+
+    return front
+
+}
+
 function newRow(table, fields){
     let fRow = table.childNodes[1];
     let row = document.createElement('tr');
@@ -228,11 +273,11 @@ function updateRow(row, json) {
     },500);
 }
 
+
 function lefttooltip(open){
     let tooltip = document.getElementById('tooltip');
     let body = tooltip.childNodes[3];
     body.textContent='';
-    for (key in tooltip.childNodes) { console.log(tooltip.childNodes[key])};
     switch(open){
         case true:
             tooltip.classList.remove('hidden');
@@ -241,11 +286,18 @@ function lefttooltip(open){
             header = ['Параметр', 'Описание']
             option = []
             desc = []
+            action = []
             for (let key in data){
                 option.push(key);
-                desc.push(data[key]); 
+                desc.push(data[key]);
+                let button = imgButton('img-right', '24px') 
+                button.onclick=function(){
+                    oName = this.parentNode.parentNode.childNodes[0].textContent;
+                    document.getElementById('obejctNewOptName').value=oName;
+                };
+                action.push(button)
             }
-            fields = [option, desc];
+            fields = [option, desc, action];
             let table = makeTable(header, fields);
             body.appendChild(table);
             window.vanish = setTimeout(function(){
@@ -276,6 +328,7 @@ function optsTable(front, id, data, actions){
     form.id='buffForm-NewOpt'
     let iName = document.createElement('input'); //Создадим ввод имени
     iName.name='name';
+    iName.id='obejctNewOptName'
     iName.onfocus=function(){lefttooltip(true)};
     iName.setAttribute('form','buffForm-NewOpt');
     let iValue = document.createElement('textarea'); //Создадим ввод описания
@@ -312,4 +365,20 @@ function optsTable(front, id, data, actions){
     mainBlock.appendChild(div); //Блок таблицы -> Блок с таблицей и её названием
     front.appendChild(mainBlock) //Блок с таблицей и её названием -> Общий блок информации обзора
     //
+}
+
+function deleteObject(object, id) {
+    var isDelete = confirm("Удаление обзора разрушит все зависимые связи, вы уверены?");
+    if (isDelete == true){
+        switch(object){
+            case 'views':
+                data = {
+                    'status':'view',
+                    'action':'delete',
+                    'id':id
+                }
+                break;
+        };
+        form_submit('', data);
+    }
 }

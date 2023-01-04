@@ -24,9 +24,6 @@ def view(dbsql):
 
 
 def newView(dbsql):
-    for key, value in request.form.items(multi=True):
-        if not request.form.get(key): 
-            return 'empty_serv_field'
     try:
         data = {
             'name': request.form['name'],
@@ -43,14 +40,15 @@ def deleteView(dbsql):
     else: return 'failure'
     
 def viewNewOpt(dbsql):
-    for key, value in request.form.items(multi=True):
-        if not request.form.get(key): 
-            return 'empty_serv_field'
-    data = {
-        'viewID' : request.form.get('viewID'),
-        'config': request.form.get('name'),
-        'value': request.form.get('value')
-    }
+    try:
+        data = {
+            'viewID' : request.form.get('id'),
+            'config': request.form.get('name'),
+            'value': request.form.get('value')
+        }
+    except Exception as e:
+        logger(inspect.currentframe().f_code.co_name)
+        return 'empty_serv_field'
     return viewNewOpt_query(dbsql, data)
 
 def viewUpdateOpt(dbsql):

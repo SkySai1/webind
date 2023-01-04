@@ -295,19 +295,27 @@ body{
   cursor: not-allowed !important;
 }
 #tooltip {
-  width: 25vw;
-  height: inherit;
+  width: 55vw;
+  height: 100%;
   z-index: 3;
-  background: linear-gradient(308deg, #d0d0d0, #a0cdf2);
+  background: linear-gradient(90deg, #f9fdff, #a0cdf2e0);
   border-radius: 0 15px 15px 0;
   left: -100vw;
   position: absolute;
   transition: all 0.2s;
+  box-shadow: 5px 9px 10px 0px rgb(45 94 135);
 }
 #tooltip > div {
   text-align: left;
   overflow: auto;
   height: calc(100% - 3em);
+}
+#tooltip * td:nth-child(1){
+  max-width: 25%;
+}
+#tooltip * td:nth-child(2){
+  max-width: 70%;
+  word-break: break-all;
 }
 .tooltip_move{
   left: 0vw !important;
@@ -761,6 +769,7 @@ body{
   margin: 0;
 }
 .objectInfoFront{
+  font-family: monospace;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -774,14 +783,6 @@ body{
   align-items: center;
   overflow: auto;
   height: 45vh;
-}
-.objectInfoFront > div:nth-child(1) {
-  width: 50vw;
-}
-.objectInfoFront > div:nth-child(2) {
-  width: 25vw;
-}
-.objectInfoFront > div:nth-child(3) {
   width: 25vw;
 }
 .objectInfoFront > div > div{
@@ -810,9 +811,6 @@ body{
   background: #ebc3c3;
   cursor: pointer;
 }
-.objectInfoFront * table {
-  font-family: 'Courier New', Courier, serif;
-}
 .objectInfoFront * td:nth-child(2) {
   word-break: break-all;
 }
@@ -820,6 +818,7 @@ body{
   word-break: break-all;
 }
 .objectOptTable{
+  font-family: 'Courier New', Courier, serif;
   width: inherit;
 }
 .objectOptTable > tr:nth-child(1){
@@ -898,7 +897,7 @@ body{
   transition-duration:  0.2s;
   transition-property: font-size, top, background;
   background: transparent;
-  width: 40vw;
+  width: 50vw !important;
 }
 .objectOptBlock > div:nth-child(1){
   min-height: 3em;
