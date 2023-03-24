@@ -27,6 +27,12 @@ def logger(e):
 	logging.error(f"\n\n{now}# ERROR:")
 	logging.exception(f"{e}")
     
+def login_check(role):
+	if role == 'all':
+		if 'loggedin' not in session:
+			return None
+		return 1
+
 def do_the_login(dbsql):
 	if request.form.get('username') and request.form.get('password'):
 		try:
@@ -56,7 +62,7 @@ def show_the_login_form():
 
 #Функция предварительной загрузки главной страницы
 def main_page():
-	return render_template('index.html')
+	return render_template('index.html.j2')
 
 def add_server():
 	if config_check() is False:
@@ -68,7 +74,7 @@ def add_server():
 		if not key == 'version' and not key == 'hostname' and not os.access(value, os.R_OK):
 			error.append(value)
 	if error:
-		return render_template('index.html',access_error = error)
+		return render_template('index.html.j2',access_error = error)
 #Функция проверки config.yaml
 def config_check():
 	if not os.path.exists('config.yaml'):

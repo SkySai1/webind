@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Центр управления DNS {% block title %}{% endblock %} </title>
+    <link rel="stylesheet" href="../static/css/index.css">
+    {# Фавикон #}
+	<link rel="apple-touch-icon" sizes="180x180" href="../static/fav/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="../static/fav/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="../static/fav/favicon-16x16.png">
+	<link rel="manifest" href="../static/fav/site.webmanifest">
+	<link rel="mask-icon" href="../static/fav/safari-pinned-tab.svg" color="#5bbcd5">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="theme-color" content="#ffffff">
+	<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+</head>
+<body>
+    <div id="content">
+		<div id="header" class="jusify">
+			<div class="left_block">
+				<h1>Центр управления DNS </h1>
+				{% if session['role'] == 'superadmin' %}
+					<h2 class="zero-mode">Супер администратор</h2>
+				{% elif session['role'] == 'admin' %}
+					<h2 class="first-mode">Администратор</h2>
+				{% else %}
+					<h2 class="second-mode">{{ session['username'] }}</h2>
+				{% endif %}
+				{# <p>{{ session['username'] }}</p>#}
+			</div>
+		</div>
+	</div>
+</body>

@@ -50,7 +50,9 @@ if os.path.exists('db.yaml'):
 		dbsql = None
 else: dbsql = None
 
+
 ##!-- Сегмент адресации
+
 @app.route('/', methods=['GET','POST'])
 def index():
 	try:
@@ -94,6 +96,7 @@ def index():
 		return render_template('404.html'), 404
 	except TemplateNotFound:
 		abort(404)
+
 #404
 @app.errorhandler(404)
 def page_not_found(e):
