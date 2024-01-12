@@ -1,7 +1,7 @@
 from flask import request
 
 from backend.dbcontrol import *
-from backend.function import logger
+from backend.stuff import logger
 
 def users(dbsql):
     if 'superadmin' in session.get('role'):

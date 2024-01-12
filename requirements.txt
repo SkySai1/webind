@@ -11,12 +11,10 @@ importlib-metadata
 itsdangerous
 Jinja2
 MarkupSafe
-mysqlclient
 paramiko
 pkg_resources
 psycopg2
 pycparser
-PyMySQL
 PyNaCl
 PyYAML
 six

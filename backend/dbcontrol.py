@@ -9,13 +9,13 @@ from flask import request, render_template, session, flash
 import yaml
 import os
 import json
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, update, delete, inspect as dbinspect
+from sqlalchemy import Column, Engine, ForeignKey, Integer, String, Boolean, update, delete, inspect as dbinspect
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship  
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from backend.function import logger
+from backend.stuff import logger
 
 ### Раздел описания сущностей БД 
 Base = declarative_base()
@@ -200,6 +200,13 @@ def connect_db(app):
             return False
     return False
 
+def check_user(dbsql, login, passwd):
+    conn = dbsql.session()
+    stmt = select(Users).where(Users.username == login).where(Users.password == passwd)
+    result = conn.execute(stmt).fetchone()
+    return result
+    
+
 #Фукнкция создания БД sql lite
 def create_sqlite_db():
     try:
@@ -208,7 +215,8 @@ def create_sqlite_db():
         if 'create' in request.form:
             Base.metadata.create_all(engine)
             cursor = engine.connect()
-            answer = cursor.execute("select * from users limit 1")
+            stmt = select(Users).limit(1)
+            answer = cursor.execute(stmt)
             result = answer.fetchone()
             if not result:
                 if not request.form.get('sauser') or not request.form.get('sapass'):
@@ -446,10 +454,11 @@ def getservlist(dbsql):
             servs = []
             with engine.connect() as ses:
                 for row in ses.execute(stmt):
+                    print(row.hostname)
                     myjson = {
-                        "id":row['id'], 
-                        "hostname":row['hostname'], 
-                        "status":row['configured']}
+                        "id":row.id, 
+                        "hostname":row.hostname, 
+                        "status":row.configured}
                     servs.append(myjson)
             return json.dumps(servs)
         except Exception as e:
@@ -480,12 +489,12 @@ def getserv(dbsql):
             getHostInfo = select(Servers).where(Servers.id == s_id)
             with dbsql.engine.connect() as ses:
                 for servInfoArray in ses.execute(getHostInfo).all():
-                    servInfo['hostname'] = servInfoArray['hostname']
-                    servInfo['version'] = servInfoArray['bind_version']  
-                    servInfo['core'] = servInfoArray['core']
-                    servInfo['username'] = servInfoArray['username']
-                    servInfo['conf'] = servInfoArray['confpath']
-                    servInfo['directory'] = servInfoArray['workdirectory']          
+                    servInfo['hostname'] = servInfoArray.hostname
+                    servInfo['version'] = servInfoArray.bind_version 
+                    servInfo['core'] = servInfoArray.core
+                    servInfo['username'] = servInfoArray.username
+                    servInfo['conf'] = servInfoArray.confpath
+                    servInfo['directory'] = servInfoArray.workdirectory       
                 
             ## Поиск всех параметров привязанных к серверу    
             getHostOptsId = (

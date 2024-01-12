@@ -2,7 +2,7 @@ import inspect
 from flask import request, session
 
 from backend.dbcontrol import get_views_list, newView_query, deleteView_query, viewNewOpt_query, viewRemoveOpt_query, viewUpdateOpt_query, showOpts_query
-from backend.function import logger
+from backend.stuff import logger
 
 def view(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):

@@ -2,7 +2,7 @@ import hashlib
 import inspect
 import socket
 import sys
-from flask import Flask, render_template, session, redirect, url_for, request, flash, escape
+from flask import Flask, render_template, session, redirect, url_for, request, flash
 from jinja2 import *
 import os
 import yaml
@@ -11,37 +11,28 @@ import re
 import datetime
 import logging
 from subprocess import PIPE
+from backend.stuff import logger
+
+from backend.dbcontrol import check_user
 
 def restart():
 	os.execv(sys.argv[0], sys.argv)
 
-def logger(e):
-	now = datetime.datetime.now()
-	logdir = os.path.dirname(os.path.abspath(__file__))+"%s" % '/logs'
-	if not os.path.exists(logdir):
-			os.makedirs(logdir)
-	logging.basicConfig(filename=f"{logdir}/errors.log", level=logging.DEBUG)
-	logging.debug(f"\n\n{now}# DEBUG:")
-	logging.info(f"\n\n{now}# INFO:")
-	logging.warning(f"\n\n{now}# WARNING:")
-	logging.error(f"\n\n{now}# ERROR:")
-	logging.exception(f"{e}")
-    
+   
 def do_the_login(dbsql):
 	if request.form.get('username') and request.form.get('password'):
 		try:
 			password=request.form['password']
 			username=request.form['username']
-			query = dbsql.session()
+			#query = dbsql.session()
 			pass_hash = hashlib.sha1(password.encode()).hexdigest()
-			answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
-			account = None
-			for row in answer: account = row
-			if account:
+			#answer = query.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{pass_hash}'")
+			answer = check_user(dbsql, username, pass_hash)
+			if answer:
 				session['loggedin'] = True
-				session['id'] = account['id']
-				session['username'] = account['username']
-				session['role'] = account['role']
+				session['id'] = answer[0].id
+				session['username'] = answer[0].username
+				session['role'] = answer[0].role
 				return 'ok'
 			else:
 				return 'badpass'

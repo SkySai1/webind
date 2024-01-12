@@ -2,7 +2,7 @@ import inspect
 from flask import request, session
 
 from backend.dbcontrol import zoneadd_query, get_zones_list, showOpts_query
-from backend.function import logger
+from backend.stuff import logger
 
 def zone(dbsql):
     if 'superadmin' in session.get('role') or 'admin' in session.get('role'):
